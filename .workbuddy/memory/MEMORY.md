@@ -39,8 +39,10 @@
 - **Focus Card V2 后端（2026-08-03）**：schema +Task.purpose/departureAt +TimeLog.detail；服务层 purpose 透传+父级继承+回流；API start 写出发/complete 补记/checkin detail/**惰性结算**（views/today 打开补算过期 scheduled 自动完成，无 cron，detail='auto'）；context 注入动机。报告 docs/FocusCardV2-后端实施报告-2026-08-03.md，前端待对接 5 处
 - **Focus Card V2 前端对接（2026-08-03）**：FocusCardV2 钩子带数据（start/complete+duration/checkin+detail/pause+reason）；toCardV2 直读 purpose/departureAt；Inbox/档案面板加动机编辑 —— 已全部完成，**V2 全链路闭环**
 - **Review 主题趋势周环比（2026-08-03）**：stats themeBreakdown 每项加 prev {count,percent}|null（上周同主题按任务数聚合）；纯函数 aggregateThemeCounts/buildThemePrev 抽到 src/lib/task/theme.ts；报告 docs/Review主题趋势周环比-实施报告-2026-08-03.md，前端 B5 一行消费
+- **SQLite→PG 迁移 + Vercel 部署准备（2026-08-03 晚）**：schema provider=postgresql+binaryTargets(debian-openssl-3.0.x)；便携 PG 16.4 本地迁移成功（scripts/migrate-sqlite-to-pg.mjs + verify-migration.mjs）；20 表 1717 行一致 / 79 测试 / 冒烟全过；git init+commit 6a1c4a4；剩 GitHub push + Neon + Vercel 用户操作。报告 docs/数据库迁移与Vercel部署-实施报告-2026-08-03.md
 
 ## 待开发（可选遗留）
+- **云部署收尾（需用户账号）**：GitHub 推仓库 → Neon 建库导数据 → Vercel 部署 + 环境变量（DATABASE_URL/AUTH_SECRET/AUTH_TRUST_HOST）
 - Focus Card 左栏项目阶段 stages/projectProgress 直读项目树 API（当前 mock）
 - 忘记确认提示条（前端 UI，基于 departureAt 补）
 - mini-cal 迁入 V2 右栏
