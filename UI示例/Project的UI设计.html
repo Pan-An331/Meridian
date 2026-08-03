@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task OS · Project 项目整理页 UI（Trilium 树 + Todoist 项目列表 融合版 · 可交互演示）</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text2: #6b7280;
+    --text3: #9ca3af;
+    --brand: #6366f1;
+    --brand-bg: #eef2ff;
+    --brand-deep: #4338ca;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --green-deep: #15803d;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --orange: #d85a30;
+    --orange-bg: #fff7ed;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --radius-lg: 12px;
+    --radius-md: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: #eef0f4;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 24px 120px;
+  }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; letter-spacing: -0.3px; }
+  .sub { text-align: center; font-size: 13px; color: var(--text2); margin: 8px 0 36px; line-height: 1.7; }
+  .sub b { color: var(--brand-deep); font-weight: 600; }
+
+  .viewport {
+    max-width: 1080px; margin: 0 auto;
+    background: var(--bg); border-radius: 14px; overflow: hidden;
+    border: 1px solid #d9dce3; box-shadow: 0 12px 40px rgba(0,0,0,0.10);
+  }
+  .bar { height: 42px; background: #f4f5f7; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+  .bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .bar i:nth-child(1) { background: #ff5f57; } .bar i:nth-child(2) { background: #febc2e; } .bar i:nth-child(3) { background: #28c840; }
+  .bar-url { flex:1; max-width: 460px; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 11px; color: var(--text3); text-align: center; }
+  .bar-ver { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+  .content { padding: 24px 26px 28px; }
+
+  /* 页头 */
+  .page-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .page-desc { font-size: 12.5px; color: var(--text2); }
+  .stats { display: flex; gap: 8px; margin-left: auto; flex: none; }
+  .stat { font-size: 12px; padding: 5px 12px; border-radius: 8px; font-weight: 500; white-space: nowrap; }
+  .stat-project { background: var(--brand-bg); color: var(--brand-deep); }
+  .stat-task { background: var(--purple-bg); color: var(--purple); }
+  .stat-done { background: var(--green-bg); color: var(--green-deep); }
+  .stat b { font-weight: 600; }
+
+  /* 布局：左树 + 右内容 */
+  .main { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .panel-head { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  .panel-title { font-size: 14px; font-weight: 600; }
+  .panel-sub { font-size: 11px; color: var(--text3); }
+  .panel-body { padding: 10px; }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; }
+  .search { font-size: 12px; padding: 6px 11px; border-radius: 8px; border: 1px solid var(--border); background: #fafafa; outline: none; transition: border .15s; width: 130px; }
+  .search:focus { border-color: var(--brand); background: #fff; }
+  .btn { font-size: 12px; padding: 6px 11px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--text2); transition: all .15s; font-family: inherit; }
+  .btn:hover { border-color: var(--brand); color: var(--brand); }
+  .btn-primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 500; }
+  .btn-primary:hover { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+
+  /* ===== 左侧项目列表（Todoist 风格） ===== */
+  .side-head { display: flex; align-items: center; gap: 7px; padding: 9px 12px 7px; }
+  .side-head span { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: .04em; }
+  .side-head .count { font-size: 10.5px; color: var(--text3); font-weight: 400; }
+  .side-head .btn-new { margin-left: auto; font-size: 11px; padding: 4px 9px; border-radius: 7px; border: 1px dashed var(--brand); background: var(--brand-bg); color: var(--brand-deep); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .side-head .btn-new:hover { border-style: solid; background: var(--brand); color: #fff; }
+
+  .proj-list { padding: 2px 8px 10px; display: flex; flex-direction: column; gap: 1px; max-height: 560px; overflow-y: auto; }
+  .proj-empty { text-align: center; color: var(--text3); font-size: 12px; padding: 24px 0; }
+
+  /* 树节点 */
+  .tnode {
+    display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 7px;
+    border-radius: 7px; cursor: pointer; user-select: none; position: relative;
+    transition: background .12s; color: var(--text);
+  }
+  .tnode:hover { background: #f3f4f6; }
+  .tnode.selected { background: var(--brand-bg); }
+  .tnode.selected .t-title { color: var(--brand-deep); font-weight: 600; }
+  .tnode.dragover-before { box-shadow: 0 -2.5px 0 0 var(--brand); background: var(--brand-bg); }
+  .tnode.dragover-after { box-shadow: 0 2.5px 0 0 var(--brand); background: var(--brand-bg); }
+  .tnode.dragover-child { background: var(--brand-bg); box-shadow: 0 0 0 2px var(--brand) inset; }
+  .tnode.dragover-forbidden { background: var(--red-bg); box-shadow: 0 0 0 2px var(--red) inset; }
+  .tnode.dragging { opacity: 0.4; }
+
+  .t-arrow {
+    width: 18px; height: 18px; flex: none; display: flex; align-items: center; justify-content: center;
+    border: none; background: none; cursor: pointer; color: var(--text3); border-radius: 4px;
+  }
+  .t-arrow:hover { background: #e5e7eb; color: var(--text2); }
+  .t-arrow svg { width: 11px; height: 11px; transition: transform .15s; }
+  .t-arrow.expanded svg { transform: rotate(90deg); }
+  .t-arrow.leaf { visibility: hidden; }
+
+  .t-ic { flex: none; display: flex; align-items: center; }
+  .t-ic svg { width: 15px; height: 15px; }
+  .t-color { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .t-title { font-size: 13px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .t-title.done { color: var(--text3); text-decoration: line-through; }
+  .t-count { font-size: 10.5px; color: var(--text3); flex: none; font-variant-numeric: tabular-nums; }
+  .t-badge { font-size: 10px; padding: 1px 6px; border-radius: 5px; font-weight: 500; flex: none; line-height: 1.6; }
+  .badge-anchor { background: var(--brand); color: #fff; }
+  .badge-accum { background: var(--amber-bg); color: var(--amber); }
+  .t-spacer { flex: 1; }
+  .t-ops { display: none; gap: 2px; flex: none; }
+  .tnode:hover .t-ops { display: flex; }
+  .t-op {
+    width: 22px; height: 22px; flex: none; display: flex; align-items: center; justify-content: center;
+    border: none; background: none; cursor: pointer; color: var(--text3); border-radius: 6px;
+  }
+  .t-op:hover { background: #e5e7eb; color: var(--brand); }
+  .t-op svg { width: 13px; height: 13px; }
+
+  /* 清单叶子（执行项） */
+  .tnode.check-item { min-height: 28px; }
+  .tnode.check-item .t-title { font-size: 12px; }
+  .t-check {
+    width: 15px; height: 15px; border-radius: 4.5px; flex: none; display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #d1d5db; background: transparent; cursor: pointer; transition: all .15s; padding: 0;
+  }
+  .t-check:hover { border-color: var(--brand); }
+  .t-check.on { background: var(--green); border-color: var(--green); }
+  .t-check.on svg { width: 9px; height: 9px; stroke: #fff; }
+
+  /* 拖拽提示 */
+  .drag-hint {
+    position: fixed; z-index: 80; pointer-events: none; display: none; align-items: center; gap: 6px;
+    background: #1f2937; color: #fff; font-size: 12px; padding: 5px 12px; border-radius: 8px;
+    white-space: nowrap; transform: translate(-50%, -130%); box-shadow: 0 4px 14px rgba(0,0,0,0.16);
+  }
+  .drag-hint.show { display: flex; }
+  .drag-hint.hint-forbidden { background: var(--red); }
+  .drag-hint .hint-line { width: 18px; height: 2px; background: #fff; border-radius: 1px; }
+  .drag-hint .hint-folder { width: 14px; height: 12px; }
+
+  /* ===== 右侧内容区 ===== */
+  .right-panel { display: flex; flex-direction: column; min-height: 560px; }
+  .mode-bar {
+    display: flex; align-items: center; gap: 6px; padding: 11px 14px; border-bottom: 1px solid var(--border);
+  }
+  .mode-seg { display: flex; gap: 3px; background: #f1f2f5; border-radius: 9px; padding: 3px; }
+  .mode-btn {
+    font: inherit; font-size: 12px; font-weight: 500; border: none; cursor: pointer; padding: 6px 14px;
+    border-radius: 7px; background: transparent; color: var(--text2); transition: all .15s;
+  }
+  .mode-btn.active { background: #fff; color: var(--brand-deep); box-shadow: 0 1px 3px rgba(0,0,0,0.10); font-weight: 600; }
+  .mode-desc { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  .detail-scroll { padding: 14px 16px 20px; flex: 1; overflow-y: auto; max-height: 560px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* 任务详情卡 */
+  .task-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 11px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .task-card.active-task { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(99,102,241,.10); }
+  .task-card-head {
+    display: flex; align-items: center; gap: 9px; padding: 12px 14px;
+  }
+  .task-card-head:hover { background: #fafbfc; }
+  .tc-fold {
+    width: 18px; height: 18px; flex: none; display: flex; align-items: center; justify-content: center;
+    color: var(--text3); border: none; background: none; cursor: pointer; transition: transform .15s;
+  }
+  .tc-fold svg { width: 11px; height: 11px; }
+  .tc-fold.open { transform: rotate(90deg); }
+  .tc-star { flex: none; color: var(--brand); display: flex; }
+  .tc-star svg { width: 15px; height: 15px; }
+  .tc-title { font-size: 13.5px; font-weight: 600; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tc-chain { font-size: 10.5px; color: var(--text3); flex: none; max-width: 40%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tc-meta { display: flex; gap: 6px; flex: none; }
+  .tc-body { padding: 4px 14px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .tc-body.collapsed { display: none; }
+
+  .check-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 7px; font-size: 12.5px; position: relative; }
+  .check-row:hover { background: #f8f9fb; }
+  .check-row.done { color: var(--text3); text-decoration: line-through; }
+  .check-row .cr-label { flex: 1; min-width: 0; }
+  .check-row .cr-tag { font-size: 10px; padding: 1px 7px; border-radius: 5px; flex: none; }
+  .check-row .cr-grip { width: 14px; height: 14px; color: #c4c4c4; cursor: grab; flex: none; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s; }
+  .check-row:hover .cr-grip { opacity: 1; }
+  .check-row.dragging { opacity: 0.4; }
+  .check-row.dragover-before { box-shadow: 0 -2px 0 0 var(--brand); background: var(--brand-bg); }
+  .check-row.dragover-after { box-shadow: 0 2px 0 0 var(--brand); background: var(--brand-bg); }
+  .cr-tag-phase { background: var(--purple-bg); color: var(--purple); }
+  .cr-tag-note { background: #f3f4f6; color: var(--text2); }
+
+  .tc-add {
+    display: flex; align-items: center; gap: 7px; margin-top: 7px; padding: 6px 8px; border-radius: 7px;
+    border: 1px dashed var(--border); color: var(--text3); font-size: 12px; cursor: pointer; transition: all .15s; background: none;
+  }
+  .tc-add:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-bg); }
+  .tc-add svg { width: 12px; height: 12px; }
+
+  .task-empty {
+    text-align: center; padding: 46px 20px; color: var(--text3); font-size: 12.5px; line-height: 2;
+  }
+  .task-empty b { color: var(--brand-deep); }
+
+  .sib-group-title {
+    font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: .05em;
+    padding: 8px 4px 2px; display: flex; align-items: center; gap: 7px;
+  }
+  .sib-group-title::before { content: ''; width: 4px; height: 13px; border-radius: 2px; background: var(--gc, var(--brand)); flex: none; }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%) translateY(80px);
+    background: #1f2937; color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 10px;
+    opacity: 0; transition: all .25s; z-index: 99; pointer-events: none; max-width: 80vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast b { color: #a5b4fc; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .stats { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Task OS · Project 项目整理页 UI（融合版 · 可交互演示）</h1>
+<div class="sub">左侧 = <b>Todoist 式项目列表</b>（彩色圆点 + 文件夹层层展开）＋ <b>Trilium 式树</b>（任意深度）<br>
+右侧 = <b>模式 A</b>（单 Task + 执行清单）／ <b>模式 B</b>（同级 Task 列表 + 各自清单）切换<br>
+拖拽：<b>拖到节点上 = 进入该层级（调层级）</b> · <b>拖到两节点之间 = 插序（调顺序）</b> · 清单项同样可拖</div>
+
+<div class="viewport">
+  <div class="bar">
+    <i></i><i></i><i></i>
+    <div class="bar-url">taskos.local/projects</div>
+    <div class="bar-ver">Project · 整理</div>
+  </div>
+
+  <div class="content">
+    <!-- 页头 -->
+    <div class="page-head">
+      <div>
+        <div class="page-title">Project · 项目整理</div>
+        <div class="page-desc" style="margin-top:2px">左侧选节点 → 右侧看清单；拖拽整理归属与顺序</div>
+      </div>
+      <div class="stats" id="stats">
+        <span class="stat stat-project">项目 <b id="stProj">0</b></span>
+        <span class="stat stat-task">任务 <b id="stTask">0</b></span>
+        <span class="stat stat-done">已完成 <b id="stDone">0</b></span>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- ===== 左：项目树（Todoist 项目列表风格） ===== -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">项目</span>
+          <span class="panel-sub">文件夹层层展开 · 拖拽整理</span>
+          <div class="toolbar" style="margin-left:auto">
+            <input class="search" id="treeSearch" placeholder="搜索…">
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="side-head">
+            <span>我的项目</span>
+            <span class="count" id="projCount">0</span>
+            <button class="btn-new" id="btnNewProject">＋ 新建项目</button>
+          </div>
+          <div class="proj-list" id="tree"></div>
+          <div style="font-size:10.5px;color:var(--text3);padding:2px 12px 8px;line-height:1.7;">
+            <b style="color:var(--text2)">拖拽提示</b>：拖到<b>文件夹/节点上</b>＝移入该层级 · 拖到<b>两节点之间</b>＝插入顺序 · 清单项同样可拖
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 右：内容区（模式 A/B） ===== -->
+      <div class="panel right-panel">
+        <div class="mode-bar">
+          <div class="mode-seg">
+            <button class="mode-btn active" id="modeA">模式 A · 单任务</button>
+            <button class="mode-btn" id="modeB">模式 B · 同级任务</button>
+          </div>
+          <span class="mode-desc" id="modeDesc">聚焦当前 Task 及其执行清单</span>
+        </div>
+        <div class="detail-scroll" id="detailScroll"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="drag-hint" id="dragHint"></div>
+
+<script>
+/* ═══════════ 数据（V5 语义：project / phase / task 任意深度 + ★anchor + 积累 + 执行清单） ═══════════ */
+let seq = 1000;
+const uid = () => 'n' + (seq++);
+
+let roots = [
+  { id: 'p1', title: '4 轴飞行器', level: 'project', color: '#7c3aed', expanded: true, children: [
+    { id: 's1', title: '硬件设计', level: 'phase', expanded: true, children: [
+      { id: 't1', title: '画原理图', level: 'task', anchor: true, expanded: true,
+        checks: [ { id:'c1', text:'电源模块', done:true, tag:'phase' }, { id:'c2', text:'主控 MCU 电路', done:false, tag:'phase' }, { id:'c3', text:'电机驱动电路', done:false, tag:'phase' } ],
+        children: [] },
+      { id: 't1b', title: 'PCB 打样', level: 'task', expanded: false,
+        checks: [ { id:'c4', text:'提交嘉立创', done:false, tag:'note' }, { id:'c5', text:'核对封装', done:false, tag:'note' } ],
+        children: [] },
+      { id: 's1b', title: '结构设计', level: 'phase', expanded: false, children: [
+        { id: 't2', title: '3D 打印外壳', level: 'task', expanded: true,
+          checks: [ { id:'c6', text:'建模机架', done:true, tag:'phase' }, { id:'c7', text:'打印样件', done:false, tag:'note' } ],
+          children: [] },
+      ]},
+    ]},
+    { id: 's2', title: '软件设计', level: 'phase', expanded: false, children: [
+      { id: 't3', title: '编写飞控代码', level: 'task', anchor: true, expanded: true,
+        checks: [ { id:'c8', text:'姿态解算', done:false, tag:'phase' }, { id:'c9', text:'PID 调参', done:false, tag:'phase' } ],
+        children: [] },
+    ]},
+  ]},
+  { id: 'p2', title: '毕业论文', level: 'project', color: '#2563eb', expanded: false, children: [
+    { id: 's3', title: '文献综述', level: 'phase', expanded: false, children: [
+      { id: 't4', title: '精读 5 篇论文', level: 'task', expanded: true,
+        checks: [ { id:'c10', text:'检索近 3 年文献', done:true, tag:'note' }, { id:'c11', text:'做阅读笔记', done:false, tag:'note' } ],
+        children: [] },
+    ]},
+    { id: 's4', title: '开题报告', level: 'phase', expanded: false, children: [] },
+  ]},
+  { id: 'p3', title: '健康生活', level: 'project', color: '#16a34a', expanded: true, children: [
+    { id: 't5', title: '晨跑 3km', level: 'task', anchor: true, accumulate: true, streak: 12, todayChecked: true, expanded: true,
+      checks: [], children: [] },
+  ]},
+];
+
+let dragId = null, dragSource = null;
+let selectedId = 't1';
+let mode = 'A';   // A=单任务  B=同级任务
+let kbdLocked = false;
+
+/* ═══════════ 工具 ═══════════ */
+const $ = (s) => document.querySelector(s);
+
+function findNode(id, list = roots) {
+  for (const n of list) {
+    if (n.id === id) return n;
+    const f = findNode(id, n.children || []);
+    if (f) return f;
+  }
+  return null;
+}
+function findParent(id, list = roots) {
+  for (const n of list) {
+    if ((n.children || []).some(c => c.id === id)) return n;
+    const f = findParent(id, n.children || []);
+    if (f) return f;
+  }
+  return null;
+}
+function isDescendant(id, maybeDesc) {
+  const n = findNode(id);
+  if (!n) return false;
+  const stack = [...(n.children || [])];
+  while (stack.length) {
+    const c = stack.pop();
+    if (c.id === maybeDesc) return true;
+    stack.push(...(c.children || []));
+  }
+  return false;
+}
+function chainOf(id) {
+  // 归属链：根 → 父 → 当前
+  const names = [];
+  function walk(list, target, acc) {
+    for (const n of list) {
+      if (n.id === target) { names.push(...acc, n.title); return true; }
+      if (walk(n.children || [], target, [...acc, n.title])) return true;
+    }
+    return false;
+  }
+  walk(roots, id, []);
+  return names.join(' / ');
+}
+function countStats() {
+  let proj = 0, task = 0, done = 0;
+  function walk(list) {
+    for (const n of list) {
+      if (n.level === 'project') proj++;
+      if (n.level === 'task') { task++; if (n.done) done++; }
+      if (n.checks) done += n.checks.filter(c => c.done).length;
+      walk(n.children || []);
+    }
+  }
+  walk(roots);
+  $('#stProj').textContent = proj;
+  $('#stTask').textContent = task;
+  $('#stDone').textContent = done;
+  $('#projCount').textContent = proj + ' 个项目';
+}
+function toast(msg) {
+  const t = $('#toast');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+const IC = {
+  folder: (c) => '<svg viewBox="0 0 24 24" fill="none" stroke="' + (c || '#9ca3af') + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>',
+  folderOpen: (c) => '<svg viewBox="0 0 24 24" fill="none" stroke="' + (c || '#9ca3af') + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 5h9a2 2 0 0 1 2 2v2"/><path d="M4 10h16" opacity=".45"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="#6366f1" stroke="#6366f1" stroke-width="1.2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  task: '<svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  accum: '<svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.4 2.4M15.3 15.3l2.4 2.4M17.7 6.3l-2.4 2.4M8.7 15.3l-2.4 2.4"/></svg>',
+  grip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg>',
+};
+
+/* ═══════════ 左侧树渲染（Todoist 项目列表 + 文件夹层层展开） ═══════════ */
+function countChildren(n) {
+  let c = (n.checks || []).length;
+  for (const ch of (n.children || [])) c += countChildren(ch);
+  return c;
+}
+
+function buildTree() {
+  const tree = $('#tree');
+  tree.innerHTML = '';
+  const q = $('#treeSearch').value.trim().toLowerCase();
+  renderNodes(roots, 0, tree, q);
+  if (!tree.children.length) tree.innerHTML = '<div class="proj-empty">暂无项目，点右上「＋ 新建项目」</div>';
+  countStats();
+}
+
+function renderNodes(list, depth, container, q) {
+  for (const n of list) {
+    if (q && !(n.title + ' ' + (n.checks || []).map(c => c.text).join(' ')).toLowerCase().includes(q)) {
+      if (n.children) renderNodes(n.children, depth, container, q);
+      continue;
+    }
+    const row = makeNodeRow(n, depth, q);
+    container.appendChild(row);
+    if ((q || n.expanded) && n.children && n.children.length) {
+      renderNodes(n.children, depth + 1, container, q);
+    }
+    // 任务展开时渲染执行清单（执行项 = 最细叶子，可拖拽）
+    if ((q || n.expanded) && n.checks && n.checks.length && n.level === 'task') {
+      for (const ck of n.checks) {
+        const cr = makeCheckRow(n, ck, depth + 1);
+        container.appendChild(cr);
+      }
+    }
+  }
+}
+
+function makeNodeRow(n, depth, q) {
+  const row = document.createElement('div');
+  row.className = 'tnode' + (selectedId === n.id ? ' selected' : '');
+  row.dataset.id = n.id;
+  row.draggable = true;
+  row.style.paddingLeft = (8 + depth * 22) + 'px';
+  row.style.background = n.level === 'project' && !q ? (hexA(n.color, 0.05)) : '';
+
+  const hasKids = (n.children && n.children.length) || (n.level === 'task' && n.checks && n.checks.length);
+  const arrow = document.createElement('button');
+  arrow.className = 't-arrow' + (n.expanded && !q ? ' expanded' : '') + (!hasKids ? ' leaf' : '');
+  arrow.innerHTML = IC.arrow;
+  arrow.addEventListener('click', (e) => { e.stopPropagation(); n.expanded = !n.expanded; buildTree(); renderDetail(); });
+  row.appendChild(arrow);
+
+  // 图标：project=文件夹（按颜色） phase=小文件夹灰 task=★/圆点 积累=太阳
+  const ic = document.createElement('span');
+  ic.className = 't-ic';
+  if (n.level === 'project') ic.innerHTML = (n.expanded ? IC.folderOpen(n.color) : IC.folder(n.color));
+  else if (n.level === 'phase') ic.innerHTML = '<svg viewBox="0 0 24 24" fill="' + (n.color || '#9ca3af') + '" opacity=".55"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>';
+  else if (n.accumulate) ic.innerHTML = IC.accum;
+  else if (n.anchor) ic.innerHTML = IC.star;
+  else ic.innerHTML = IC.task;
+  row.appendChild(ic);
+
+  // 项目颜色圆点（Todoist 风格）
+  if (n.level === 'project' && n.color) {
+    const dot = document.createElement('span');
+    dot.className = 't-color';
+    dot.style.background = n.color;
+    row.appendChild(dot);
+  }
+
+  const title = document.createElement('span');
+  title.className = 't-title' + (n.done ? ' done' : '');
+  title.textContent = n.title;
+  row.appendChild(title);
+
+  if (n.accumulate) {
+    const acc = document.createElement('span');
+    acc.className = 't-badge badge-accum';
+    acc.textContent = '🔥 ' + (n.streak || 0) + ' 天';
+    row.appendChild(acc);
+  }
+  if (n.anchor && n.level === 'task' && !n.accumulate) {
+    const st = document.createElement('span');
+    st.className = 't-badge badge-anchor';
+    st.textContent = '★';
+    row.appendChild(st);
+  }
+
+  const cnt = document.createElement('span');
+  cnt.className = 't-count';
+  cnt.textContent = countChildren(n) ? countChildren(n) : '';
+  row.appendChild(cnt);
+
+  const ops = document.createElement('span');
+  ops.className = 't-ops';
+  const opNew = document.createElement('button');
+  opNew.className = 't-op'; opNew.title = '新建子级'; opNew.innerHTML = IC.plus;
+  opNew.addEventListener('click', (e) => { e.stopPropagation(); addChildTo(n); });
+  ops.appendChild(opNew);
+  const opMenu = document.createElement('button');
+  opMenu.className = 't-op'; opMenu.title = '更多'; opMenu.innerHTML = IC.dots;
+  opMenu.addEventListener('click', (e) => { e.stopPropagation(); nodeMenu(n, row); });
+  ops.appendChild(opMenu);
+  row.appendChild(ops);
+
+  row.addEventListener('click', () => {
+    selectedId = n.id;
+    buildTree();
+    renderDetail();
+  });
+
+  // 拖拽
+  row.addEventListener('dragstart', (e) => {
+    dragId = n.id; dragSource = 'tree';
+    e.dataTransfer.effectAllowed = 'move';
+    row.classList.add('dragging');
+    showDragHint('拖动中…');
+  });
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    hideDragHint();
+    clearDragState();
+  });
+  row.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = row.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const h = rect.height;
+    clearDragState();
+    // 判定：上 1/3 = before（插序） 下 1/3 = after（插序） 中间 = child（进入该层级）
+    if (y < h * 0.3) { row.classList.add('dragover-before'); showDragHint('插入 ' + n.title + ' 之前', false, true); }
+    else if (y > h * 0.7) { row.classList.add('dragover-after'); showDragHint('插入 ' + n.title + ' 之后', false, true); }
+    else {
+      if (isDescendant(dragId, n.id) || dragId === n.id) { row.classList.add('dragover-forbidden'); showDragHint('不能移入自己的子级', true); }
+      else { row.classList.add('dragover-child'); showDragHint('移入「' + n.title + '」', false, false, true); }
+    }
+  });
+  row.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = row.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const h = rect.height;
+    clearDragState();
+    hideDragHint();
+    if (!dragId) return;
+    if (y < h * 0.3) moveNode(dragId, n.id, 'before');
+    else if (y > h * 0.7) moveNode(dragId, n.id, 'after');
+    else moveNode(dragId, n.id, 'child');
+    dragId = null;
+  });
+
+  return row;
+}
+
+function makeCheckRow(task, ck, depth) {
+  const row = document.createElement('div');
+  row.className = 'tnode check-item';
+  row.dataset.ckId = ck.id;
+  row.style.paddingLeft = (26 + depth * 22) + 'px';
+  row.draggable = true;
+  row.title = '清单项可拖拽到其他任务下';
+
+  const box = document.createElement('button');
+  box.className = 't-check' + (ck.done ? ' on' : '');
+  box.innerHTML = IC.check;
+  box.addEventListener('click', (e) => {
+    e.stopPropagation();
+    ck.done = !ck.done;
+    buildTree(); renderDetail();
+  });
+  row.appendChild(box);
+
+  const label = document.createElement('span');
+  label.className = 't-title';
+  label.textContent = ck.text;
+  row.appendChild(label);
+
+  const tag = document.createElement('span');
+  tag.className = 't-badge ' + (ck.tag === 'phase' ? 'badge-anchor' : '');
+  tag.style.background = ck.tag === 'phase' ? 'var(--purple-bg)' : '#f3f4f6';
+  tag.style.color = ck.tag === 'phase' ? 'var(--purple)' : 'var(--text2)';
+  tag.textContent = ck.tag === 'phase' ? '阶段子任务' : '备注行';
+  row.appendChild(tag);
+
+  // 拖拽清单项：可排序（同任务内）或改归属（其他任务）
+  row.addEventListener('dragstart', (e) => {
+    dragId = ck.id; dragSource = 'check'; dragCheckFrom = task.id;
+    e.dataTransfer.effectAllowed = 'move';
+    row.classList.add('dragging');
+    showDragHint('拖动执行项…');
+  });
+  row.addEventListener('dragend', () => { row.classList.remove('dragging'); hideDragHint(); clearDragState(); });
+  row.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = row.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const h = rect.height;
+    clearDragState();
+    row.classList.add(y < h / 2 ? 'dragover-before' : 'dragover-after');
+    showDragHint(y < h / 2 ? '排到「' + ck.text + '」之前' : '排到「' + ck.text + '」之后', false, true);
+  });
+  row.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = row.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const h = rect.height;
+    clearDragState(); hideDragHint();
+    if (!dragId || dragSource !== 'check') { dragId = null; return; }
+    const toTask = findNode(task.id);
+    moveCheckItem(dragId, dragCheckFrom, toTask, ck.id, y < h / 2 ? 'before' : 'after');
+    dragId = null;
+  });
+
+  row.addEventListener('click', () => {
+    selectedId = task.id;
+    buildTree(); renderDetail();
+  });
+  return row;
+}
+
+let dragCheckFrom = null;
+
+/* ═══════════ 移动逻辑（调层级 / 调顺序） ═══════════ */
+
+// 清单项移动：同任务内排序（before/after）或跨任务归属（追加）
+function moveCheckItem(checkId, fromTaskId, toTask, targetCheckId, pos) {
+  const fromTask = findNode(fromTaskId);
+  if (!fromTask || !fromTask.checks) return;
+  const idx = fromTask.checks.findIndex(c => c.id === checkId);
+  if (idx < 0) return;
+  const ck = fromTask.checks[idx];
+  fromTask.checks.splice(idx, 1);
+
+  if (!toTask) { fromTask.checks.splice(idx, 0, ck); return; }
+
+  if (toTask.id === fromTaskId) {
+    // 同任务内排序：插到目标清单项之前/之后
+    const ti = toTask.checks.findIndex(c => c.id === targetCheckId);
+    if (ti < 0) { toTask.checks.splice(idx, 0, ck); return; }
+    let insertAt = pos === 'before' ? ti : ti + 1;
+    if (insertAt > idx) insertAt--;
+    toTask.checks.splice(insertAt, 0, ck);
+    toast('已调整执行项顺序');
+  } else {
+    // 跨任务归属：追加到目标任务
+    if (!toTask.checks) toTask.checks = [];
+    if (targetCheckId && toTask.checks.some(c => c.id === targetCheckId)) {
+      const ti = toTask.checks.findIndex(c => c.id === targetCheckId);
+      toTask.checks.splice(pos === 'before' ? ti : ti + 1, 0, ck);
+    } else {
+      toTask.checks.push(ck);
+    }
+    toast('执行项已移入 <b>' + toTask.title + '</b>');
+  }
+  buildTree(); renderDetail();
+}
+
+function moveNode(id, targetId, pos) {
+  // 清单项移动：从某个任务的 checks 移到另一个任务
+  if (dragSource === 'check') {
+    const fromTask = findNode(dragCheckFrom);
+    const idx = fromTask.checks.findIndex(c => c.id === id);
+    if (idx < 0) return;
+    const ck = fromTask.checks[idx];
+    fromTask.checks.splice(idx, 1);
+    const toTask = findNode(targetId);
+    if (!toTask) { fromTask.checks.splice(idx, 0, ck); return; }
+    if (toTask.level === 'task' && toTask.id !== fromTask.id) {
+      if (!toTask.checks) toTask.checks = [];
+      toTask.checks.push(ck);
+      toast('清单项已移入 <b>' + toTask.title + '</b>');
+    } else {
+      fromTask.checks.splice(idx, 0, ck);
+      toast('只能拖到任务节点上');
+    }
+    buildTree(); renderDetail();
+    return;
+  }
+
+  const node = findNode(id);
+  if (!node) return;
+  const target = findNode(targetId);
+  if (!target) return;
+  if (id === targetId || isDescendant(id, targetId)) { toast('不能移动到自己的子级'); return; }
+
+  const oldParent = findParent(id);
+  const oldIdx = oldParent.children.indexOf(node);
+  oldParent.children.splice(oldIdx, 1);
+
+  if (pos === 'child') {
+    // 调层级：进入目标节点（目标如果是 project/phase/task 均可作容器）
+    if (!target.children) target.children = [];
+    target.children.push(node);
+    target.expanded = true;
+    toast('已移入 <b>' + target.title + '</b>（层级 +1）');
+  } else {
+    // 调顺序：插到目标前/后（同一父级）
+    const newParent = findParent(targetId);
+    let ti = newParent.children.indexOf(target);
+    if (pos === 'after') ti++;
+    newParent.children.splice(ti, 0, node);
+    toast(pos === 'before' ? '已插入 <b>' + target.title + '</b> 之前' : '已插入 <b>' + target.title + '</b> 之后');
+  }
+  buildTree(); renderDetail();
+}
+
+/* ═══════════ 拖拽提示 ═══════════ */
+function showDragHint(text, forbidden, line, folder) {
+  const h = $('#dragHint');
+  h.innerHTML = (folder ? '<span class="hint-folder">' + IC.folder('#fff') + '</span>' : (line ? '<span class="hint-line"></span>' : '')) + '<span>' + text + '</span>';
+  h.classList.add('show');
+  h.classList.toggle('hint-forbidden', !!forbidden);
+}
+function hideDragHint() { $('#dragHint').classList.remove('show'); }
+function clearDragState() {
+  document.querySelectorAll('.tnode.dragover-before,.tnode.dragover-after,.tnode.dragover-child,.tnode.dragover-forbidden')
+    .forEach(el => el.classList.remove('dragover-before', 'dragover-after', 'dragover-child', 'dragover-forbidden'));
+  document.querySelectorAll('.check-row.dragover-before,.check-row.dragover-after')
+    .forEach(el => el.classList.remove('dragover-before', 'dragover-after'));
+}
+document.addEventListener('dragover', (e) => {
+  const h = $('#dragHint');
+  if (h.classList.contains('show')) h.style.left = e.clientX + 'px';
+  if (h.classList.contains('show')) h.style.top = e.clientY + 'px';
+});
+
+/* ═══════════ 新建 ═══════════ */
+function addChildTo(n) {
+  const title = prompt(n.level === 'project' ? '在该项目下新建阶段，输入名称：' : '在「' + n.title + '」下新建，输入名称：');
+  if (!title || !title.trim()) return;
+  const nn = { id: uid(), title: title.trim(), level: n.level === 'project' ? 'phase' : 'task', expanded: true, checks: [], children: [] };
+  if (!n.children) n.children = [];
+  n.children.push(nn);
+  n.expanded = true;
+  buildTree();
+  selectedId = nn.id;
+  buildTree(); renderDetail();
+  toast('已创建 <b>' + nn.title + '</b>');
+}
+$('#btnNewProject').addEventListener('click', () => {
+  const title = prompt('新建项目，输入名称：');
+  if (!title || !title.trim()) return;
+  const colors = ['#7c3aed', '#2563eb', '#16a34a', '#d97706', '#db2777', '#0d9488'];
+  const nn = { id: uid(), title: title.trim(), level: 'project', color: colors[Math.floor(Math.random() * colors.length)], expanded: true, children: [] };
+  roots.push(nn);
+  buildTree();
+  toast('已创建项目 <b>' + nn.title + '</b>');
+});
+$('#treeSearch').addEventListener('input', buildTree);
+
+/* ═══════════ 节点菜单（标★ / 积累 / 新建子级 / 移除关系） ═══════════ */
+function nodeMenu(n, row) {
+  const actions = [];
+  if (n.level === 'task' && !n.accumulate) actions.push('切换 ★锚点');
+  if (n.level === 'task') actions.push('切换积累型');
+  if (n.level !== 'project') actions.push('移除关系（回待整理池）');
+  const pick = prompt('节点操作：\n' + actions.map((a, i) => (i + 1) + '. ' + a).join('\n'));
+  const idx = parseInt(pick, 10) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= actions.length) return;
+  const act = actions[idx];
+  if (act === '切换 ★锚点') {
+    n.anchor = !n.anchor;
+    toast(n.anchor ? '已标为 ★ Today 锚点' : '已取消 ★ 锚点');
+  } else if (act === '切换积累型') {
+    n.accumulate = !n.accumulate;
+    if (n.accumulate) n.streak = n.streak || 0;
+    toast(n.accumulate ? '已设为积累型（打卡）' : '已取消积累型');
+  } else if (act === '移除关系（回待整理池）') {
+    const p = findParent(n.id);
+    p.children.splice(p.children.indexOf(n), 1);
+    roots.push(n); // 简化：放回根部作独立任务
+    toast('已移除归属，回到根层级');
+  }
+  buildTree(); renderDetail();
+}
+
+/* ═══════════ 右侧内容区（模式 A / B） ═══════════ */
+function renderDetail() {
+  const box = $('#detailScroll');
+  box.innerHTML = '';
+  const n = findNode(selectedId);
+  if (!n) { box.innerHTML = '<div class="task-empty">左侧选择一个节点</div>'; return; }
+  if (mode === 'A') renderModeA(box, n);
+  else renderModeB(box, n);
+}
+
+function renderModeA(box, n) {
+  // 模式 A：只显示当前选中的 Task 及其执行清单（若选的是项目/阶段，则显示该容器下第一个 ★task 或第一个 task）
+  const task = pickTask(n);
+  if (!task) {
+    box.innerHTML = '<div class="task-empty">该层级下暂无任务<br>点击左侧节点旁的 <b>＋</b> 新建</div>';
+    return;
+  }
+  const card = document.createElement('div');
+  card.className = 'task-card active-task';
+  card.innerHTML = taskCardInner(task, true, true);   // locked：始终展开，显示全
+  box.appendChild(card);
+  bindCard(card, task, true);
+}
+
+function pickTask(n) {
+  if (n.level === 'task') return n;
+  // 在子树中找 ★task 优先
+  const found = [];
+  function walk(list) {
+    for (const x of list) {
+      if (x.level === 'task') found.push(x);
+      walk(x.children || []);
+    }
+  }
+  walk(n.children || []);
+  return found.find(x => x.anchor) || found[0] || null;
+}
+
+function taskCardInner(task, showChain, locked) {
+  const chain = chainOf(task.id);
+  const checks = (task.checks || []).map(ck =>
+    '<div class="check-row' + (ck.done ? ' done' : '') + '" draggable="true" data-ck="' + ck.id + '" data-task="' + task.id + '">' +
+      '<span class="cr-grip">' + IC.grip + '</span>' +
+      '<button class="t-check' + (ck.done ? ' on' : '') + '" data-ck="' + ck.id + '">' + IC.check + '</button>' +
+      '<span class="cr-label">' + ck.text + '</span>' +
+      '<span class="cr-tag ' + (ck.tag === 'phase' ? 'cr-tag-phase' : 'cr-tag-note') + '">' + (ck.tag === 'phase' ? '阶段' : '备注') + '</span>' +
+    '</div>').join('');
+  return (
+    '<div class="task-card-head" data-fold="' + task.id + '">' +
+      '<button class="tc-fold open"' + (locked ? ' style="visibility:hidden"' : '') + '>' + IC.arrow + '</button>' +
+      (task.anchor || task.accumulate ? '<span class="tc-star">' + (task.accumulate ? IC.accum : IC.star) + '</span>' : '') +
+      '<span class="tc-title">' + task.title + '</span>' +
+      (showChain ? '<span class="tc-chain">' + chain + '</span>' : '') +
+      '<span class="tc-meta">' +
+        (task.accumulate ? '<span class="t-badge badge-accum">🔥 ' + (task.streak || 0) + ' 天</span>' : '') +
+        (task.done ? '<span class="t-badge" style="background:var(--green-bg);color:var(--green-deep)">已完成</span>' : '') +
+      '</span>' +
+    '</div>' +
+    '<div class="tc-body">' +
+      (task.accumulate ? '<div style="font-size:11.5px;color:var(--amber);padding:6px 8px;background:var(--amber-bg);border-radius:8px;margin-bottom:6px;">积累型任务 · 今日' + (task.todayChecked ? '已打卡 ✓' : '未打卡') + '</div>' : '') +
+      (checks || '<div style="font-size:12px;color:var(--text3);padding:8px;">暂无执行清单，点下方「＋」添加</div>') +
+      '<button class="tc-add" data-add="' + task.id + '">' + IC.plus + ' 添加执行项（拖拽手柄可排序）</button>' +
+    '</div>'
+  );
+}
+
+function renderModeB(box, n) {
+  // 模式 B：显示当前选中 task 所在阶段下所有同级 task（含各自执行清单）
+  const task = pickTask(n);
+  if (!task) {
+    box.innerHTML = '<div class="task-empty">该层级下暂无任务<br>点击左侧节点旁的 <b>＋</b> 新建</div>';
+    return;
+  }
+  const parent = findParent(task.id);
+  const sibs = parent ? (parent.children || []) : roots;
+  const sameLevel = sibs.filter(s => s.level === 'task' || s.level === 'phase');
+  // 找出所有 task 级节点（含子阶段里的）
+  let tasks = [];
+  function collect(list, top) {
+    for (const x of list) {
+      if (x.level === 'task') tasks.push(x);
+      collect(x.children || [], top);
+    }
+  }
+  collect(sibs.length ? sibs : [task], task);
+  tasks = tasks.filter((x, i) => tasks.indexOf(x) === i);
+
+  if (!tasks.length) {
+    box.innerHTML = '<div class="task-empty">该层级下暂无任务</div>';
+    return;
+  }
+
+  // 组头（Todoist 项目色）
+  const proj = getProject(task);
+  const gt = document.createElement('div');
+  gt.className = 'sib-group-title';
+  gt.style.setProperty('--gc', proj.color || '#9ca3af');
+  gt.innerHTML = (proj.color ? '<span style="width:8px;height:8px;border-radius:50%;background:' + proj.color + ';display:inline-block;"></span>' : '') +
+    (proj.title || '根层级') + ' · ' + tasks.length + ' 个任务';
+  box.appendChild(gt);
+
+  tasks.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'task-card' + (t.id === task.id ? ' active-task' : '');
+    const locked = t.id === task.id;   // 当前选中卡锁定展开
+    card.innerHTML = taskCardInner(t, true, locked);
+    bindCard(card, t, locked);
+    box.appendChild(card);
+  });
+
+  // 保留新增任务入口
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tc-add';
+  addBtn.style.marginTop = '4px';
+  addBtn.innerHTML = IC.plus + ' 在此阶段下新增任务';
+  addBtn.addEventListener('click', () => {
+    const title = prompt('新增任务，输入名称：');
+    if (!title || !title.trim()) return;
+    const nn = { id: uid(), title: title.trim(), level: 'task', expanded: true, checks: [], children: [] };
+    (parent ? parent.children : roots).push(nn);
+    buildTree(); renderDetail();
+    toast('已创建任务 <b>' + nn.title + '</b>');
+  });
+  box.appendChild(addBtn);
+}
+
+function getProject(n) {
+  function walk(list, acc) {
+    for (const x of list) {
+      if (x.id === n.id) return acc.length ? acc[acc.length - 1] : x;
+      const r = walk(x.children || [], [...acc, x]);
+      if (r) return r;
+    }
+    return null;
+  }
+  return walk(roots, []) || n;
+}
+
+function bindCard(card, task, locked) {
+  // 折叠：仅点箭头折叠（头部点击不折叠，保证内容始终可见可查）
+  const fold = card.querySelector('.tc-fold');
+  if (fold && !locked) {
+    fold.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const body = card.querySelector('.tc-body');
+      body.classList.toggle('collapsed');
+      fold.classList.toggle('open');
+    });
+  }
+  // 清单勾选
+  card.querySelectorAll('.t-check[data-ck]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ck = (task.checks || []).find(c => c.id === b.dataset.ck);
+      if (ck) { ck.done = !ck.done; buildTree(); renderDetail(); }
+    });
+  });
+  // 添加执行项
+  const add = card.querySelector('.tc-add[data-add]');
+  if (add) add.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const text = prompt('添加执行项：');
+    if (!text || !text.trim()) return;
+    if (!task.checks) task.checks = [];
+    task.checks.push({ id: uid(), text: text.trim(), done: false, tag: 'note' });
+    buildTree(); renderDetail();
+    toast('已添加 <b>' + text.trim() + '</b>');
+  });
+  // 清单行拖拽：同任务内排序 + 跨任务归属
+  card.querySelectorAll('.check-row[draggable]').forEach(row => {
+    row.addEventListener('dragstart', (e) => {
+      e.stopPropagation();
+      dragId = row.dataset.ck; dragSource = 'check';
+      dragCheckFrom = task.id;
+      e.dataTransfer.effectAllowed = 'move';
+      row.classList.add('dragging');
+      showDragHint('拖动执行项…');
+    });
+    row.addEventListener('dragend', () => { row.classList.remove('dragging'); hideDragHint(); clearDragState(); });
+    row.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = row.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const h = rect.height;
+      clearDragState();
+      row.classList.add(y < h / 2 ? 'dragover-before' : 'dragover-after');
+      showDragHint(y < h / 2 ? '排序到 ' + row.querySelector('.cr-label').textContent + ' 之前' : '排序到 ' + row.querySelector('.cr-label').textContent + ' 之后', false, true);
+    });
+    row.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = row.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const h = rect.height;
+      clearDragState(); hideDragHint();
+      if (!dragId || dragSource !== 'check') { dragId = null; return; }
+      const toTask = findNode(row.dataset.task);
+      const pos = y < h / 2 ? 'before' : 'after';
+      moveCheckItem(dragId, dragCheckFrom, toTask, row.dataset.ck, pos);
+      dragId = null;
+    });
+  });
+}
+
+/* ═══════════ 模式切换 ═══════════ */
+function setMode(m) {
+  mode = m;
+  $('#modeA').classList.toggle('active', m === 'A');
+  $('#modeB').classList.toggle('active', m === 'B');
+  $('#modeDesc').textContent = m === 'A' ? '聚焦当前 Task 及其执行清单' : '该阶段下所有同级 Task + 各自执行清单';
+  renderDetail();
+}
+$('#modeA').addEventListener('click', () => setMode('A'));
+$('#modeB').addEventListener('click', () => setMode('B'));
+
+/* ═══════════ 工具 ═══════════ */
+function hexA(hex, a) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+
+/* ═══════════ 初始化 ═══════════ */
+buildTree();
+renderDetail();
+</script>
+</body>
+</html>

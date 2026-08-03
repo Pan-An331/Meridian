@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Logo 锚点 v4 · 时间×方向</title>
+<style>
+:root{
+  --bg:#eef0f4; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --blue:#1e3a8a; --gold:#f59e0b;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;padding-bottom:80px}
+.page{max-width:1000px;margin:0 auto;padding:30px 24px 0}
+h1{font-size:23px;font-weight:700;letter-spacing:-.3px}
+.sub{font-size:12.5px;color:var(--text2);margin-top:6px}
+.insight{background:linear-gradient(135deg,#1e3a8a,#312e81 60%,#4c1d95);border-radius:16px;padding:20px 24px;color:#fff;margin-top:18px}
+.insight h3{font-size:14px;font-weight:700;margin-bottom:8px;color:#fcd34d}
+.insight p{font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.75}
+.insight b{color:#fff}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.card{border:1px solid var(--border);border-radius:16px;background:var(--card);overflow:hidden;display:flex;flex-direction:column}
+.card .stage{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f8f9fb,#f1f3f7);position:relative}
+.card .stage .vtag{position:absolute;top:9px;left:9px;font-size:8.5px;font-weight:700;color:#fff;background:var(--blue);padding:2.5px 8px;border-radius:8px;letter-spacing:.4px}
+.card .stage .vtag.gold{background:var(--gold)}
+.card .body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column}
+.card .body h3{font-size:13px;font-weight:700}
+.card .body .en{font-size:10px;color:var(--text3);margin-top:1px}
+.card .body .concept{font-size:11px;color:var(--text2);margin-top:7px;line-height:1.55}
+.card .body .concept b{color:var(--text)}
+.card .body .dims{margin-top:7px;font-size:10.5px;background:#fffbeb;border-radius:7px;padding:6px 9px;color:#92400e;line-height:1.5}
+.card .body .spec{margin-top:7px;font-size:9.8px;color:var(--text3);background:#f7f8fa;border-radius:8px;padding:7px 9px;line-height:1.5;font-family:ui-monospace,Consolas,monospace}
+.card .fav{display:flex;gap:7px;align-items:center;margin-top:9px;padding-top:8px;border-top:1px dashed #e5e7eb}
+.card .fav .fl{font-size:9px;color:var(--text3)}
+.fav-b{width:22px;height:22px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+.fav-b svg{display:block}
+.anchor-box{border:1.5px solid var(--border);border-radius:14px;background:#fff;padding:18px 20px;margin-top:18px}
+.anchor-box h3{font-size:14px;font-weight:700;margin-bottom:8px}
+.anchor-box p{font-size:12.5px;color:var(--text2);line-height:1.75}
+.anchor-box b{color:var(--text)}
+.talk{font-family:ui-monospace,Consolas,monospace;background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:11.5px;line-height:1.8;color:#374151}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:36px}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Meridian Logo 锚点 v4 · 时间 × 方向</h1>
+<div class="sub">产品经理出稿 · 2026-08-03 · 按用户明确公式「时间感 + 方向感」重做 · 纯参考锚，未改码</div>
+
+<div class="insight">
+  <h3>关键洞察：正午 = 正北 = 子午线（时间与方向在 Meridian 里是同一个东西）</h3>
+  <p>
+    时钟的 <b>12 点（正午）</b> 与指北针的 <b>N（正北）</b> 指向同一个方向——子午线正是"正午太阳所在的经线"。<br>
+    所以符号公式：<b>时钟圆环（时间感）× 指向正午/正北的方向针（方向感）</b>——一个符号同时是钟、是罗盘、是子午线。
+  </p>
+</div>
+
+<div class="grid">
+
+  <!-- V1 正午之针 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag gold">1</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3.5"/>
+        <line x1="50" y1="14" x2="50" y2="21" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+        <line x1="50" y1="79" x2="50" y2="86" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="21" y2="50" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="79" y1="50" x2="86" y2="50" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 50 50 L 50 26 L 43 26 L 50 12 L 57 26 L 50 26 Z" fill="#f59e0b"/>
+        <circle cx="50" cy="50" r="3" fill="#1e3a8a"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>1 · 正午之针</h3>
+      <div class="en">Noon Pointer</div>
+      <div class="concept">钟面圆环 + <b>金色箭头针指向 12 点（正午）</b>——"时间的箭头指向正午"。</div>
+      <div class="dims">时间感：钟面刻度 + 12 点金色 · 方向感：箭头 = 指向（正午=正北）</div>
+      <div class="spec">环 3.5 / 12 点金刻度 4 / 金箭头 8×12</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><path d="M 50 50 L 50 26 L 42 26 L 50 10 L 58 26 L 50 26 Z" fill="#fcd34d"/><line x1="50" y1="14" x2="50" y2="22" stroke="#fcd34d" stroke-width="5"/><circle cx="50" cy="50" r="4" fill="#fff"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V2 日晷 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag">2</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <path d="M 14 52 A 36 36 0 0 1 86 52" fill="none" stroke="#1e3a8a" stroke-width="3.5"/>
+        <line x1="14" y1="52" x2="86" y2="52" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="50" y1="52" x2="50" y2="14" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+        <line x1="50" y1="52" x2="68" y2="66" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 4"/>
+        <line x1="30" y1="30" x2="34" y2="34" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round"/>
+        <line x1="70" y1="30" x2="66" y2="34" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>2 · 日晷</h3>
+      <div class="en">Sundial</div>
+      <div class="concept">半圆晷面 + <b>金色晷针指北</b> + 金色影线——日晷靠太阳方向计时，天然的时间×方向合体。</div>
+      <div class="dims">时间感：晷面刻度 + 影线 · 方向感：晷针指北（正午太阳方位）</div>
+      <div class="spec">晷弧 3.5 / 晷针 4 / 影线 2.5 虚线</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><path d="M 10 55 A 40 40 0 0 1 90 55 Z" fill="#1e3a8a"/><line x1="50" y1="55" x2="50" y2="12" stroke="#fcd34d" stroke-width="6" stroke-linecap="round"/><line x1="10" y1="55" x2="90" y2="55" stroke="#fff" stroke-width="4"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V3 指北针钟 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag gold">3</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3.5"/>
+        <line x1="50" y1="14" x2="50" y2="21" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+        <line x1="50" y1="79" x2="50" y2="86" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="21" y2="50" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="79" y1="50" x2="86" y2="50" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="50,16 59,50 50,84 41,50" fill="#f59e0b"/>
+        <polygon points="50,16 59,50 50,50 41,50" fill="#f59e0b"/>
+        <polygon points="50,84 59,50 50,50 41,50" fill="#1e3a8a"/>
+        <circle cx="50" cy="50" r="3.5" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>3 · 指北针钟</h3>
+      <div class="en">Compass Clock</div>
+      <div class="concept">钟面圆环 + <b>经典指北针（金北针/蓝南针）指向 12 点</b>——罗盘与时钟完全重合。</div>
+      <div class="dims">时间感：钟面 + 12 点金刻度 · 方向感：指北针样式（北针金色朝上=正午）</div>
+      <div class="spec">环 3.5 / 金北针 4×9 / 蓝南针 4×9</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><polygon points="50,14 60,50 50,86 40,50" fill="#fff"/><polygon points="50,14 60,50 50,50 40,50" fill="#fcd34d"/><circle cx="50" cy="50" r="3.5" fill="#1e3a8a"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V4 穿出之针 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag">4</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3.5"/>
+        <path d="M 42 36 L 42 16 L 34 16 L 50 2 L 66 16 L 58 16 L 58 36 Z" fill="#f59e0b"/>
+        <line x1="42" y1="40" x2="42" y2="48" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="50" cy="54" r="3.5" fill="#1e3a8a"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>4 · 穿出之针</h3>
+      <div class="en">Piercing Arrow</div>
+      <div class="concept"><b>金色箭头从钟心指向 12 点并穿出圆环</b>——时间之环被方向之针突破，中轴在圆之外延伸。</div>
+      <div class="dims">时间感：圆环（闭环/钟）· 方向感：箭头穿出 = 指向明确、突破边界</div>
+      <div class="spec">环 3.5 / 金箭头 12×16 穿出环外</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><path d="M 42 36 L 42 14 L 34 14 L 50 0 L 66 14 L 58 14 L 58 36 Z" fill="#fcd34d"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="anchor-box">
+  <h3>四个变体 = 同一公式的不同强度</h3>
+  <p>
+    <b>1 正午之针</b>：钟面最像"表"（时间感最强）+ 金色箭头指 12 点（方向感清晰）——最均衡，推荐<br>
+    <b>2 日晷</b>：最"设计感"（日晷本身就冷门高级）——时间×方向的天然合体，但元素多、识别成本略高<br>
+    <b>3 指北针钟</b>：罗盘符号最强（一眼"方向"），钟面给时间——指北针样式有品牌识别度<br>
+    <b>4 穿出之针</b>：最简（一个箭头 + 一个环）——"方向突破时间"，Slogan 的图形版
+  </p>
+</div>
+
+<div class="anchor-box">
+  <h3>给设计师的话术（选定方向后复制）</h3>
+  <div class="talk">
+    产品确定 Logo 方向为「时间×方向」V__（见《Meridian Logo 锚点 v4》）。请在<b>这个锚点上精修</b>，不要另起炉灶：<br>
+    ① 符号必须同时包含 <b>时间元素（钟面/刻度/晷）</b> 和 <b>方向元素（箭头/指北针/晷针）</b>，缺一不可<br>
+    ② 金色 = 正午/方向，深蓝 #1E3A8A = 时间/结构；指向 12 点（正午=正北）<br>
+    ③ 精修范围：箭头/针的造型、刻度密度、粗细比例（±2 稿：更钟表 / 更罗盘）<br>
+    ④ 交付：主图标 SVG+PNG / 横向带字版 / favicon 16-32-48 / 侧栏 24px 应用
+  </div>
+</div>
+
+<div class="foot">Meridian Logo 锚点 v4 · 时间×方向系列 · 2026-08-03 · 产品经理出稿 · 未改码</div>
+
+</div>
+</body>
+</html>

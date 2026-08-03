@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian 品牌视觉方案 · 2026-08-03</title>
+<style>
+:root{
+  --bg:#eef0f4; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --brand:#6366f1;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;padding-bottom:80px}
+.page{max-width:1000px;margin:0 auto;padding:30px 24px 0}
+h1{font-size:24px;font-weight:700;letter-spacing:-.3px}
+.sub{font-size:12.5px;color:var(--text2);margin-top:6px}
+.sec{margin-top:36px}
+.sec-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px}
+.sec-title .no{width:22px;height:22px;border-radius:7px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.sec-desc{font-size:12px;color:var(--text3);margin:6px 0 14px}
+
+/* 定稿横幅 */
+.banner{background:linear-gradient(135deg,#1e3a8a 0%,#312e81 55%,#4c1d95 100%);border-radius:18px;padding:34px 36px;color:#fff;margin-top:22px;display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.banner .logo-big{width:110px;height:110px;flex-shrink:0;background:rgba(255,255,255,.08);border-radius:22px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.banner .b-name{font-size:42px;font-weight:800;letter-spacing:-1px}
+.banner .b-cn{font-size:17px;font-weight:600;color:#fcd34d;margin-top:2px;letter-spacing:2px}
+.banner .b-slogan{font-size:13.5px;color:rgba(255,255,255,.75);margin-top:10px}
+.banner .b-tags{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.banner .b-tag{font-size:10.5px;font-weight:600;padding:4px 12px;border-radius:14px;background:rgba(255,255,255,.14);color:#fff}
+
+/* 释义 */
+.meaning{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.meaning .card{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:16px 18px}
+.meaning .card h4{font-size:13.5px;font-weight:700;margin-bottom:6px}
+.meaning .card .en{font-size:11px;color:var(--text3);font-weight:500;margin-left:6px}
+.meaning .card p{font-size:12px;color:var(--text2)}
+.meaning .card p b{color:var(--text)}
+
+/* logo 变体 */
+.logo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.logo-card{border:1px solid var(--border);border-radius:14px;background:var(--card);padding:20px 14px 14px;text-align:center;cursor:pointer;transition:all .15s}
+.logo-card:hover{border-color:#6366f1;box-shadow:0 4px 14px rgba(99,102,241,.12)}
+.logo-card .stage{width:120px;height:120px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:#f7f8fa;border-radius:18px}
+.logo-card h4{font-size:13px;font-weight:700;margin-top:12px}
+.logo-card .sem{font-size:11px;color:var(--text3);margin-top:3px}
+.logo-card .pro{font-size:11px;color:#047857;margin-top:8px;text-align:left}
+.logo-card .con{font-size:11px;color:#b91c1c;margin-top:4px;text-align:left}
+.logo-card .fav{display:flex;gap:8px;justify-content:center;margin-top:10px;align-items:center}
+.logo-card .fav span{font-size:9.5px;color:var(--text3)}
+.fav-mini{width:24px;height:24px;border-radius:7px;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+
+/* 配色方案 */
+.color-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.color-card{border:1.5px solid var(--border);border-radius:14px;background:var(--card);padding:16px;cursor:pointer;transition:all .15s}
+.color-card:hover{border-color:#6366f1;box-shadow:0 4px 14px rgba(99,102,241,.12)}
+.color-card.hot{border-color:#1e3a8a;background:linear-gradient(180deg,#fbfdff,#fff)}
+.color-card h4{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.color-card .rec{font-size:9.5px;font-weight:600;padding:2px 9px;border-radius:10px;background:#eef2ff;color:#4338ca}
+.swatches{display:flex;gap:8px;margin:14px 0 4px}
+.sw{flex:1;border-radius:10px;padding:20px 0 8px;text-align:center}
+.sw .hex{font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.sw .role{font-size:9px;color:rgba(255,255,255,.8);margin-top:2px}
+.demo{display:flex;align-items:center;gap:10px;margin-top:12px;background:#fafbfc;border-radius:10px;padding:10px 12px}
+.demo .btn{font-size:11px;font-weight:600;padding:6px 14px;border-radius:8px;color:#fff}
+.demo .link{font-size:11px;font-weight:600}
+.demo .nav{font-size:10.5px;padding:4px 10px;border-radius:7px;font-weight:600}
+.color-card p{font-size:11px;color:var(--text2);margin-top:10px}
+.color-card p b{color:var(--text)}
+
+/* 登录页示意 */
+.login-mock{border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-top:10px}
+.login-top{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:#fff}
+.login-top .mini{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.login-top .n{font-size:14px;font-weight:800;letter-spacing:-.2px}
+.login-top .s{font-size:10.5px;color:var(--text3);margin-left:2px}
+.login-body{display:grid;grid-template-columns:1.2fr 1fr;min-height:300px}
+.login-left{background:linear-gradient(135deg,#1e3a8a 0%,#312e81 60%,#4c1d95 100%);color:#fff;padding:48px 44px;position:relative;overflow:hidden}
+.login-left h2{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.35}
+.login-left .sl{font-size:13px;color:rgba(255,255,255,.72);margin-top:12px;max-width:300px;line-height:1.8}
+.login-left .deco{position:absolute;right:-40px;bottom:-40px;opacity:.14}
+.login-right{background:#fff;padding:48px 44px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.login-right .in{height:42px;border:1.5px solid var(--border);border-radius:10px;background:#fafbfc}
+.login-right .btn-big{height:44px;border-radius:10px;font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center}
+.login-right .tip{font-size:10.5px;color:var(--text3);text-align:center}
+
+/* token 清单 */
+.tok-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.tok-table th{background:#f8fafc;text-align:left;padding:9px 12px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border)}
+.tok-table td{padding:9px 12px;border-bottom:1px solid #f1f2f5;color:var(--text2)}
+.tok-table td:first-child{font-weight:600;color:var(--text);white-space:nowrap}
+.tok-table .chip{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-right:6px}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:40px}
+@media(max-width:760px){.logo-grid,.color-grid{grid-template-columns:1fr 1fr}.meaning,.login-body{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Meridian 品牌视觉方案</h1>
+<div class="sub">品牌定稿 · 2026-08-03 · 名字已定（Meridian · 子午），本方案渲染 logo 变体与品牌色候选，供你挑选后实施</div>
+
+<!-- ═══ 定稿横幅 ═══ -->
+<div class="banner">
+  <div class="logo-big">
+    <svg width="76" height="76" viewBox="0 0 76 76">
+      <circle cx="38" cy="38" r="30" fill="none" stroke="#fcd34d" stroke-width="4"/>
+      <circle cx="38" cy="38" r="21" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5" stroke-dasharray="3 5"/>
+      <line x1="38" y1="4" x2="38" y2="72" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="38" cy="38" r="4" fill="#fcd34d"/>
+    </svg>
+  </div>
+  <div>
+    <div class="b-name">Meridian</div>
+    <div class="b-cn">子 午</div>
+    <div class="b-slogan">你的时间，自有中轴 —— 子午线是方向，正午是时间</div>
+    <div class="b-tags">
+      <span class="b-tag">英文名 Meridian</span>
+      <span class="b-tag">中文名 子午</span>
+      <span class="b-tag">Slogan 你的时间，自有中轴</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 名字释义 ═══ -->
+<div class="sec">
+  <div class="sec-title"><span class="no">1</span>为什么 Meridian · 子午 是对的</div>
+  <div class="meaning">
+    <div class="card">
+      <h4>子午线 <span class="en">Meridian · 经线</span></h4>
+      <p><b>方向</b>——子午线是从北极到南极的经线，指向明确。对应产品"<b>过滤未来、知道该做什么</b>"：AI 帮你校准方向。</p>
+    </div>
+    <div class="card">
+      <h4>正午 <span class="en">Meridian · 正午时刻</span></h4>
+      <p><b>时间</b>——Meridian 古义即"正午"。对应产品"<b>时间管理、专注当下</b>"：你的时间以你为中轴。</p>
+    </div>
+    <div class="card">
+      <h4>中文「子午」<span class="en">子时 · 午时</span></h4>
+      <p><b>子时（午夜）与午时（正午）</b>本身是时辰——中文名直接继承时间意象，且"子午"二字好读好记，比"子午线"更简洁有格调。</p>
+    </div>
+    <div class="card">
+      <h4>中轴意象 <span class="en">Your time, your meridian</span></h4>
+      <p>每一天都以你为中轴展开——<b>成长闭环（输入→规划→执行→复盘）围绕你的时间轴运转</b>。Slogan："你的时间，自有中轴"。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Logo 变体 ═══ -->
+<div class="sec">
+  <div class="sec-title"><span class="no">2</span>Logo 变体 · 全部围绕「圆环 + 中轴」概念</div>
+  <div class="sec-desc">子午线的图形本质 = <b>一个圆（地球/时钟/闭环）+ 一条中轴线（子午线）</b>。四个变体从极简到丰富，含 favicon 效果。</div>
+
+  <div class="logo-grid">
+    <!-- A 中轴 -->
+    <div class="logo-card">
+      <div class="stage">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="34" fill="#eef2ff" stroke="#1e3a8a" stroke-width="4"/>
+          <circle cx="42" cy="42" r="24" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="3 6"/>
+          <line x1="42" y1="2" x2="42" y2="82" stroke="#1e3a8a" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="42" cy="42" r="5" fill="#f59e0b"/>
+        </svg>
+      </div>
+      <h4>A · 中轴</h4>
+      <div class="sem">圆环 + 贯穿中轴 + 金心</div>
+      <div class="pro">✓ 最简，子午线图形本质<br>✓ 单色+一点金，favicon 极清晰<br>✓ "圆环=闭环/时钟"</div>
+      <div class="con">✗ 中轴略像"日晷/教堂尖顶"联想</div>
+      <div class="fav"><span>favicon</span>
+        <div class="fav-mini"><svg width="16" height="16" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="#1e3a8a"/><line x1="42" y1="6" x2="42" y2="78" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="42" r="5" fill="#f59e0b"/></svg></div>
+      </div>
+    </div>
+
+    <!-- B 日晷 -->
+    <div class="logo-card">
+      <div class="stage">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="34" fill="#eef2ff" stroke="#1e3a8a" stroke-width="4"/>
+          <line x1="42" y1="16" x2="42" y2="24" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="42" y1="60" x2="42" y2="68" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="16" y1="42" x2="24" y2="42" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="60" y1="42" x2="68" y2="42" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="42" y1="42" x2="42" y2="20" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+          <line x1="42" y1="42" x2="56" y2="32" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="42" cy="42" r="4" fill="#1e3a8a"/>
+        </svg>
+      </div>
+      <h4>B · 日晷</h4>
+      <div class="sem">时钟圆环 + 中轴指针（金色指"正午"）</div>
+      <div class="pro">✓ 时间语义最强（时钟+正午）<br>✓ 金针=正午阳光，呼应"Meridian=正午"</div>
+      <div class="con">✗ 元素多，favicon 需简化</div>
+      <div class="fav"><span>favicon</span>
+        <div class="fav-mini"><svg width="16" height="16" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="#1e3a8a"/><line x1="42" y1="42" x2="42" y2="22" stroke="#fcd34d" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="42" r="4" fill="#fff"/></svg></div>
+      </div>
+    </div>
+
+    <!-- C 准星中轴 -->
+    <div class="logo-card">
+      <div class="stage">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="34" fill="#eef2ff" stroke="#1e3a8a" stroke-width="4"/>
+          <line x1="42" y1="2" x2="42" y2="82" stroke="#1e3a8a" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="6" y1="42" x2="18" y2="42" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="66" y1="42" x2="78" y2="42" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="42" cy="42" r="5" fill="#f59e0b"/>
+        </svg>
+      </div>
+      <h4>C · 准星中轴</h4>
+      <div class="sem">中轴 + 金色水平准星（保留"瞄准"概念）</div>
+      <div class="pro">✓ 继承你喜欢的"瞄准此刻"<br>✓ 中轴=子午线，水平=准星，十字=聚焦</div>
+      <div class="con">✗ 金色准星有"射击"残留联想（弱于红准星）</div>
+      <div class="fav"><span>favicon</span>
+        <div class="fav-mini"><svg width="16" height="16" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="#1e3a8a"/><line x1="42" y1="4" x2="42" y2="80" stroke="#fff" stroke-width="5"/><line x1="10" y1="42" x2="22" y2="42" stroke="#fcd34d" stroke-width="4"/><line x1="62" y1="42" x2="74" y2="42" stroke="#fcd34d" stroke-width="4"/><circle cx="42" cy="42" r="4" fill="#fcd34d"/></svg></div>
+      </div>
+    </div>
+
+    <!-- D 经线球 -->
+    <div class="logo-card">
+      <div class="stage">
+        <svg width="84" height="84" viewBox="0 0 84 84">
+          <circle cx="42" cy="42" r="34" fill="#eef2ff" stroke="#1e3a8a" stroke-width="4"/>
+          <ellipse cx="42" cy="42" rx="34" ry="14" fill="none" stroke="#1e3a8a" stroke-width="2.5"/>
+          <line x1="42" y1="8" x2="42" y2="76" stroke="#1e3a8a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="42" cy="42" r="4" fill="#f59e0b"/>
+        </svg>
+      </div>
+      <h4>D · 经线球</h4>
+      <div class="sem">地球圆 + 经线 + 纬线（地球仪）</div>
+      <div class="pro">✓ 子午线的"地理"本义最直白</div>
+      <div class="con">✗ 像地球仪/地图/教育 App<br>✗ 时间语义丢失</div>
+      <div class="fav"><span>favicon</span>
+        <div class="fav-mini"><svg width="16" height="16" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="#1e3a8a"/><ellipse cx="42" cy="42" rx="34" ry="13" fill="none" stroke="#fff" stroke-width="3.5"/><line x1="42" y1="8" x2="42" y2="76" stroke="#fff" stroke-width="3.5"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 品牌色 ═══ -->
+<div class="sec">
+  <div class="sec-title"><span class="no">3</span>品牌色 · 三套候选</div>
+  <div class="sec-desc">「子午」名字自带颜色故事：<b>子时=午夜（深蓝），午时=正午（金色）</b>。三套方案从"呼应名字"到"保守延续"。</div>
+
+  <div class="color-grid">
+    <!-- 方案 A 子午 -->
+    <div class="color-card hot">
+      <h4>方案 A · 子午 <span class="rec">★ 推荐</span></h4>
+      <div class="swatches">
+        <div class="sw" style="background:#1e3a8a"><div class="hex">#1E3A8A</div><div class="role">子夜蓝 · 主色</div></div>
+        <div class="sw" style="background:#f59e0b"><div class="hex">#F59E0B</div><div class="role">正午金 · 强调</div></div>
+        <div class="sw" style="background:#0f172a"><div class="hex">#0F172A</div><div class="role">墨色 · 文字</div></div>
+      </div>
+      <div class="demo">
+        <span class="btn" style="background:#1e3a8a">出发</span>
+        <span class="link" style="color:#1e3a8a">链接文字</span>
+        <span class="nav" style="background:#eef2ff;color:#1e3a8a">今日</span>
+        <span class="nav" style="color:#98a2b3">规划</span>
+      </div>
+      <p><b>子夜蓝</b>（深蓝）冷静专注，像深夜的学习桌；<b>正午金</b>用在 logo 中轴、slogan 点缀、打卡完成瞬间——"子时沉淀，午时发光"的完整叙事。和现有页面（浅灰底+白卡）完全兼容。</p>
+    </div>
+
+    <!-- 方案 B 延续 -->
+    <div class="color-card">
+      <h4>方案 B · Indigo 延续</h4>
+      <div class="swatches">
+        <div class="sw" style="background:#6366f1"><div class="hex">#6366F1</div><div class="role">Indigo · 主色</div></div>
+        <div class="sw" style="background:#4338ca"><div class="hex">#4338CA</div><div class="role">深 Indigo</div></div>
+        <div class="sw" style="background:#0f172a"><div class="hex">#0F172A</div><div class="role">墨色 · 文字</div></div>
+      </div>
+      <div class="demo">
+        <span class="btn" style="background:#6366f1">出发</span>
+        <span class="link" style="color:#6366f1">链接文字</span>
+        <span class="nav" style="background:#eef2ff;color:#4338ca">今日</span>
+        <span class="nav" style="color:#98a2b3">规划</span>
+      </div>
+      <p><b>零风险选项</b>：保持现有 #6366F1 不动，只换名字和 logo。改动面最小，但品牌色不承载"子午"故事——名字与颜色脱节。</p>
+    </div>
+
+    <!-- 方案 C 午夜青 -->
+    <div class="color-card">
+      <h4>方案 C · 午夜青</h4>
+      <div class="swatches">
+        <div class="sw" style="background:#0f2a43"><div class="hex">#0F2A43</div><div class="role">午夜青 · 主色</div></div>
+        <div class="sw" style="background:#06b6d4"><div class="hex">#06B6D4</div><div class="role">青 · 强调</div></div>
+        <div class="sw" style="background:#0f172a"><div class="hex">#0F172A</div><div class="role">墨色 · 文字</div></div>
+      </div>
+      <div class="demo">
+        <span class="btn" style="background:#0f2a43">出发</span>
+        <span class="link" style="color:#06b6d4">链接文字</span>
+        <span class="nav" style="background:#ecfeff;color:#0f2a43">今日</span>
+        <span class="nav" style="color:#98a2b3">规划</span>
+      </div>
+      <p><b>冷静科技感</b>：午夜蓝黑 + 青色强调，像深夜的开发环境。比 A 更"数码"，比 B 更冷；但青色和现有"领域"色系有轻微碰撞。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 登录页示意 ═══ -->
+<div class="sec">
+  <div class="sec-title"><span class="no">4</span>登录页首屏示意（方案 A 色 + Logo A）</div>
+  <div class="login-mock">
+    <div class="login-top">
+      <div class="mini" style="background:#1e3a8a">
+        <svg width="15" height="15" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="#fff" stroke-width="7"/><line x1="42" y1="6" x2="42" y2="78" stroke="#fcd34d" stroke-width="7" stroke-linecap="round"/><circle cx="42" cy="42" r="5" fill="#fcd34d"/></svg>
+      </div>
+      <div class="n">Meridian <span class="s">子午</span></div>
+    </div>
+    <div class="login-body">
+      <div class="login-left">
+        <h2>你的时间，<br>自有中轴。</h2>
+        <div class="sl">把脑子里的想法交给 AI 整理成可执行的时间系统——输入、规划、执行、复盘，每一天都围绕你的中轴运转。</div>
+        <svg class="deco" width="220" height="220" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="#fff" stroke-width="2"/><circle cx="42" cy="42" r="20" fill="none" stroke="#fff" stroke-width="1"/><line x1="42" y1="2" x2="42" y2="82" stroke="#fcd34d" stroke-width="2"/></svg>
+      </div>
+      <div class="login-right">
+        <div class="in"></div>
+        <div class="in"></div>
+        <div class="btn-big" style="background:#1e3a8a">进入子午 →</div>
+        <div class="tip">AI 驱动的个人时间操作系统</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 实施范围 ═══ -->
+<div class="sec">
+  <div class="sec-title"><span class="no">5</span>实施范围 · 改名 + 换色要动哪些 token</div>
+  <div class="sec-desc">选定 logo 变体 + 配色后执行。品牌色只影响以下 token（全项目搜索 --v2-brand 系）：</div>
+  <table class="tok-table">
+    <tr><th>位置</th><th>现状</th><th>改为（按方案 A）</th></tr>
+    <tr><td>登录/注册页标题</td><td>Task OS</td><td>Meridian · 子午 + slogan</td></tr>
+    <tr><td>侧栏导航显示名</td><td>Inbox/Plan/Today/Review/Project</td><td>收集/规划/今日/复盘/项目（URL 不变）</td></tr>
+    <tr><td>主按钮 / 主链接 / 选中态</td><td>--v2-brand: #6366F1</td><td>--v2-brand: #1E3A8A（子夜蓝）</td></tr>
+    <tr><td>品牌强调（logo/slogan/打卡完成）</td><td>—</td><td>+ --v2-brand-gold: #F59E0B（正午金，新 token）</td></tr>
+    <tr><td>favicon / 登录页 logo</td><td>默认</td><td>选定变体的 SVG 全套（favicon 16/32 + 侧栏 24 + 登录页 96）</td></tr>
+    <tr><td>浏览器标题 metadata</td><td>Personal Task OS</td><td>Meridian · 子午</td></tr>
+    <tr><td>设置页「关于」</td><td>Task OS · AI 驱动的个人时间操作系统</td><td>Meridian · 子午 · AI 驱动的个人时间操作系统</td></tr>
+    <tr><td>文档体系</td><td>Task OS 项目总控文档等 10+ 份</td><td>文件名 + 正文替换（可分批）</td></tr>
+    <tr><td>数据库 / URL</td><td>—</td><td><b>零改动</b></td></tr>
+  </table>
+</div>
+
+<div class="foot">Meridian · 子午 品牌视觉方案 v1 · 2026-08-03 · 纯方案未改码 · 选定 logo 变体 + 配色后实施</div>
+
+</div>
+</body>
+</html>

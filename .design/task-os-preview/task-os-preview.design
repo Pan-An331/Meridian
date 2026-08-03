@@ -1,0 +1,55 @@
+{
+  "data": [
+    {
+      "id": "page-preview",
+      "title": "UI 优化预览",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1753935900000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 901,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-3ccf04fa",
+          "measuredAt": 1785466027848
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/preview.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-tech-doc",
+      "title": "Task OS 技术文档",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1753936300000,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-3a5b2b15",
+          "measuredAt": 1785481148707
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/tech-doc.html",
+        "interactions": []
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "Task OS UI 优化预览"
+  }
+}

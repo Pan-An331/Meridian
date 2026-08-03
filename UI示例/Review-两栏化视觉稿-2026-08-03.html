@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review 两栏化 · 视觉稿 v2</title>
+<style>
+:root{
+  --bg:#eef1f6; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --brand:#6366f1; --brand-deep:#4f46e5; --brand-bg:#eef2ff; --brand-border:#c7d2fe;
+  --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --green:#059669; --green-bg:#ecfdf5;
+  --orange:#c2410c; --orange-bg:#fff0e6;
+  --kaoyan:#F97316; --comp:#DB2777; --shape:#0D9488;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#e8ecf3;color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:50px}
+.page{max-width:1280px;margin:0 auto;padding:26px 20px 0}
+.page-head{text-align:center;margin-bottom:18px}
+.page-head h1{font-size:23px;font-weight:700;letter-spacing:-.3px}
+.page-head .sub{font-size:12px;color:var(--text2);margin-top:6px}
+.req-chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.rc{font-size:10.5px;font-weight:600;padding:3.5px 11px;border-radius:14px;background:#fff;color:var(--text2);border:1px solid #dfe3ea;letter-spacing:.2px}
+.rc.key{background:var(--brand-bg);color:var(--brand-deep);border-color:var(--brand-border)}
+.tabs{display:flex;gap:8px;justify-content:center;margin:18px 0 6px}
+.tab-btn{font-size:13px;font-weight:600;padding:9px 22px;border-radius:12px;border:1px solid #dfe3ea;background:#fff;color:var(--text2);cursor:pointer;transition:all .15s}
+.tab-btn.on{background:#111827;color:#fff;border-color:#111827}
+.view-wrap{display:none}
+.view-wrap.on{display:block}
+
+.viewport{position:relative;background:#f7f8fa;border:1px solid #e3e7ee;border-radius:16px;margin:12px 0 8px;padding:24px 26px 26px;box-shadow:inset 0 2px 6px rgba(15,23,42,.04)}
+.vp-tag{display:flex;align-items:center;justify-content:center;gap:8px;font-size:10px;color:var(--text3);letter-spacing:.4px;margin-bottom:13px}
+.vp-tag b{color:var(--text2);font-weight:600}
+.vp-line{flex:1;max-width:400px;height:1px;background:#e6eaf0}
+
+.rv{max-width:1100px;margin:0 auto}
+.rv-m{max-width:420px;margin:0 auto}
+.page-head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:15px}
+.ph-left h2{font-size:24px;font-weight:700;letter-spacing:-.3px}
+.ph-left .sub2{font-size:11px;color:var(--text3);margin-top:3px}
+.seg{display:flex;gap:3px;background:#eceff4;border-radius:9px;padding:3px}
+.seg button{font-size:12.5px;font-weight:600;padding:6px 16px;border-radius:7px;border:none;background:transparent;color:var(--text3);cursor:pointer}
+.seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+
+/* ═══ 战报（真实项目 ReportCard 结构 · v3 拉长：内容竖排加厚 + 呼吸感） ═══ */
+.card-base{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.report{padding:24px 26px;margin-bottom:16px;display:flex;flex-direction:column;gap:16px}
+.wk-label{font-size:11px;font-weight:500;letter-spacing:2px;color:var(--text3)}
+.r-summary{font-size:24px;font-weight:600;letter-spacing:-.3px;line-height:1.4;color:var(--text)}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.r-cell{border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-height:112px}
+.r-cell .c-title{font-size:11px;letter-spacing:.3px}
+.r-cell .c-main{font-size:15px;font-weight:600;color:var(--text)}
+.r-cell .c-big{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1.15;font-variant-numeric:tabular-nums}
+.r-cell .c-sub{font-size:11px;margin-top:1px}
+.r-cell .c-row{display:flex;align-items:center;gap:8px}
+.c-purple{background:var(--purple-bg)}
+.c-purple .c-title{color:#7c7ad8}
+.c-purple .c-sub{color:#7c7ad8}
+.c-purple .c-big{color:#7c3aed}
+.c-gray{background:#f4f4f6}
+.c-gray .c-title{color:var(--text3)}
+.c-gray .c-sub{color:var(--text3)}
+.c-gray .c-big{color:var(--text)}
+.r-kw{background:#f4f4f6;border-radius:12px;padding:13px 15px}
+.r-kw .k-title{font-size:11px;color:var(--text3);margin-bottom:7px}
+.k-tag{display:inline-block;font-size:12px;font-weight:500;padding:4.5px 14px;border-radius:999px;margin-right:6px;margin-bottom:4px}
+.r-find{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.6;color:#3c3489;background:var(--purple-bg);border-radius:12px;padding:14px 16px;border-left:4px solid #8b5cf6}
+.r-find b{font-weight:600}
+.r-find .f-star{width:26px;height:26px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;box-shadow:0 1px 3px rgba(124,58,237,.15)}
+
+/* ═══ 双栏 ═══ */
+.two{display:grid;grid-template-columns:13fr 7fr;gap:16px;align-items:start}
+.left-col,.right-col{min-width:0}
+.left-col{display:flex;flex-direction:column;gap:16px}
+.right-col{display:flex;flex-direction:column;gap:16px}
+.sticky-tag{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.card .c-head{display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.card .c-head .t{font-size:13.5px;font-weight:600;color:var(--text)}
+.card .c-head .badge{font-size:9.5px;font-weight:600;padding:2px 9px;border-radius:11px;background:#f1f5f9;color:var(--text2);letter-spacing:.3px}
+.card .c-head .hint{margin-left:auto;font-size:10px;color:var(--text3)}
+.card .c-head .hint b{color:var(--text2);font-weight:600}
+
+/* ═══ 本周成果（真实项目 DayDiary 样式 · 字号放大） ═══ */
+.d-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.d-head .d-title{font-size:15.5px;font-weight:600;color:var(--text)}
+.d-head .d-range{font-size:12px;color:var(--text3)}
+.d-head .d-sort{font-size:12px;color:var(--text3)}
+.d-days{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+.day-block{border-bottom:1px solid var(--border);padding-bottom:7px}
+.day-block.peak{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin:0 -4px}
+.day-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.day-name{font-size:14.5px;font-weight:500;color:var(--text)}
+.day-name.peak{color:#92400e}
+.day-badge{font-size:12px;padding:2px 9px;border-radius:999px;font-weight:500}
+.b-peak{background:#fde68a;color:#92400e}
+.b-gray{background:#f1f5f9;color:var(--text2)}
+.b-today{background:var(--brand);color:#fff}
+.task-row{display:flex;align-items:center;gap:10px;padding:4.5px 0}
+.t-time{font-size:13.5px;font-variant-numeric:tabular-nums;width:48px;flex-shrink:0;color:var(--text3)}
+.t-time.peak{color:#b45309}
+.t-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.t-title{font-size:15px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-title.peak{color:#451a03}
+.t-tags{width:72px;flex-shrink:0;display:flex;justify-content:flex-end;gap:4px}
+.t-tag{font-size:12px;padding:1px 7px;border-radius:999px;font-weight:500;white-space:nowrap}
+.tg-deep{background:var(--brand-bg);color:var(--brand-deep)}
+.tg-multi{background:#f1f5f9;color:var(--text2)}
+.t-dur{font-size:13.5px;font-variant-numeric:tabular-nums;width:88px;flex-shrink:0;text-align:right;color:var(--text2)}
+.t-dur.peak{color:#b45309;font-weight:500}
+.d-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:14px;padding-top:11px;border-top:1px solid var(--border)}
+.lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.lg .ld{width:8px;height:8px;border-radius:50%}
+
+/* 下周建议 */
+.sugg-box{background:var(--green-bg);border:1px solid #bbf7d0;border-radius:13px;padding:15px 17px}
+.sugg-head{font-size:13px;font-weight:700;color:#14532d;margin-bottom:3px}
+.sugg-sub{font-size:10.5px;color:#4d7c0f;margin-bottom:7px}
+.sugg-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px dashed #d7eecf;font-size:12.5px;color:#14532d}
+.sugg-item:first-of-type{border-top:none}
+.sugg-item .no{font-size:11px;font-weight:700;color:#4d7c0f;flex-shrink:0}
+.sugg-item .go{margin-left:auto;font-size:10px;font-weight:600;background:#16a34a;color:#fff;border-radius:7px;padding:4px 11px;flex-shrink:0}
+
+/* 指标卡 2×2 */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.m-cell{border:1px solid var(--border);border-radius:11px;padding:12px 13px;position:relative;overflow:hidden;background:#fff}
+.m-cell .top-bar{position:absolute;top:0;left:0;right:0;height:5px}
+.m-cell .m-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text2);margin-top:4px}
+.m-cell .m-label .dot{width:7px;height:7px;border-radius:3px}
+.m-cell .m-val{font-size:24px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.5px;margin-top:5px;line-height:1.2}
+.m-cell .m-sub{font-size:9.5px;color:var(--text3);margin-top:4px}
+.trend{font-size:9.5px;font-weight:700;padding:1.5px 7px;border-radius:9px}
+.t-up{background:var(--green-bg);color:var(--green)}
+.t-down{background:#fef2f2;color:#dc2626}
+.t-flat{background:#f1f5f9;color:var(--text3)}
+
+/* 主题投入 */
+.theme-row{margin-bottom:12px}
+.theme-row:last-child{margin-bottom:0}
+.tr-top{display:flex;align-items:center;gap:8px}
+.t-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:2.5px 9px;border-radius:11px}
+.t-badge .td{width:7px;height:7px;border-radius:50%}
+.tr-hours{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums}
+.tr-pct{font-size:12px;font-weight:700;margin-left:auto;font-variant-numeric:tabular-nums}
+.tr-bar{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;margin-top:6px}
+.tr-bar i{display:block;height:100%;border-radius:3px}
+.tr-other{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-top:4px}
+
+/* 本周洞察 */
+.insight-row{display:flex;gap:9px;padding:10px 12px;background:#fafbfc;border:1px solid #f1f2f5;border-radius:10px;margin-bottom:9px;font-size:11.5px;color:var(--text2)}
+.insight-row:last-child{margin-bottom:0}
+.insight-row .ico{width:22px;height:22px;border-radius:7px;background:var(--brand-bg);color:var(--brand-deep);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.insight-row b{color:var(--text);font-weight:600}
+
+/* 移动顺序标 */
+.m-order{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:600;color:#b45309;background:var(--orange-bg);border:1px solid #fed7aa;border-radius:8px;padding:2px 7px;letter-spacing:.3px}
+
+/* 设计要点 */
+.notes{margin:12px auto 0;display:flex;flex-direction:column;gap:8px;max-width:1100px}
+.note{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:11px 15px;font-size:12px;color:var(--text2);line-height:1.55}
+.note .nno{flex-shrink:0;width:19px;height:19px;border-radius:6px;background:var(--brand-bg);color:var(--brand-deep);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.note b{color:var(--text);font-weight:600}
+.notes-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.4px;margin:6px 0 2px;max-width:1100px}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-head">
+  <h1>Review 两栏化 · 视觉稿 v2</h1>
+  <div class="sub">UI Designer 出稿 · 2026-08-03 · v3 修订：战报卡纵向拉长（双卡加厚大数字）· 本周成果沿用现有 day/task-row 样式并放大字号 · 两栏布局不变</div>
+  <div class="req-chips">
+    <span class="rc key">战报卡拉长 · 不扁</span>
+    <span class="rc key">本周成果 · 字号放大</span>
+    <span class="rc key">左 13fr 右 7fr 仪表 sticky</span>
+    <span class="rc key">指标卡 2×2</span>
+    <span class="rc key"><860px 回退单栏</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn on" data-v="desk">桌面 ≥860px · 双栏</button>
+  <button class="tab-btn" data-v="mobi">移动 &lt;860px · 单栏回退</button>
+</div>
+
+<!-- ═══════════ 桌面双栏 ═══════════ -->
+<div class="view-wrap on" id="desk">
+  <div class="viewport">
+    <div class="vp-tag"><span class="vp-line"></span>内容区 1100px · 战报全宽（现状卡）· 下方 13fr/7fr 双栏 · 右栏 sticky<span class="vp-line"></span></div>
+    <div class="rv">
+
+      <div class="page-head-row">
+        <div class="ph-left">
+          <h2>回顾</h2>
+          <div class="sub2">看见自己做到了什么，比上周更好</div>
+        </div>
+        <div class="seg"><button class="on">本周</button><button>本月</button></div>
+      </div>
+
+      <!-- 战报（现有 ReportCard 结构：WEEK 标签 → 摘要 → 主色/之最双卡 → 关键词 → 发现条） -->
+      <div class="card-base report">
+        <div class="wk-label">WEEK 31 · 2026 · 你的本周</div>
+        <div class="r-summary">这一周，你完成了 15 件任务，四轴飞行器是主线，考研节奏稳住</div>
+        <div class="r-grid">
+          <div class="r-cell c-purple">
+            <div class="c-title">本周主色</div>
+            <div class="c-row">
+              <span style="width:34px;height:34px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px rgba(124,58,237,.25);background:#7C3AED"></span>
+              <div style="min-width:0">
+                <div class="c-main">专业实践</div>
+                <div class="c-sub">画原理图 · PCB 布线的星期</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:auto">
+              <span class="c-big">40%</span>
+              <span class="c-sub">全周时间投入占比</span>
+            </div>
+          </div>
+          <div class="r-cell c-gray">
+            <div class="c-title">本周之最 · 最投入</div>
+            <div class="c-main" style="font-size:16px">画原理图 · STM32 最小系统</div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:auto">
+              <span class="c-big">150<span style="font-size:13px;color:var(--text2);font-weight:600"> 分钟</span></span>
+              <span class="c-sub">全周最长 · 周四 7/30</span>
+            </div>
+          </div>
+        </div>
+        <div class="r-kw">
+          <div class="k-title">本周关键词</div>
+          <div>
+            <span class="k-tag" style="color:#3b6d11;background:#eaf3de">考研</span>
+            <span class="k-tag" style="color:#534ab7;background:#eeedfe">画原理图</span>
+            <span class="k-tag" style="color:#0f6e56;background:#e1f5ee">布线</span>
+          </div>
+        </div>
+        <div class="r-find"><span class="f-star">✨</span><span><b>发现：</b>这周 40% 的时间都投入在「专业实践」上——画原理图、PCB 布线，看得出真的很专注</span></div>
+      </div>
+
+      <!-- 双栏 -->
+      <div class="two">
+        <!-- 左 · 本周成果 + 下周建议 -->
+        <div class="left-col">
+          <!-- 本周成果（现有 DayDiary 样式 · 字号放大：任务 13.5→15 / 天 13→14.5 / 时间时长 12.5→13.5） -->
+          <div class="card">
+            <div class="d-head">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span class="d-title">本周成果</span>
+                <span class="d-range">7/27 – 8/2</span>
+              </div>
+              <span class="d-sort">按天 · 按时间</span>
+            </div>
+            <div class="d-days">
+
+              <div class="day-block peak">
+                <div class="day-top">
+                  <span class="day-name peak">周一 7/27</span>
+                  <span class="day-badge b-peak">3 件 · 3h05m</span>
+                </div>
+                <div class="task-row"><span class="t-time peak">09:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title peak">高数专题讲座</span><span class="t-tags"><span class="t-tag tg-deep">深度专注</span></span><span class="t-dur peak">90 分钟</span></div>
+                <div class="task-row"><span class="t-time">14:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">画原理图 · STM32 最小系统</span><span class="t-tags"></span><span class="t-dur">75 分钟</span></div>
+                <div class="task-row"><span class="t-time">22:00</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">背单词 Unit 9</span><span class="t-tags"><span class="t-tag tg-multi">分1段</span></span><span class="t-dur">20 分钟</span></div>
+              </div>
+
+              <div class="day-block">
+                <div class="day-top">
+                  <span class="day-name">周二 7/28</span>
+                  <span class="day-badge b-gray">2 件 · 2h05m</span>
+                </div>
+                <div class="task-row"><span class="t-time">10:30</span><span class="t-dot" style="background:#3B82F6"></span><span class="t-title">考研数学 · 第三章</span><span class="t-tags"><span class="t-tag tg-deep">深度专注</span></span><span class="t-dur">90 分钟</span></div>
+                <div class="task-row"><span class="t-time">18:00</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">夜跑 5km</span><span class="t-tags"></span><span class="t-dur">35 分钟</span></div>
+              </div>
+
+              <div class="day-block">
+                <div class="day-top">
+                  <span class="day-name">周三 7/29</span>
+                  <span class="day-badge b-gray">3 件 · 4h30m</span>
+                </div>
+                <div class="task-row"><span class="t-time">10:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">电赛 · PCB 布线</span><span class="t-tags"><span class="t-tag tg-multi">分2段</span></span><span class="t-dur">120 分钟</span></div>
+                <div class="task-row"><span class="t-time">16:00</span><span class="t-dot" style="background:#3B82F6"></span><span class="t-title">考研英语 · 阅读精析</span><span class="t-tags"></span><span class="t-dur">60 分钟</span></div>
+                <div class="task-row"><span class="t-time">19:30</span><span class="t-dot" style="background:#92400E"></span><span class="t-title">科创社例会</span><span class="t-tags"></span><span class="t-dur">90 分钟</span></div>
+              </div>
+
+              <div class="day-block">
+                <div class="day-top">
+                  <span class="day-name">周四 7/30</span>
+                  <span class="day-badge b-gray">2 件 · 2h50m</span>
+                </div>
+                <div class="task-row"><span class="t-time">14:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">电赛方案设计</span><span class="t-tags"><span class="t-tag tg-deep">深度专注</span></span><span class="t-dur">150 分钟</span></div>
+                <div class="task-row"><span class="t-time">22:30</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">背单词 Unit 10</span><span class="t-tags"></span><span class="t-dur">20 分钟</span></div>
+              </div>
+
+              <div class="day-block" style="border-bottom:none;padding-bottom:0">
+                <div class="day-top">
+                  <span class="day-name">周五 7/31</span>
+                  <span class="day-badge b-today">今天 · 3 件</span>
+                </div>
+                <div class="task-row"><span class="t-time">09:00</span><span class="t-dot" style="background:#3B82F6"></span><span class="t-title">考研数学 · 错题复盘</span><span class="t-tags"></span><span class="t-dur">90 分钟</span></div>
+                <div class="task-row"><span class="t-time">14:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">提交竞赛报告</span><span class="t-tags"></span><span class="t-dur">60 分钟</span></div>
+                <div class="task-row"><span class="t-time">17:00</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">力量训练</span><span class="t-tags"></span><span class="t-dur">45 分钟</span></div>
+              </div>
+
+            </div>
+            <div class="d-legend">
+              <span class="lg"><span class="ld" style="background:#475569"></span>课程</span>
+              <span class="lg"><span class="ld" style="background:#3B82F6"></span>学习</span>
+              <span class="lg"><span class="ld" style="background:#7C3AED"></span>实践</span>
+              <span class="lg"><span class="ld" style="background:#16A34A"></span>健康</span>
+              <span class="lg"><span class="ld" style="background:#CA8A04"></span>生活</span>
+              <span class="lg"><span class="ld" style="background:#92400E"></span>外部</span>
+              <span class="lg"><span class="ld" style="background:var(--brand-deep)"></span>深度专注</span>
+              <span class="lg"><span class="ld" style="background:#9ca3af"></span>分N段</span>
+            </div>
+          </div>
+
+          <!-- 本周洞察（与本周成果一块 · 主叙事：证据 → 结论 承接） -->
+          <div class="card">
+            <div class="c-head"><span class="t">本周洞察</span><span class="badge">精简</span></div>
+            <div class="insight-row"><span class="ico">🕒</span><span><b>任务时段偏好</b>：更常在下午完成产出型任务（画原理图 / 布线 均排 14:00 后）</span></div>
+            <div class="insight-row"><span class="ico">⏸️</span><span><b>打断注意</b>：周三例会打断 PCB 布线，建议大块任务避开社交时段</span></div>
+          </div>
+        </div>
+
+        <!-- 右 · 仪表区（不 sticky · 滚动跟随） -->
+        <div class="right-col">
+          <div class="sticky-tag" style="position:static">
+            <div class="card" style="padding:15px">
+              <div class="c-head" style="margin-bottom:11px"><span class="t">健康仪表</span><span class="badge">本周</span><span class="hint">北极星 <b>周完成率</b></span></div>
+              <div class="metrics">
+                <div class="m-cell"><div class="top-bar" style="background:#6366f1"></div><div class="m-label"><span class="dot" style="background:#6366f1"></span>周完成率</div><div class="m-val">82%</div><div class="m-sub">完成 15/18 · <span class="trend t-up">↑ 6.3%</span></div></div>
+                <div class="m-cell"><div class="top-bar" style="background:#8b5cf6"></div><div class="m-label"><span class="dot" style="background:#8b5cf6"></span>AI 采纳率</div><div class="m-val">76%</div><div class="m-sub">采纳 19/25 · <span class="trend t-up">↑ 4.1%</span></div></div>
+                <div class="m-cell"><div class="top-bar" style="background:#d97706"></div><div class="m-label"><span class="dot" style="background:#d97706"></span>堆积率</div><div class="m-val">8%</div><div class="m-sub">堆积 2 条 · <span class="trend t-down">↑ 2.0%</span></div></div>
+                <div class="m-cell"><div class="top-bar" style="background:#dc2626"></div><div class="m-label"><span class="dot" style="background:#dc2626"></span>打卡保持率</div><div class="m-val">91%</div><div class="m-sub">背单词 7/7 · <span class="trend t-flat">— 持平</span></div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="c-head"><span class="t">主题投入</span><span class="badge">本周</span><span class="hint">按排期任务数 · <b>无 AI 依赖</b></span></div>
+              <div class="theme-row">
+                <div class="tr-top">
+                  <span class="t-badge" style="background:#FFF7ED;color:#C2410C"><span class="td" style="background:#F97316"></span>考研</span>
+                  <span class="tr-hours">6 项</span><span class="tr-pct" style="color:#C2410C">40%</span>
+                  <span class="trend t-flat" style="margin-left:4px">—</span>
+                </div>
+                <div class="tr-bar"><i style="width:40%;background:#F97316"></i></div>
+                <div class="tr-other"><span>主攻 · 占本周排期 40%</span><span>较上周 —</span></div>
+              </div>
+              <div class="theme-row">
+                <div class="tr-top">
+                  <span class="t-badge" style="background:#FDF2F8;color:#BE185D"><span class="td" style="background:#DB2777"></span>竞赛</span>
+                  <span class="tr-hours">5 项</span><span class="tr-pct" style="color:#BE185D">33%</span>
+                  <span class="trend t-up" style="margin-left:4px">↑ 12%</span>
+                </div>
+                <div class="tr-bar"><i style="width:33%;background:#DB2777"></i></div>
+                <div class="tr-other"><span>待加强 · 占本周排期 33%</span><span>较上周 ↑ 12%</span></div>
+              </div>
+              <div class="theme-row">
+                <div class="tr-top">
+                  <span class="t-badge" style="background:#F0FDFA;color:#0F766E"><span class="td" style="background:#0D9488"></span>身材</span>
+                  <span class="tr-hours">1 项</span><span class="tr-pct" style="color:#0F766E">7%</span>
+                  <span class="trend t-down" style="margin-left:4px">↓ 5%</span>
+                </div>
+                <div class="tr-bar"><i style="width:7%;background:#0D9488"></i></div>
+                <div class="tr-other"><span>待加强 · 本周仅 1 次</span><span>较上周 ↓ 5%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下周建议（AI 行动区 · 沉底全宽独立，不占主叙事位置） -->
+      <div class="sugg-box" style="margin-top:16px">
+        <div class="sugg-head">🎯 下周可以试试</div>
+        <div class="sugg-sub">逐条应用 · 只采纳符合你情况的建议</div>
+        <div class="sugg-item"><span class="no">①</span><span>竞赛进入 PCB 阶段，把画原理图拆成 2 个 60 分钟块</span><span class="go">应用</span></div>
+        <div class="sugg-item"><span class="no">②</span><span>身材主题本周仅 1 次，建议恢复每周 3 次力量训练</span><span class="go">应用</span></div>
+        <div class="sugg-item"><span class="no">③</span><span>考研英语阅读放在上午，比下午效率高 18%</span><span class="go">应用</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="notes-title">v4 修订 · 设计要点</div>
+    <div class="note"><span class="nno">1</span><span><b>本周洞察移入左列</b>：与本周成果一块（证据 → 结论 承接叙事）；右仪表区只剩 指标卡 2×2 + 主题投入。<span class="spec">（用户：洞察和成果一块，两栏显示）</span></span></div>
+    <div class="note"><span class="nno">2</span><span><b>下周建议（AI）沉底全宽独立</b>：不占用主叙事位置，作为页面收尾的行动区。<span class="spec">（用户：不是 AI 下周建议那样用）</span></span></div>
+    <div class="note"><span class="nno">3</span><span><b>右栏去掉 sticky</b>：滚动时指标卡 + 主题投入跟随页面正常滚动，不再"定住不动"。<span class="spec">（用户：滑动时不动有问题）</span></span></div>
+    <div class="note"><span class="nno">4</span><span><b>战报拉长 / 本周成果字号放大保持</b>：v3 已确认项不变。</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ 移动单栏回退 ═══════════ -->
+<div class="view-wrap" id="mobi">
+  <div class="viewport">
+    <div class="vp-tag"><span class="vp-line"></span>&lt;860px 单栏 · 顺序：战报 → 指标 → 主题 → 本周成果 → 洞察 → 建议<span class="vp-line"></span></div>
+    <div class="rv-m">
+
+      <div class="page-head-row" style="margin-bottom:12px">
+        <div class="ph-left"><h2 style="font-size:20px">回顾</h2></div>
+        <div class="seg"><button class="on">本周</button><button>本月</button></div>
+      </div>
+
+      <!-- 战报（现有卡） -->
+      <div class="card-base report" style="padding:16px 15px;margin-bottom:12px;gap:11px">
+        <div class="wk-label">WEEK 31 · 你的本周</div>
+        <div class="r-summary" style="font-size:19px">这一周，你完成了 15 件任务，四轴飞行器是主线</div>
+        <div class="r-grid">
+          <div class="r-cell c-purple" style="padding:12px 13px;min-height:0">
+            <div class="c-title">本周主色</div>
+            <div class="c-row">
+              <span style="width:28px;height:28px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px rgba(124,58,237,.25);background:#7C3AED"></span>
+              <div style="min-width:0"><div class="c-main" style="font-size:13.5px">专业实践</div><div class="c-sub">画原理图 · 布线的星期</div></div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:7px;margin-top:2px">
+              <span class="c-big" style="font-size:21px">40%</span>
+              <span class="c-sub">全周时间占比</span>
+            </div>
+          </div>
+          <div class="r-cell c-gray" style="padding:12px 13px;min-height:0">
+            <div class="c-title">本周之最 · 最投入</div>
+            <div class="c-main" style="font-size:13.5px">画原理图 · STM32</div>
+            <div style="display:flex;align-items:baseline;gap:7px;margin-top:2px">
+              <span class="c-big" style="font-size:21px">150<span style="font-size:11px;color:var(--text2);font-weight:600"> 分钟</span></span>
+              <span class="c-sub">全周最长</span>
+            </div>
+          </div>
+        </div>
+        <div class="r-kw" style="padding:9px 11px">
+          <div class="k-title">本周关键词</div>
+          <span class="k-tag" style="color:#3b6d11;background:#eaf3de">考研</span>
+          <span class="k-tag" style="color:#534ab7;background:#eeedfe">画原理图</span>
+          <span class="k-tag" style="color:#0f6e56;background:#e1f5ee">布线</span>
+        </div>
+        <div class="r-find"><span class="f-star">✨</span><span><b>发现：</b>40% 时间投入「专业实践」</span></div>
+      </div>
+
+      <!-- 指标 2×2（②） -->
+      <div class="card" style="margin-bottom:12px;padding:14px">
+        <div class="c-head" style="margin-bottom:10px"><span class="m-order">②</span><span class="t" style="font-size:13px">健康仪表</span><span class="badge">本周</span></div>
+        <div class="metrics">
+          <div class="m-cell" style="padding:10px 11px"><div class="top-bar" style="background:#6366f1"></div><div class="m-label"><span class="dot" style="background:#6366f1"></span>周完成率</div><div class="m-val" style="font-size:21px">82%</div><div class="m-sub">15/18 · <span class="trend t-up">↑ 6.3%</span></div></div>
+          <div class="m-cell" style="padding:10px 11px"><div class="top-bar" style="background:#8b5cf6"></div><div class="m-label"><span class="dot" style="background:#8b5cf6"></span>AI 采纳率</div><div class="m-val" style="font-size:21px">76%</div><div class="m-sub">19/25 · <span class="trend t-up">↑ 4.1%</span></div></div>
+          <div class="m-cell" style="padding:10px 11px"><div class="top-bar" style="background:#d97706"></div><div class="m-label"><span class="dot" style="background:#d97706"></span>堆积率</div><div class="m-val" style="font-size:21px">8%</div><div class="m-sub">2 条 · <span class="trend t-down">↑ 2.0%</span></div></div>
+          <div class="m-cell" style="padding:10px 11px"><div class="top-bar" style="background:#dc2626"></div><div class="m-label"><span class="dot" style="background:#dc2626"></span>打卡保持率</div><div class="m-val" style="font-size:21px">91%</div><div class="m-sub">7/7 · <span class="trend t-flat">— 持平</span></div></div>
+        </div>
+      </div>
+
+      <!-- 主题投入（③） -->
+      <div class="card" style="margin-bottom:12px;padding:14px">
+        <div class="c-head" style="margin-bottom:10px"><span class="m-order">③</span><span class="t" style="font-size:13px">主题投入</span></div>
+        <div class="theme-row">
+          <div class="tr-top"><span class="t-badge" style="background:#FFF7ED;color:#C2410C"><span class="td" style="background:#F97316"></span>考研</span><span class="tr-hours">6 项</span><span class="tr-pct" style="color:#C2410C">40%</span><span class="trend t-flat" style="margin-left:4px">—</span></div>
+          <div class="tr-bar"><i style="width:40%;background:#F97316"></i></div>
+        </div>
+        <div class="theme-row">
+          <div class="tr-top"><span class="t-badge" style="background:#FDF2F8;color:#BE185D"><span class="td" style="background:#DB2777"></span>竞赛</span><span class="tr-hours">5 项</span><span class="tr-pct" style="color:#BE185D">33%</span><span class="trend t-up" style="margin-left:4px">↑ 12%</span></div>
+          <div class="tr-bar"><i style="width:33%;background:#DB2777"></i></div>
+        </div>
+        <div class="theme-row" style="margin-bottom:0">
+          <div class="tr-top"><span class="t-badge" style="background:#F0FDFA;color:#0F766E"><span class="td" style="background:#0D9488"></span>身材</span><span class="tr-hours">1 项</span><span class="tr-pct" style="color:#0F766E">7%</span><span class="trend t-down" style="margin-left:4px">↓ 5%</span></div>
+          <div class="tr-bar"><i style="width:7%;background:#0D9488"></i></div>
+        </div>
+      </div>
+
+      <!-- 本周成果（④ · 字号放大同桌面） -->
+      <div class="card" style="margin-bottom:12px;padding:15px">
+        <div class="c-head" style="margin-bottom:8px"><span class="m-order">④</span><span class="t" style="font-size:13px">本周成果</span><span class="d-range" style="font-size:11px;color:var(--text3)">7/27 – 8/2</span></div>
+        <div class="day-block">
+          <div class="day-top"><span class="day-name">周一 7/27</span><span class="day-badge b-peak">3 件 · 3h05m</span></div>
+          <div class="task-row"><span class="t-time">09:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">高数专题讲座</span><span class="t-tags"><span class="t-tag tg-deep">深度专注</span></span><span class="t-dur">90 分钟</span></div>
+          <div class="task-row"><span class="t-time">14:00</span><span class="t-dot" style="background:#7C3AED"></span><span class="t-title">画原理图 · STM32</span><span class="t-tags"></span><span class="t-dur">75 分钟</span></div>
+          <div class="task-row"><span class="t-time">22:00</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">背单词 Unit 9</span><span class="t-tags"></span><span class="t-dur">20 分钟</span></div>
+        </div>
+        <div class="day-block" style="border-bottom:none;padding-bottom:0">
+          <div class="day-top"><span class="day-name">周二 7/28</span><span class="day-badge b-gray">2 件 · 2h05m</span></div>
+          <div class="task-row"><span class="t-time">10:30</span><span class="t-dot" style="background:#3B82F6"></span><span class="t-title">考研数学 · 第三章</span><span class="t-tags"></span><span class="t-dur">90 分钟</span></div>
+          <div class="task-row"><span class="t-time">18:00</span><span class="t-dot" style="background:#16A34A"></span><span class="t-title">夜跑 5km</span><span class="t-tags"></span><span class="t-dur">35 分钟</span></div>
+        </div>
+      </div>
+
+      <!-- 洞察（⑤） -->
+      <div class="card" style="margin-bottom:12px;padding:14px">
+        <div class="c-head" style="margin-bottom:10px"><span class="m-order">⑤</span><span class="t" style="font-size:13px">本周洞察</span></div>
+        <div class="insight-row" style="margin-bottom:7px"><span class="ico">🕒</span><span>更常在下午完成产出型任务</span></div>
+        <div class="insight-row" style="margin-bottom:0"><span class="ico">⏸️</span><span>周三例会打断 PCB 布线</span></div>
+      </div>
+
+      <!-- 建议（⑥） -->
+      <div class="sugg-box">
+        <div class="sugg-head">🎯 下周可以试试</div>
+        <div class="sugg-item"><span class="no">①</span><span>画原理图拆成 2 个 60 分钟块</span><span class="go">应用</span></div>
+        <div class="sugg-item"><span class="no">②</span><span>恢复每周 3 次力量训练</span><span class="go">应用</span></div>
+        <div class="sugg-item" style="border-top:1px dashed #d7eecf"><span class="no">③</span><span>英语阅读放上午</span><span class="go">应用</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="notes" style="max-width:720px">
+    <div class="notes-title">移动版 · 设计要点</div>
+    <div class="note"><span class="nno">1</span><span><b>单栏回退顺序</b>：战报 → 指标 ② → 主题 ③ → 本周成果 ④ → 洞察 ⑤ → 建议 ⑥（CSS order 实现）。</span></div>
+    <div class="note"><span class="nno">2</span><span><b>本周成果字号同样放大</b>：与桌面一致（15px 任务名 / 14.5px 星期 / 13.5px 时间时长）。</span></div>
+  </div>
+</div>
+
+<div class="foot">Task OS · Review 两栏化视觉稿 v2 · 2026-08-03 · 战报/本周成果保留现有 UI，仅字号放大；两栏布局与定稿 §7.2 一致</div>
+
+</div>
+<script>
+document.querySelectorAll('.tab-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.view-wrap').forEach(function(w){w.classList.remove('on')});
+    document.getElementById(this.dataset.v).classList.add('on');
+    document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('on')});
+    this.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

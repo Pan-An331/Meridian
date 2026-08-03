@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preflight</title>
+    <style id="theme-vars">
+/* ═══════════════════════════════════════════
+   Task OS — Design Token System
+   Indigo brand + neutral gray scale + semantic states
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* ── Brand Primary (Indigo) ── */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+
+  /* ── Neutral Scale ── */
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* ── Semantic States ── */
+  --state-success: #16a34a;
+  --state-success-bg: #f0fdf4;
+  --state-success-border: #bbf7d0;
+  --state-warning: #d97706;
+  --state-warning-bg: #fffbeb;
+  --state-warning-border: #fde68a;
+  --state-error: #dc2626;
+  --state-error-bg: #fef2f2;
+  --state-error-border: #fecaca;
+  --state-info: #0ea5e9;
+  --state-info-bg: #f0f9ff;
+  --state-info-border: #bae6fd;
+
+  /* ── Semantic Aliases (required) ── */
+  --brand-background: #f8fafc;
+  --brand-foreground: #0f172a;
+  --brand-card: #ffffff;
+  --brand-card-foreground: #0f172a;
+  --brand-primary: #4f46e5;
+  --brand-primary-foreground: #ffffff;
+  --brand-muted: #f1f5f9;
+  --brand-muted-foreground: #64748b;
+  --brand-border: #e2e8f0;
+  --brand-input: #e2e8f0;
+  --brand-ring: #6366f1;
+  --brand-radius-sm: 0.375rem;
+  --brand-radius-md: 0.5rem;
+  --brand-radius-lg: 0.75rem;
+  --brand-radius-xl: 1rem;
+
+  /* ── Sidebar ── */
+  --sidebar-bg: #0f172a;
+  --sidebar-fg: #e2e8f0;
+  --sidebar-muted: #64748b;
+  --sidebar-active-bg: #4f46e5;
+  --sidebar-active-fg: #ffffff;
+  --sidebar-border: rgba(255,255,255,0.08);
+  --sidebar-hover: rgba(255,255,255,0.08);
+
+  /* ── Surface Layers ── */
+  --surface-elevated: #ffffff;
+  --surface-ai: #eef2ff;
+  --surface-ai-border: #c7d2fe;
+
+  /* ── Typography ── */
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+
+  /* ── Animation ── */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--brand-background);
+    --color-foreground: var(--brand-foreground);
+    --color-card: var(--brand-card);
+    --color-card-foreground: var(--brand-card-foreground);
+    --color-primary: var(--brand-primary);
+    --color-primary-foreground: var(--brand-primary-foreground);
+    --color-muted: var(--brand-muted);
+    --color-muted-foreground: var(--brand-muted-foreground);
+    --color-border: var(--brand-border);
+    --color-input: var(--brand-input);
+    --color-ring: var(--brand-ring);
+    --radius-sm: var(--brand-radius-sm);
+    --radius-md: var(--brand-radius-md);
+    --radius-lg: var(--brand-radius-lg);
+    --radius-xl: var(--brand-radius-xl);
+  }
+  @layer base {
+    body { background: var(--brand-background); color: var(--brand-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--brand-background); }
+      .text-background { color: var(--brand-background); }
+      .border-background { border-color: var(--brand-background); }
+      .ring-background { --tw-ring-color: var(--brand-background); }
+      .bg-foreground { background-color: var(--brand-foreground); }
+      .text-foreground { color: var(--brand-foreground); }
+      .border-foreground { border-color: var(--brand-foreground); }
+      .ring-foreground { --tw-ring-color: var(--brand-foreground); }
+      .bg-card { background-color: var(--brand-card); }
+      .text-card { color: var(--brand-card); }
+      .border-card { border-color: var(--brand-card); }
+      .ring-card { --tw-ring-color: var(--brand-card); }
+      .bg-card-foreground { background-color: var(--brand-card-foreground); }
+      .text-card-foreground { color: var(--brand-card-foreground); }
+      .border-card-foreground { border-color: var(--brand-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--brand-card-foreground); }
+      .bg-primary { background-color: var(--brand-primary); }
+      .text-primary { color: var(--brand-primary); }
+      .border-primary { border-color: var(--brand-primary); }
+      .ring-primary { --tw-ring-color: var(--brand-primary); }
+      .bg-primary-foreground { background-color: var(--brand-primary-foreground); }
+      .text-primary-foreground { color: var(--brand-primary-foreground); }
+      .border-primary-foreground { border-color: var(--brand-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--brand-primary-foreground); }
+      .bg-muted { background-color: var(--brand-muted); }
+      .text-muted { color: var(--brand-muted); }
+      .border-muted { border-color: var(--brand-muted); }
+      .ring-muted { --tw-ring-color: var(--brand-muted); }
+      .bg-muted-foreground { background-color: var(--brand-muted-foreground); }
+      .text-muted-foreground { color: var(--brand-muted-foreground); }
+      .border-muted-foreground { border-color: var(--brand-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--brand-muted-foreground); }
+      .bg-border { background-color: var(--brand-border); }
+      .text-border { color: var(--brand-border); }
+      .border-border { border-color: var(--brand-border); }
+      .ring-border { --tw-ring-color: var(--brand-border); }
+      .bg-input { background-color: var(--brand-input); }
+      .text-input { color: var(--brand-input); }
+      .border-input { border-color: var(--brand-input); }
+      .ring-input { --tw-ring-color: var(--brand-input); }
+      .bg-ring { background-color: var(--brand-ring); }
+      .text-ring { color: var(--brand-ring); }
+      .border-ring { border-color: var(--brand-ring); }
+      .ring-ring { --tw-ring-color: var(--brand-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

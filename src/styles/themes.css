@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════
+   Task OS Theme System V3
+   四轴独立主题：品牌色 · AI 面板色 · 页面肤色 · 语义色
+   通过 data-theme-brand / data-theme-ai / data-theme-page / data-theme-sem 属性切换
+   ═══════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════
+   AXIS 1: 品牌色 (Brand)
+   控制：按钮、Badge、侧边栏激活、标签、焦点环
+   ═══════════════════════════════════════════════ */
+
+:root,
+[data-theme-brand="indigo"] {
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+  --brand-name: "靛蓝";
+}
+
+[data-theme-brand="sunset"] {
+  --brand-50: #fff7ed;
+  --brand-100: #ffedd5;
+  --brand-200: #fdba74;
+  --brand-300: #fb923c;
+  --brand-400: #f97316;
+  --brand-500: #ea580c;
+  --brand-600: #c2410c;
+  --brand-700: #9a3412;
+  --brand-800: #7c2d12;
+  --brand-900: #431407;
+  --brand-name: "日落";
+}
+
+[data-theme-brand="ocean"] {
+  --brand-50: #f0fdfa;
+  --brand-100: #ccfbf1;
+  --brand-200: #5eead4;
+  --brand-300: #2dd4bf;
+  --brand-400: #14b8a6;
+  --brand-500: #0d9488;
+  --brand-600: #0f766e;
+  --brand-700: #115e59;
+  --brand-800: #134e4a;
+  --brand-900: #042f2e;
+  --brand-name: "深海";
+}
+
+[data-theme-brand="forest"] {
+  --brand-50: #ecfdf5;
+  --brand-100: #d1fae5;
+  --brand-200: #6ee7b7;
+  --brand-300: #34d399;
+  --brand-400: #10b981;
+  --brand-500: #059669;
+  --brand-600: #047857;
+  --brand-700: #065f46;
+  --brand-800: #064e3b;
+  --brand-900: #022c22;
+  --brand-name: "森林";
+}
+
+[data-theme-brand="midnight"] {
+  --brand-50: #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-200: #c4b5fd;
+  --brand-300: #a78bfa;
+  --brand-400: #8b5cf6;
+  --brand-500: #7c3aed;
+  --brand-600: #6d28d9;
+  --brand-700: #5b21b6;
+  --brand-800: #4c1d95;
+  --brand-900: #2e1065;
+  --brand-name: "午夜";
+}
+
+/* ═══════════════════════════════════════════════
+   AXIS 2: AI 面板色 (AI Panel)
+   控制：AI 聊天面板、AI 建议卡片、AI 输出区域
+   ═══════════════════════════════════════════════ */
+
+:root,
+[data-theme-ai="indigo"] {
+  --ai-50: #eef2ff;
+  --ai-100: #e0e7ff;
+  --ai-200: #c7d2fe;
+  --ai-300: #a5b4fc;
+  --ai-400: #818cf8;
+  --ai-500: #6366f1;
+  --ai-600: #4f46e5;
+  --ai-700: #4338ca;
+  --ai-800: #3730a3;
+  --ai-900: #312e81;
+  --ai-border: #c7d2fe;
+  --ai-name: "靛蓝";
+}
+
+[data-theme-ai="sunset"] {
+  --ai-50: #fff7ed;
+  --ai-100: #ffedd5;
+  --ai-200: #fdba74;
+  --ai-300: #fb923c;
+  --ai-400: #f97316;
+  --ai-500: #ea580c;
+  --ai-600: #c2410c;
+  --ai-700: #9a3412;
+  --ai-800: #7c2d12;
+  --ai-900: #431407;
+  --ai-border: #fdba74;
+  --ai-name: "日落";
+}
+
+[data-theme-ai="ocean"] {
+  --ai-50: #f0fdfa;
+  --ai-100: #ccfbf1;
+  --ai-200: #5eead4;
+  --ai-300: #2dd4bf;
+  --ai-400: #14b8a6;
+  --ai-500: #0d9488;
+  --ai-600: #0f766e;
+  --ai-700: #115e59;
+  --ai-800: #134e4a;
+  --ai-900: #042f2e;
+  --ai-border: #5eead4;
+  --ai-name: "深海";
+}
+
+[data-theme-ai="forest"] {
+  --ai-50: #ecfdf5;
+  --ai-100: #d1fae5;
+  --ai-200: #6ee7b7;
+  --ai-300: #34d399;
+  --ai-400: #10b981;
+  --ai-500: #059669;
+  --ai-600: #047857;
+  --ai-700: #065f46;
+  --ai-800: #064e3b;
+  --ai-900: #022c22;
+  --ai-border: #6ee7b7;
+  --ai-name: "森林";
+}
+
+[data-theme-ai="midnight"] {
+  --ai-50: #f5f3ff;
+  --ai-100: #ede9fe;
+  --ai-200: #c4b5fd;
+  --ai-300: #a78bfa;
+  --ai-400: #8b5cf6;
+  --ai-500: #7c3aed;
+  --ai-600: #6d28d9;
+  --ai-700: #5b21b6;
+  --ai-800: #4c1d95;
+  --ai-900: #2e1065;
+  --ai-border: #c4b5fd;
+  --ai-name: "午夜";
+}
+
+/* ═══════════════════════════════════════════════
+   AXIS 3: 页面肤色 (Page)
+   控制：主背景、侧边栏、卡片表面色
+   侧栏底色对齐设计稿（导航栏方案演示.html）：深紫黑 #1b1833，与品牌靛蓝同系
+   ═══════════════════════════════════════════════ */
+
+:root,
+[data-theme-page="light"] {
+  --page-bg: #ffffff;
+  --page-sidebar: #1b1833;       /* 设计稿值：深紫黑（原 #1e293b 灰蓝 → 灰蒙蒙根因，已修正） */
+  --page-sidebar-text: #e6e6f0;
+  --page-surface: #f1f5f9;
+  --page-surface-hover: #e2e8f0;
+  --page-border: #e2e8f0;
+  --page-border-subtle: #f1f5f9;
+  --page-name: "浅色";
+}
+
+[data-theme-page="warm"] {
+  --page-bg: #fffbeb;
+  --page-sidebar: #292524;
+  --page-sidebar-text: #e7e5e4;
+  --page-surface: #fef9ee;
+  --page-surface-hover: #fde68a;
+  --page-border: #fcd34d;
+  --page-border-subtle: #fef3c7;
+  --page-name: "暖色";
+}
+
+[data-theme-page="dark"] {
+  --page-bg: #0f172a;
+  --page-sidebar: #232a3f;       /* 独立于背景，与 #0f172a 拉开一级亮度，导航层次不消失 */
+  --page-sidebar-text: #e2e8f0;
+  --page-surface: #1e293b;
+  --page-surface-hover: #334155;
+  --page-border: #334155;
+  --page-border-subtle: #1e293b;
+  --page-name: "深色";
+}
+
+/* ═══════════════════════════════════════════════
+   AXIS 5: 中性灰阶 (Neutral) —— 主题感知
+   gray-* Tailwind 类统一映射到此轴（globals.css @theme 覆盖）
+   浅色：原 slate 值（保证现有观感不变）
+   深色：反转，浅色文字可读
+   ═══════════════════════════════════════════════ */
+
+:root,
+[data-theme-page="light"],
+[data-theme-page="warm"] {
+  --neutral-50: #f8fafc;
+  --neutral-100: #f3f4f6;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --neutral-800: #1f2937;
+  --neutral-900: #111827;
+}
+
+[data-theme-page="dark"] {
+  --neutral-50: #0f172a;
+  --neutral-100: #1e293b;
+  --neutral-200: #334155;
+  --neutral-300: #475569;
+  --neutral-400: #64748b;
+  --neutral-500: #94a3b8;
+  --neutral-600: #a3b0c4;
+  --neutral-700: #cbd5e1;
+  --neutral-800: #dbe3ee;
+  --neutral-900: #e2e8f0;
+}
+
+/* ═══════════════════════════════════════════════
+   AXIS 4: 语义色 (Semantic)
+   控制：优先级、状态、时段、来源、截止、密度、置信度
+   ═══════════════════════════════════════════════ */
+
+:root,
+[data-theme-sem="indigo"] {
+  --sem-priority-p1: #ef4444; --sem-priority-p1-bg: #fee2e2; --sem-priority-p1-border: #fecaca;
+  --sem-priority-p2: #f97316; --sem-priority-p2-bg: #ffedd5; --sem-priority-p2-border: #fed7aa;
+  --sem-priority-p3: #eab308; --sem-priority-p3-bg: #fef9c3; --sem-priority-p3-border: #fef08a;
+  --sem-priority-p4: #3b82f6; --sem-priority-p4-bg: #dbeafe; --sem-priority-p4-border: #bfdbfe;
+  --sem-priority-p5: #9ca3af; --sem-priority-p5-bg: #f3f4f6; --sem-priority-p5-border: #e5e7eb;
+  --sem-status-notstarted: #94a3b8; --sem-status-notstarted-bg: #f1f5f9; --sem-status-notstarted-border: #e2e8f0;
+  --sem-status-completed: #10b981; --sem-status-completed-bg: #d1fae5; --sem-status-completed-border: #a7f3d0;
+  --sem-status-delayed: #f59e0b; --sem-status-delayed-bg: #fef3c7; --sem-status-delayed-border: #fde68a;
+  --sem-period-morning: #f59e0b; --sem-period-morning-bg: #fef3c7;
+  --sem-period-afternoon: #f97316; --sem-period-afternoon-bg: #ffedd5;
+  --sem-period-evening: #6366f1; --sem-period-evening-bg: #e0e7ff;
+  --sem-source-user: #6366f1;
+  --sem-source-ai: #8b5cf6; --sem-source-ai-bg: #f5f3ff;
+  --sem-deadline-overdue: #ef4444;
+  --sem-density-low: #93c5fd; --sem-density-low-bg: #dbeafe;
+  --sem-density-medium: #fcd34d; --sem-density-medium-bg: #fef3c7;
+  --sem-density-high: #fb923c; --sem-density-high-bg: #ffedd5;
+  --sem-density-overload: #ef4444; --sem-density-overload-bg: #fee2e2;
+  --sem-confidence-high: #10b981;
+  --ai-accent: #6366f1; --ai-accent-bg: #eef2ff;
+  --ai-text-color: #4338ca; --ai-collapse-hover: rgba(99,102,241,0.05);
+  --ai-advice-item-border: #c7d2fe; --ai-advice-item-hover-bg: #fafafe;
+  --stat-tasks: #6366f1; --stat-time: #10b981; --stat-streak: #f59e0b;
+  --complete-bg: #dcfce7; --complete-border: #bbf7d0; --complete-text: #166534; --complete-btn: #16a34a; --complete-btn-hover: #15803d;
+  --plan-today-bg: #eef2ff; --plan-scheduled-bg: #dbeafe; --plan-scheduled-text: #1e40af; --plan-deadline-bg: #fef3c7; --plan-deadline-text: #92400e;
+}
+
+[data-theme-sem="sunset"] {
+  --sem-priority-p1: #dc2626; --sem-priority-p1-bg: #fee2e2; --sem-priority-p1-border: #fecaca;
+  --sem-priority-p2: #ea580c; --sem-priority-p2-bg: #ffedd5; --sem-priority-p2-border: #fed7aa;
+  --sem-priority-p3: #ca8a04; --sem-priority-p3-bg: #fef9c3; --sem-priority-p3-border: #fef08a;
+  --sem-priority-p4: #2563eb; --sem-priority-p4-bg: #dbeafe; --sem-priority-p4-border: #bfdbfe;
+  --sem-priority-p5: #6b7280; --sem-priority-p5-bg: #f3f4f6; --sem-priority-p5-border: #e5e7eb;
+  --sem-status-notstarted: #78716c; --sem-status-notstarted-bg: #f5f5f4; --sem-status-notstarted-border: #e7e5e4;
+  --sem-status-completed: #16a34a; --sem-status-completed-bg: #dcfce7; --sem-status-completed-border: #bbf7d0;
+  --sem-status-delayed: #d97706; --sem-status-delayed-bg: #fef3c7; --sem-status-delayed-border: #fde68a;
+  --sem-period-morning: #f59e0b; --sem-period-morning-bg: #fef3c7;
+  --sem-period-afternoon: #ea580c; --sem-period-afternoon-bg: #ffedd5;
+  --sem-period-evening: #a855f7; --sem-period-evening-bg: #f3e8ff;
+  --sem-source-user: #ea580c;
+  --sem-source-ai: #d946ef; --sem-source-ai-bg: #fdf4ff;
+  --sem-deadline-overdue: #dc2626;
+  --sem-density-low: #7dd3fc; --sem-density-low-bg: #e0f2fe;
+  --sem-density-medium: #fbbf24; --sem-density-medium-bg: #fef3c7;
+  --sem-density-high: #fb923c; --sem-density-high-bg: #ffedd5;
+  --sem-density-overload: #ef4444; --sem-density-overload-bg: #fee2e2;
+  --sem-confidence-high: #16a34a;
+  --ai-accent: #ea580c; --ai-accent-bg: #fff7ed;
+  --ai-text-color: #9a3412; --ai-collapse-hover: rgba(234,88,12,0.05);
+  --ai-advice-item-border: #fdba74; --ai-advice-item-hover-bg: #fffbf5;
+  --stat-tasks: #ea580c; --stat-time: #10b981; --stat-streak: #f59e0b;
+  --complete-bg: #ecfdf5; --complete-border: #a7f3d0; --complete-text: #065f46; --complete-btn: #10b981; --complete-btn-hover: #059669;
+  --plan-today-bg: #fff7ed; --plan-scheduled-bg: #fff7ed; --plan-scheduled-text: #9a3412; --plan-deadline-bg: #fef2f2; --plan-deadline-text: #991b1b;
+}
+
+[data-theme-sem="ocean"] {
+  --sem-priority-p1: #ef4444; --sem-priority-p1-bg: #fee2e2; --sem-priority-p1-border: #fecaca;
+  --sem-priority-p2: #f97316; --sem-priority-p2-bg: #ffedd5; --sem-priority-p2-border: #fed7aa;
+  --sem-priority-p3: #eab308; --sem-priority-p3-bg: #fef9c3; --sem-priority-p3-border: #fef08a;
+  --sem-priority-p4: #0ea5e9; --sem-priority-p4-bg: #e0f2fe; --sem-priority-p4-border: #bae6fd;
+  --sem-priority-p5: #94a3b8; --sem-priority-p5-bg: #f1f5f9; --sem-priority-p5-border: #e2e8f0;
+  --sem-status-notstarted: #94a3b8; --sem-status-notstarted-bg: #f1f5f9; --sem-status-notstarted-border: #e2e8f0;
+  --sem-status-completed: #059669; --sem-status-completed-bg: #d1fae5; --sem-status-completed-border: #a7f3d0;
+  --sem-status-delayed: #f59e0b; --sem-status-delayed-bg: #fef3c7; --sem-status-delayed-border: #fde68a;
+  --sem-period-morning: #38bdf8; --sem-period-morning-bg: #e0f2fe;
+  --sem-period-afternoon: #0284c7; --sem-period-afternoon-bg: #bae6fd;
+  --sem-period-evening: #1e3a5f; --sem-period-evening-bg: #dbeafe;
+  --sem-source-user: #0284c7;
+  --sem-source-ai: #0ea5e9; --sem-source-ai-bg: #f0f9ff;
+  --sem-deadline-overdue: #ef4444;
+  --sem-density-low: #93c5fd; --sem-density-low-bg: #dbeafe;
+  --sem-density-medium: #fcd34d; --sem-density-medium-bg: #fef3c7;
+  --sem-density-high: #fb923c; --sem-density-high-bg: #ffedd5;
+  --sem-density-overload: #ef4444; --sem-density-overload-bg: #fee2e2;
+  --sem-confidence-high: #059669;
+  --ai-accent: #0d9488; --ai-accent-bg: #f0fdfa;
+  --ai-text-color: #0f766e; --ai-collapse-hover: rgba(13,148,136,0.05);
+  --ai-advice-item-border: #5eead4; --ai-advice-item-hover-bg: #f5fdfb;
+  --stat-tasks: #0d9488; --stat-time: #0ea5e9; --stat-streak: #f59e0b;
+  --complete-bg: #ecfdf5; --complete-border: #a7f3d0; --complete-text: #065f46; --complete-btn: #10b981; --complete-btn-hover: #059669;
+  --plan-today-bg: #f0fdfa; --plan-scheduled-bg: #e0f2fe; --plan-scheduled-text: #075985; --plan-deadline-bg: #fef3c7; --plan-deadline-text: #92400e;
+}
+
+[data-theme-sem="forest"] {
+  --sem-priority-p1: #dc2626; --sem-priority-p1-bg: #fee2e2; --sem-priority-p1-border: #fecaca;
+  --sem-priority-p2: #ea580c; --sem-priority-p2-bg: #ffedd5; --sem-priority-p2-border: #fed7aa;
+  --sem-priority-p3: #ca8a04; --sem-priority-p3-bg: #fef9c3; --sem-priority-p3-border: #fef08a;
+  --sem-priority-p4: #059669; --sem-priority-p4-bg: #d1fae5; --sem-priority-p4-border: #a7f3d0;
+  --sem-priority-p5: #78716c; --sem-priority-p5-bg: #f5f5f4; --sem-priority-p5-border: #e7e5e4;
+  --sem-status-notstarted: #78716c; --sem-status-notstarted-bg: #f5f5f4; --sem-status-notstarted-border: #e7e5e4;
+  --sem-status-completed: #16a34a; --sem-status-completed-bg: #dcfce7; --sem-status-completed-border: #bbf7d0;
+  --sem-status-delayed: #ca8a04; --sem-status-delayed-bg: #fef9c3; --sem-status-delayed-border: #fef08a;
+  --sem-period-morning: #22c55e; --sem-period-morning-bg: #dcfce7;
+  --sem-period-afternoon: #16a34a; --sem-period-afternoon-bg: #bbf7d0;
+  --sem-period-evening: #15803d; --sem-period-evening-bg: #86efac;
+  --sem-source-user: #16a34a;
+  --sem-source-ai: #a855f7; --sem-source-ai-bg: #f3e8ff;
+  --sem-deadline-overdue: #dc2626;
+  --sem-density-low: #86efac; --sem-density-low-bg: #dcfce7;
+  --sem-density-medium: #fde047; --sem-density-medium-bg: #fef9c3;
+  --sem-density-high: #fb923c; --sem-density-high-bg: #ffedd5;
+  --sem-density-overload: #ef4444; --sem-density-overload-bg: #fee2e2;
+  --sem-confidence-high: #16a34a;
+  --ai-accent: #059669; --ai-accent-bg: #ecfdf5;
+  --ai-text-color: #064e3b; --ai-collapse-hover: rgba(5,150,105,0.05);
+  --ai-advice-item-border: #6ee7b7; --ai-advice-item-hover-bg: #f5fdf8;
+  --stat-tasks: #059669; --stat-time: #10b981; --stat-streak: #f59e0b;
+  --complete-bg: #ecfdf5; --complete-border: #6ee7b7; --complete-text: #064e3b; --complete-btn: #059669; --complete-btn-hover: #047857;
+  --plan-today-bg: #ecfdf5; --plan-scheduled-bg: #d1fae5; --plan-scheduled-text: #065f46; --plan-deadline-bg: #fef3c7; --plan-deadline-text: #92400e;
+}
+
+[data-theme-sem="midnight"] {
+  --sem-priority-p1: #f87171; --sem-priority-p1-bg: #450a0a; --sem-priority-p1-border: #991b1b;
+  --sem-priority-p2: #fb923c; --sem-priority-p2-bg: #431407; --sem-priority-p2-border: #9a3412;
+  --sem-priority-p3: #fde047; --sem-priority-p3-bg: #422006; --sem-priority-p3-border: #a16207;
+  --sem-priority-p4: #60a5fa; --sem-priority-p4-bg: #172554; --sem-priority-p4-border: #1e3a5f;
+  --sem-priority-p5: #64748b; --sem-priority-p5-bg: #1e293b; --sem-priority-p5-border: #334155;
+  --sem-status-notstarted: #64748b; --sem-status-notstarted-bg: #1e293b; --sem-status-notstarted-border: #334155;
+  --sem-status-completed: #34d399; --sem-status-completed-bg: #064e3b; --sem-status-completed-border: #065f46;
+  --sem-status-delayed: #fbbf24; --sem-status-delayed-bg: #422006; --sem-status-delayed-border: #a16207;
+  --sem-period-morning: #818cf8; --sem-period-morning-bg: #312e81;
+  --sem-period-afternoon: #6366f1; --sem-period-afternoon-bg: #3730a3;
+  --sem-period-evening: #c4b5fd; --sem-period-evening-bg: #4c1d95;
+  --sem-source-user: #818cf8;
+  --sem-source-ai: #c084fc; --sem-source-ai-bg: #3b0764;
+  --sem-deadline-overdue: #f87171;
+  --sem-density-low: #a5b4fc; --sem-density-low-bg: #312e81;
+  --sem-density-medium: #fde047; --sem-density-medium-bg: #422006;
+  --sem-density-high: #fb923c; --sem-density-high-bg: #431407;
+  --sem-density-overload: #f87171; --sem-density-overload-bg: #450a0a;
+  --sem-confidence-high: #34d399;
+  --ai-accent: #7c3aed; --ai-accent-bg: #f5f3ff;
+  --ai-text-color: #4c1d95; --ai-collapse-hover: rgba(124,58,237,0.05);
+  --ai-advice-item-border: #c4b5fd; --ai-advice-item-hover-bg: #faf8fe;
+  --stat-tasks: #7c3aed; --stat-time: #a855f7; --stat-streak: #f59e0b;
+  --complete-bg: #f5f3ff; --complete-border: #c4b5fd; --complete-text: #5b21b6; --complete-btn: #7c3aed; --complete-btn-hover: #6d28d9;
+  --plan-today-bg: #f5f3ff; --plan-scheduled-bg: #ede9fe; --plan-scheduled-text: #5b21b6; --plan-deadline-bg: #fef3c7; --plan-deadline-text: #92400e;
+}

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Today 页视觉方案 v2 · 两版 × 两层场景</title>
+<style>
+:root{
+  --bg:#e8ecf3; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --brand:#6366f1; --brand-deep:#4f46e5; --brand-bg:#eef2ff; --brand-border:#c7d2fe;
+  --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --green:#059669; --green-bg:#ecfdf5;
+  --orange:#c2410c; --orange-bg:#fff0e6;
+  --memo-bg:#fff9e6; --memo-bar:#f5a623; --memo-tx:#8b6914; --memo-ck:#d4a853;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#e8ecf3;color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 0}
+.page-head{text-align:center;margin-bottom:20px}
+.page-head h1{font-size:23px;font-weight:700;letter-spacing:-.3px}
+.page-head .sub{font-size:12px;color:var(--text2);margin-top:6px}
+.req-chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+.rc{font-size:10.5px;font-weight:600;padding:3.5px 11px;border-radius:14px;background:#fff;color:var(--text2);border:1px solid #dfe3ea;letter-spacing:.2px}
+.rc.key{background:var(--brand-bg);color:var(--brand-deep);border-color:var(--brand-border)}
+
+/* 主 tab */
+.tabs{display:flex;gap:10px;justify-content:center;margin:20px 0 6px}
+.tab-btn{font-size:13.5px;font-weight:600;padding:11px 26px;border-radius:13px;border:1px solid #dfe3ea;background:#fff;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center}
+.tab-btn:hover{border-color:var(--brand);color:var(--brand-deep)}
+.tab-btn.on{background:#111827;color:#fff;border-color:#111827;box-shadow:0 6px 18px rgba(17,24,39,.22)}
+.tab-btn small{display:block;font-size:10px;font-weight:500;opacity:.7;margin-top:2px}
+.plan-wrap{display:none}
+.plan-wrap.on{display:block}
+
+/* 子 tab（简单/复杂） */
+.sub-tabs{display:flex;gap:6px;justify-content:center;margin:12px 0 10px}
+.sub-btn{font-size:11.5px;font-weight:600;padding:6px 16px;border-radius:10px;border:1px solid #dfe3ea;background:#fff;color:var(--text2);cursor:pointer;transition:all .15s}
+.sub-btn.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.scene-wrap{display:none}
+.scene-wrap.on{display:block}
+
+/* 场景标签行 */
+.scene-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 4px}
+.sb{font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;letter-spacing:.3px}
+.sb-simple{background:var(--green-bg);color:var(--green);border:1px solid #a7f3d0}
+.sb-complex{background:var(--orange-bg);color:var(--orange);border:1px solid #fed7aa}
+.sb-note{font-size:10.5px;color:var(--text3)}
+
+/* 视口（模拟 1160 内容区 + 首屏线） */
+.viewport{position:relative;background:#f7f8fa;border:1px solid #e3e7ee;border-radius:16px;margin:14px 0 8px;padding:24px 24px 22px;box-shadow:inset 0 2px 6px rgba(15,23,42,.04)}
+.viewport.h-screen{height:680px;overflow:hidden}
+.vp-tag{display:flex;align-items:center;justify-content:center;gap:8px;font-size:10px;color:var(--text3);letter-spacing:.4px;margin-bottom:12px}
+.vp-tag b{color:var(--text2);font-weight:600}
+.vp-line{flex:1;max-width:380px;height:1px;background:#e6eaf0}
+/* 首屏线 */
+.fl{position:absolute;left:0;right:0;bottom:0;border-top:2px dashed #b6bdc9;z-index:4;pointer-events:none}
+.fl-tag{position:absolute;right:14px;top:-13px;background:#fff;border:1px solid #d6dbe4;border-radius:8px;font-size:10px;font-weight:600;color:var(--text3);padding:2px 9px;letter-spacing:.3px}
+.fl-tag.ok{color:var(--green);border-color:#a7f3d0;background:var(--green-bg)}
+.fl-tag.over{color:var(--orange);border-color:#fed7aa;background:var(--orange-bg)}
+
+/* 页面骨架 */
+.today{position:relative}
+.greet{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.greet h2{font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.greet .date{color:var(--text3);font-size:11.5px}
+.w-a{max-width:880px;margin:0 auto}   /* 方案 A 恒定 */
+.w-b-s{max-width:760px;margin:0 auto} /* 方案 B 简单 */
+.w-b-c{max-width:880px;margin:0 auto} /* 方案 B 复杂 */
+
+/* 主卡 */
+.fc{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(16,24,40,.08),0 2px 6px rgba(16,24,40,.05)}
+.motive{display:flex;align-items:center;gap:8px;padding:9px 20px;background:var(--purple-bg);border-bottom:1px solid #ede9fe;color:var(--purple)}
+.motive .ico{flex-shrink:0;display:flex}
+.motive .txt{font-size:12.5px;font-weight:500;color:#7c3aed;letter-spacing:.1px}
+.motive .tag{margin-left:auto;font-size:9px;font-weight:600;color:#8b5cf6;background:#fff;border:1px solid #ddd6fe;padding:1.5px 8px;border-radius:10px;letter-spacing:.3px}
+.fc-body{display:flex}
+.fc-left{flex:0.72;padding:16px 18px;border-right:1px solid var(--border);min-width:0;background:#fafafa}
+.fc-right{flex:1.28;padding:16px 20px;min-width:0}
+.c2-label{font-size:9px;color:var(--text3);letter-spacing:.4px;margin-bottom:5px}
+.c2-project{font-size:14px;font-weight:600;color:var(--text)}
+.progress-track{height:5px;background:#eef1f5;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px}
+.c2-proj-progress{margin:8px 0 13px}
+.c2-stage-list{list-style:none}
+.c2-stage-list li{display:flex;align-items:center;gap:7px;font-size:11px;padding:4px 8px;border-radius:6px;color:var(--text2)}
+.c2-stage-list li.done{color:var(--text3);text-decoration:line-through}
+.c2-stage-list li.current{background:var(--brand-bg);border-left:3px solid var(--brand);font-weight:600;color:var(--text);font-size:11.5px}
+.c2-stage-list li.future{padding-left:14px;color:var(--text3)}
+.c2-divider{height:1px;background:#f0f1f4;margin:12px 0}
+.c2-meta{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--text3)}
+.c2-meta b{color:var(--text2);font-weight:600}
+.c2-ai{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--purple);background:var(--purple-bg);border-radius:7px;padding:5px 10px;margin:10px 0 0}
+.c2-ai .lbl{font-weight:600;font-size:8.5px;letter-spacing:.3px;flex-shrink:0}
+.action-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.action-row h3{font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
+.type-tag{font-size:9.5px;font-weight:600;padding:2.5px 10px;border-radius:12px;background:var(--orange-bg);color:var(--orange);flex-shrink:0}
+.btn{border:none;border-radius:9px;font-size:12.5px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all .15s;flex-shrink:0}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-ghost{background:#f3f4f6;color:var(--text3)}
+.btn-going{background:var(--brand);color:#fff;opacity:.9}
+.list-progress{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);margin-bottom:5px}
+.list-progress b{color:var(--text2)}
+.checklist{list-style:none;background:var(--memo-bg);border-left:3px solid var(--memo-bar);border-radius:9px;padding:8px 6px;margin-top:7px}
+.checklist::before{content:attr(data-title);display:block;font-size:10.5px;font-weight:600;color:var(--memo-tx);padding:2px 5px 6px;letter-spacing:.3px;border-bottom:1px dashed rgba(139,105,20,.3);margin-bottom:5px}
+.checklist li{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13px;margin-bottom:2px;background:rgba(255,255,255,.6)}
+.checklist li.done{color:var(--text3);opacity:.65}
+.checklist li.done .txt{text-decoration:line-through}
+.checklist li.next{background:#fff;border-left:4px solid var(--brand);font-weight:600;color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.07)}
+.checklist li.pending{color:var(--text2)}
+.ck-box{width:16px;height:16px;border-radius:4.5px;border:1.5px solid var(--memo-ck);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff}
+.ck-box.on{background:var(--green);border-color:var(--green)}
+.ck-box.next{border-color:var(--brand)}
+.item-time{margin-left:auto;font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums}
+.confirm-row{display:flex;gap:8px;margin-top:11px}
+.confirm-row .btn{flex:1;text-align:center}
+.confirm-hint{font-size:9.5px;color:var(--text3);margin-top:5px;text-align:center}
+
+/* 路线 | AI 双栏 */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.aux-card{background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.aux-head{display:flex;align-items:center;gap:7px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);border-bottom:1px solid #f1f2f5}
+.aux-head .dot{width:7px;height:7px;border-radius:50%;background:var(--brand)}
+.aux-head .count{margin-left:auto;font-size:10px;font-weight:500;color:var(--text3)}
+.ai-title{background:var(--purple-bg);border-bottom:none;color:var(--purple);font-size:12.5px;padding:9px 14px}
+.ai-title .dot{background:var(--purple)}
+.ai-input{padding:9px 14px 2px}
+.ai-input .box{display:flex;align-items:center;gap:8px;border:1.5px solid #ddd6fe;border-radius:9px;background:#fff;padding:7px 11px;font-size:11.5px;color:var(--text3)}
+.ai-input .box .go{font-size:9px;font-weight:600;color:#fff;background:var(--purple);border-radius:6px;padding:3px 9px;margin-left:auto;flex-shrink:0}
+.aux-body{padding:3px 14px 12px}
+.sugg{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:11.5px;color:var(--text2);background:#fafbfc;margin-top:7px}
+.sugg .no{width:16px;height:16px;border-radius:5px;background:var(--purple-bg);color:var(--purple);font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sugg .adopt{margin-left:auto;font-size:9.5px;font-weight:600;color:var(--brand-deep);background:var(--brand-bg);border-radius:6px;padding:3px 8px;flex-shrink:0;cursor:pointer}
+.route-item{display:flex;align-items:center;gap:8px;padding:6.5px 2px;font-size:11.5px;color:var(--text2);border-bottom:1px dashed #f0f1f4}
+.route-item:last-child{border-bottom:none}
+.route-item .t{font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums;width:42px;flex-shrink:0}
+.route-item .bar{height:5px;border-radius:3px;flex-shrink:0}
+
+/* 状态折叠 */
+.state-fold{display:flex;align-items:center;gap:9px;margin-top:14px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:9px 15px;cursor:pointer}
+.state-fold .arr{font-size:10px;color:var(--text3);transition:transform .2s}
+.state-fold .lbl{font-size:12px;font-weight:600;color:var(--text2)}
+.state-fold .sum{margin-left:auto;font-size:11px;color:var(--text3)}
+.state-fold .sum span{margin-left:10px}
+
+/* 方案 A 复杂：路线/AI 折叠横幅 */
+.fold-banner{display:flex;align-items:center;gap:10px;margin-top:14px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:10px 15px;font-size:11.5px;color:var(--text2);cursor:pointer}
+.fold-banner .fb-dot{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.fold-banner .fb-item{margin-left:14px;display:flex;align-items:center;gap:5px}
+.fold-banner .fb-item b{color:var(--text);font-weight:600}
+.fold-banner .fb-arrow{margin-left:auto;font-size:11px;color:var(--text3)}
+
+/* 说明卡 */
+.notes{margin:12px auto 0;display:flex;flex-direction:column;gap:8px}
+.note{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid #e3e7ee;border-radius:12px;padding:11px 15px;font-size:12px;color:var(--text2);line-height:1.55}
+.note .nno{flex-shrink:0;width:19px;height:19px;border-radius:6px;background:var(--brand-bg);color:var(--brand-deep);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.note b{color:var(--text);font-weight:600}
+.note .spec{color:var(--text3);font-size:11px}
+.notes-title{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.4px;margin:6px 0 2px}
+
+/* 对比表 */
+.cmp{margin:34px auto 0;max-width:980px}
+.cmp h3{font-size:15px;font-weight:700;margin-bottom:12px;text-align:center}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:12px;box-shadow:0 2px 10px rgba(16,24,40,.05)}
+th{background:#f4f5f8;font-size:11px;color:var(--text2);padding:10px 14px;text-align:left;font-weight:600;border-bottom:1px solid #e8eaef}
+td{padding:10px 14px;border-bottom:1px solid #f1f2f5;color:var(--text2);vertical-align:top;line-height:1.5}
+td:first-child{color:var(--text);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:26px}
+@media(max-width:900px){.row2{grid-template-columns:1fr}.fc-body{flex-direction:column}.fc-left{border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-head">
+  <h1>Today 页视觉方案 v2 · 两版 × 两层场景</h1>
+  <div class="sub">UI Designer 出稿 · 2026-08-03 · 每版都渲染「简单任务」与「复杂任务」两种状态 · 视口模拟 1160px 内容区 + 680px 首屏线</div>
+  <div class="req-chips">
+    <span class="rc key">纵向布局 不新增分栏</span>
+    <span class="rc key">主卡限宽 880–960</span>
+    <span class="rc key">简单任务一屏三块</span>
+    <span class="rc key">复杂任务主卡优先</span>
+    <span class="rc key">标题 20 / 项目 14 / 动机 12.5</span>
+    <span class="rc key">AI 输入框上移</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn on" data-p="planA">方案 A · 一屏锁定<small>辅助可折叠 · 宽度恒定 880</small></button>
+  <button class="tab-btn" data-p="planB">方案 B · 弹性让位<small>主卡优先 · 宽度 760↔880</small></button>
+</div>
+
+<!-- ═══════════════ 方案 A · 一屏锁定 ═══════════════ -->
+<div class="plan-wrap on" id="planA">
+  <div class="sub-tabs">
+    <button class="sub-btn on" data-s="a-simple">① 简单任务 · 一屏三卡</button>
+    <button class="sub-btn" data-s="a-complex">② 复杂任务 · 辅助折叠</button>
+  </div>
+
+  <!-- A 简单 -->
+  <div class="scene-wrap on" id="a-simple">
+    <div class="scene-bar"><span class="sb sb-simple">简单任务</span><span class="sb-note">清单 3 项 · 三块一屏全见 · 无需滚动</span></div>
+    <div class="viewport h-screen">
+      <div class="vp-tag"><span class="vp-line"></span>880px 居中 · 内容区 1160px 两侧留白<span class="vp-line"></span></div>
+      <div class="today"><div class="w-a">
+        <div class="greet">
+          <h2 style="font-size:26px">下午好 👋</h2>
+          <span class="date">8月3日 周一 · 2 个任务未完成</span>
+        </div>
+        <div class="fc">
+          <div class="motive">
+            <span class="ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span>
+            <span class="txt">为四轴飞行器打好电路基础</span>
+            <span class="tag">主攻</span>
+          </div>
+          <div class="fc-body">
+            <div class="fc-left">
+              <div class="c2-label">所属项目</div>
+              <div class="c2-project">四轴飞行器</div>
+              <div class="c2-proj-progress">
+                <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>项目进度</span><b style="color:var(--text2)">3/6</b></div>
+                <div class="progress-track"><div class="progress-fill" style="width:50%;background:var(--brand)"></div></div>
+              </div>
+              <div class="c2-label">项目阶段</div>
+              <ul class="c2-stage-list">
+                <li class="done"><span style="font-size:9px">✓</span>需求分析</li>
+                <li class="done"><span style="font-size:9px">✓</span>元件调研</li>
+                <li class="current">画原理图</li>
+                <li class="future">选型元器件</li>
+                <li class="future">PCB 布局</li>
+                <li class="future">焊接调试</li>
+              </ul>
+              <div class="c2-divider"></div>
+              <div class="c2-meta"><span><b>时段</b> 9:00 - 11:00</span><span><b>预计</b> 120 分 · <b>已用</b> 45 分</span></div>
+              <div class="c2-ai"><span class="lbl">AI 执行</span><span>上次类似任务用了 90 分钟</span></div>
+            </div>
+            <div class="fc-right">
+              <div class="action-row">
+                <h3>画原理图</h3>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="type-tag">清单型</span>
+                  <button class="btn btn-ghost">暂停</button>
+                  <button class="btn btn-going">进行中…</button>
+                </div>
+              </div>
+              <div class="list-progress">执行清单 <b>1/3 已完成</b><span style="margin-left:auto">45 分</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:33%;background:var(--orange)"></div></div>
+              <ul class="checklist" data-title="执行清单">
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+                <li class="next"><span class="ck-box next"></span><span>MPU6050 传感器</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+                <li class="pending"><span class="ck-box"></span><span>L298N 电机驱动</span></li>
+              </ul>
+              <div class="confirm-row"><button class="btn btn-primary">该项完成</button><button class="btn btn-ghost">跳过后一项</button></div>
+              <div class="confirm-hint">完成该项 → 自动高亮下一项</div>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="aux-card">
+            <div class="aux-head"><span class="dot"></span>今日路线<span class="count">4 段</span></div>
+            <div class="aux-body" style="padding-top:8px">
+              <div class="route-item"><span class="t">09:00</span><span style="flex:1">画原理图 · 主攻</span><span class="bar" style="width:32px;background:var(--brand)"></span></div>
+              <div class="route-item"><span class="t">11:00</span><span style="flex:1">背单词 · 打卡</span><span class="bar" style="width:22px;background:var(--green)"></span></div>
+              <div class="route-item"><span class="t">14:00</span><span style="flex:1">PCB 布线</span><span class="bar" style="width:26px;background:var(--purple)"></span></div>
+              <div class="route-item"><span class="t">18:30</span><span style="flex:1">夜跑 5km</span><span class="bar" style="width:18px;background:#0d9488"></span></div>
+            </div>
+          </div>
+          <div class="aux-card">
+            <div class="ai-title"><span class="dot"></span>AI 调整助手 · 先输入再看</div>
+            <div class="ai-input"><div class="box">今天下午状态不太好，帮我调整排期<span class="go">提问</span></div></div>
+            <div class="aux-body">
+              <div class="sugg"><span class="no">1</span><span>PCB 布线顺延明天上午，留缓冲</span><span class="adopt">采纳</span></div>
+              <div class="sugg"><span class="no">2</span><span>夜跑改 18:00 避开低血糖</span><span class="adopt">采纳</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="state-fold">
+          <span class="arr">▾</span><span class="lbl">今日状态</span>
+          <span class="sum"><span>精力 正常</span><span>专注 一般</span><span>情绪 平稳</span></span>
+        </div>
+      </div></div>
+      <div class="fl"><span class="fl-tag ok">✓ 一屏内全见</span></div>
+    </div>
+  </div>
+
+  <!-- A 复杂 -->
+  <div class="scene-wrap" id="a-complex">
+    <div class="scene-bar"><span class="sb sb-complex">复杂任务</span><span class="sb-note">清单 10 项 · 首屏只服务主卡 · 路线/AI 收成最小入口</span></div>
+    <div class="viewport h-screen">
+      <div class="vp-tag"><span class="vp-line"></span>880px 居中 · 宽度恒定不变<span class="vp-line"></span></div>
+      <div class="today"><div class="w-a">
+        <div class="greet">
+          <h2 style="font-size:26px">下午好 👋</h2>
+          <span class="date">8月3日 周一 · 2 个任务未完成</span>
+        </div>
+        <div class="fc">
+          <div class="motive">
+            <span class="ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span>
+            <span class="txt">为四轴飞行器打好电路基础</span>
+            <span class="tag">主攻</span>
+          </div>
+          <div class="fc-body">
+            <div class="fc-left">
+              <div class="c2-label">所属项目</div>
+              <div class="c2-project">四轴飞行器</div>
+              <div class="c2-proj-progress">
+                <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>项目进度</span><b style="color:var(--text2)">3/6</b></div>
+                <div class="progress-track"><div class="progress-fill" style="width:50%;background:var(--brand)"></div></div>
+              </div>
+              <div class="c2-label">项目阶段</div>
+              <ul class="c2-stage-list">
+                <li class="done"><span style="font-size:9px">✓</span>需求分析</li>
+                <li class="done"><span style="font-size:9px">✓</span>元件调研</li>
+                <li class="current">画原理图</li>
+                <li class="future">选型元器件</li>
+                <li class="future">PCB 布局</li>
+                <li class="future">焊接调试</li>
+              </ul>
+              <div class="c2-divider"></div>
+              <div class="c2-meta"><span><b>时段</b> 9:00 - 11:00</span><span><b>预计</b> 120 分 · <b>已用</b> 45 分</span></div>
+              <div class="c2-ai"><span class="lbl">AI 执行</span><span>上次类似任务用了 90 分钟</span></div>
+            </div>
+            <div class="fc-right">
+              <div class="action-row">
+                <h3>画原理图</h3>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="type-tag">清单型</span>
+                  <button class="btn btn-ghost">暂停</button>
+                  <button class="btn btn-going">进行中…</button>
+                </div>
+              </div>
+              <div class="list-progress">执行清单 <b>3/10 已完成</b><span style="margin-left:auto">75 分</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:30%;background:var(--orange)"></div></div>
+              <ul class="checklist" data-title="执行清单">
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">MPU6050 传感器</span><span class="item-time">22分</span></li>
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">L298N 电机驱动</span><span class="item-time">16分</span></li>
+                <li class="next"><span class="ck-box next"></span><span>电源模块</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+                <li class="pending"><span class="ck-box"></span><span>蜂鸣器与 LED 指示</span></li>
+                <li class="pending"><span class="ck-box"></span><span>按键复位电路</span></li>
+                <li class="pending"><span class="ck-box"></span><span>USB 转串口</span></li>
+                <li class="pending"><span class="ck-box"></span><span>晶振电路</span></li>
+                <li class="pending"><span class="ck-box"></span><span>排针接口</span></li>
+                <li class="pending"><span class="ck-box"></span><span>原理图走线检查</span></li>
+              </ul>
+              <div class="confirm-row"><button class="btn btn-primary">该项完成</button><button class="btn btn-ghost">跳过后一项</button></div>
+              <div class="confirm-hint">完成该项 → 自动高亮下一项 · 回来弹补记时长</div>
+            </div>
+          </div>
+        </div>
+        <!-- 路线/AI 折叠横幅（最小入口） -->
+        <div class="fold-banner">
+          <span class="fb-dot"></span><span><b>今日路线</b> 4 段</span>
+          <span class="fb-item"><b>AI 建议</b> 2 条</span>
+          <span class="fb-arrow">▾ 展开详情</span>
+        </div>
+        <div class="state-fold">
+          <span class="arr">▾</span><span class="lbl">今日状态</span>
+          <span class="sum"><span>精力 正常</span><span>专注 一般</span><span>情绪 平稳</span></span>
+        </div>
+      </div></div>
+      <div class="fl"><span class="fl-tag over">首屏 = 主卡优先</span></div>
+    </div>
+  </div>
+
+  <div class="notes" style="max-width:880px">
+    <div class="notes-title">方案 A · 一屏锁定 —— 设计逻辑</div>
+    <div class="note"><span class="nno">1</span><span><b>宽度恒定 880px，布局永不变形</b>：简单还是复杂，主卡宽度、两栏比例、圆角阴影全部一致——页面"长得一样"，只有内容量在变。认知负担最低。<span class="spec">（需求②：880 在 880–960 区间内）</span></span></div>
+    <div class="note"><span class="nno">2</span><span><b>简单任务（清单 ≤3 项）→ 三块一屏全见</b>：问候语 + 主卡 + 路线|AI 双栏 + 状态折叠条，全部落在首屏内，零滚动。<span class="spec">（需求③）</span></span></div>
+    <div class="note"><span class="nno">3</span><span><b>复杂任务（清单 10 项）→ 路线/AI 收成一条折叠横幅</b>：「今日路线 4 段 · AI 建议 2 条 ▾」一行搞定，点在主卡下方、随时可展开。首屏 100% 服务任务卡，辅助信息降级为入口而非抢占。<span class="spec">（需求③复杂分支：优先任务卡）</span></span></div>
+    <div class="note"><span class="nno">4</span><span><b>字号按需求提升</b>：标题 20px bold / 所属项目 14px semibold / 动机 12.5px / 元信息 10px 小字；AI 输入框在紫色标题栏正下方。<span class="spec">（需求④⑤）</span></span></div>
+  </div>
+</div>
+
+<!-- ═══════════════ 方案 B · 弹性让位 ═══════════════ -->
+<div class="plan-wrap" id="planB">
+  <div class="sub-tabs">
+    <button class="sub-btn on" data-s="b-simple">① 简单任务 · 紧凑一屏</button>
+    <button class="sub-btn" data-s="b-complex">② 复杂任务 · 辅助沉底</button>
+  </div>
+
+  <!-- B 简单 -->
+  <div class="scene-wrap on" id="b-simple">
+    <div class="scene-bar"><span class="sb sb-simple">简单任务</span><span class="sb-note">清单 3 项 · 主卡收窄 760 · 三块一屏更宽裕</span></div>
+    <div class="viewport h-screen">
+      <div class="vp-tag"><span class="vp-line"></span>760px 居中（比 A 更窄）· 两侧留白更大<span class="vp-line"></span></div>
+      <div class="today"><div class="w-b-s">
+        <div class="greet">
+          <h2 style="font-size:24px">下午好 👋</h2>
+          <span class="date">8月3日 周一</span>
+        </div>
+        <div class="fc" style="border-radius:14px">
+          <div class="motive" style="padding:8px 18px">
+            <span class="ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span>
+            <span class="txt">为四轴飞行器打好电路基础</span>
+          </div>
+          <div class="fc-body">
+            <div class="fc-left">
+              <div class="c2-label">所属项目</div>
+              <div class="c2-project">四轴飞行器</div>
+              <div class="c2-proj-progress">
+                <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>进度</span><b style="color:var(--text2)">3/6</b></div>
+                <div class="progress-track"><div class="progress-fill" style="width:50%;background:var(--brand)"></div></div>
+              </div>
+              <div class="c2-label">项目阶段</div>
+              <ul class="c2-stage-list">
+                <li class="done"><span style="font-size:9px">✓</span>需求分析</li>
+                <li class="done"><span style="font-size:9px">✓</span>元件调研</li>
+                <li class="current">画原理图</li>
+                <li class="future">选型元器件</li>
+                <li class="future">PCB 布局</li>
+                <li class="future">焊接调试</li>
+              </ul>
+              <div class="c2-divider"></div>
+              <div class="c2-meta"><span><b>时段</b> 9:00 - 11:00</span><span><b>预计</b> 120 分 · <b>已用</b> 45 分</span></div>
+            </div>
+            <div class="fc-right">
+              <div class="action-row">
+                <h3>画原理图</h3>
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span class="type-tag">清单型</span>
+                  <button class="btn btn-ghost" style="padding:6px 12px">暂停</button>
+                  <button class="btn btn-going" style="padding:6px 12px">进行中</button>
+                </div>
+              </div>
+              <div class="list-progress">执行清单 <b>1/3</b><span style="margin-left:auto">45 分</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:33%;background:var(--orange)"></div></div>
+              <ul class="checklist" data-title="执行清单" style="border-radius:8px">
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+                <li class="next"><span class="ck-box next"></span><span>MPU6050 传感器</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+                <li class="pending"><span class="ck-box"></span><span>L298N 电机驱动</span></li>
+              </ul>
+              <div class="confirm-row"><button class="btn btn-primary">该项完成</button><button class="btn btn-ghost">跳过</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="aux-card">
+            <div class="aux-head"><span class="dot"></span>今日路线<span class="count">4 段</span></div>
+            <div class="aux-body" style="padding-top:8px">
+              <div class="route-item"><span class="t">09:00</span><span style="flex:1">画原理图 · 主攻</span></div>
+              <div class="route-item"><span class="t">11:00</span><span style="flex:1">背单词 · 打卡</span></div>
+              <div class="route-item"><span class="t">14:00</span><span style="flex:1">PCB 布线</span></div>
+              <div class="route-item"><span class="t">18:30</span><span style="flex:1">夜跑 5km</span></div>
+            </div>
+          </div>
+          <div class="aux-card">
+            <div class="ai-title" style="font-size:12px"><span class="dot"></span>AI 调整助手</div>
+            <div class="ai-input"><div class="box" style="border-radius:7px;padding:7px 10px;font-size:11px">帮我调整排期<span class="go">提问</span></div></div>
+            <div class="aux-body">
+              <div class="sugg" style="border-radius:7px"><span class="no">1</span><span>PCB 顺延明天上午</span><span class="adopt">采纳</span></div>
+              <div class="sugg" style="border-radius:7px"><span class="no">2</span><span>夜跑改 18:00</span><span class="adopt">采纳</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="state-fold">
+          <span class="arr">▾</span><span class="lbl">今日状态</span>
+          <span class="sum"><span>精力 正常</span><span>专注 一般</span></span>
+        </div>
+      </div></div>
+      <div class="fl"><span class="fl-tag ok">✓ 一屏内全见 · 更宽松</span></div>
+    </div>
+  </div>
+
+  <!-- B 复杂 -->
+  <div class="scene-wrap" id="b-complex">
+    <div class="scene-bar"><span class="sb sb-complex">复杂任务</span><span class="sb-note">清单 10 项 · 主卡放宽 880 吃满首屏 · 路线/AI 完整沉底（不折叠）</span></div>
+    <div class="viewport h-screen">
+      <div class="vp-tag"><span class="vp-line"></span>主卡放宽到 880px（弹性放大）· 辅助完整保留在下方<span class="vp-line"></span></div>
+      <div class="today"><div class="w-b-c">
+        <div class="greet">
+          <h2 style="font-size:24px">下午好 👋</h2>
+          <span class="date">8月3日 周一 · 任务较重，主卡优先</span>
+        </div>
+        <div class="fc" style="border-radius:14px">
+          <div class="motive" style="padding:8px 18px">
+            <span class="ico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span>
+            <span class="txt">为四轴飞行器打好电路基础</span>
+            <span class="tag">主攻</span>
+          </div>
+          <div class="fc-body">
+            <div class="fc-left">
+              <div class="c2-label">所属项目</div>
+              <div class="c2-project">四轴飞行器</div>
+              <div class="c2-proj-progress">
+                <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>项目进度</span><b style="color:var(--text2)">3/6</b></div>
+                <div class="progress-track"><div class="progress-fill" style="width:50%;background:var(--brand)"></div></div>
+              </div>
+              <div class="c2-label">项目阶段</div>
+              <ul class="c2-stage-list">
+                <li class="done"><span style="font-size:9px">✓</span>需求分析</li>
+                <li class="done"><span style="font-size:9px">✓</span>元件调研</li>
+                <li class="current">画原理图</li>
+                <li class="future">选型元器件</li>
+                <li class="future">PCB 布局</li>
+                <li class="future">焊接调试</li>
+              </ul>
+              <div class="c2-divider"></div>
+              <div class="c2-meta"><span><b>时段</b> 9:00 - 11:00</span><span><b>预计</b> 120 分 · <b>已用</b> 75 分</span></div>
+              <div class="c2-ai"><span class="lbl">AI 执行</span><span>按当前节奏可能超时 20 分</span></div>
+            </div>
+            <div class="fc-right">
+              <div class="action-row">
+                <h3>画原理图</h3>
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span class="type-tag">清单型</span>
+                  <button class="btn btn-ghost" style="padding:6px 12px">暂停</button>
+                  <button class="btn btn-going" style="padding:6px 12px">进行中</button>
+                </div>
+              </div>
+              <div class="list-progress">执行清单 <b>3/10 已完成</b><span style="margin-left:auto">75 分</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:30%;background:var(--orange)"></div></div>
+              <ul class="checklist" data-title="执行清单" style="border-radius:8px">
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">MPU6050 传感器</span><span class="item-time">22分</span></li>
+                <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">L298N 电机驱动</span><span class="item-time">16分</span></li>
+                <li class="next"><span class="ck-box next"></span><span>电源模块</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+                <li class="pending"><span class="ck-box"></span><span>蜂鸣器与 LED 指示</span></li>
+                <li class="pending"><span class="ck-box"></span><span>按键复位电路</span></li>
+                <li class="pending"><span class="ck-box"></span><span>USB 转串口</span></li>
+                <li class="pending"><span class="ck-box"></span><span>晶振电路</span></li>
+                <li class="pending"><span class="ck-box"></span><span>排针接口</span></li>
+                <li class="pending"><span class="ck-box"></span><span>原理图走线检查</span></li>
+              </ul>
+              <div class="confirm-row"><button class="btn btn-primary">该项完成</button><button class="btn btn-ghost">跳过后一项</button></div>
+              <div class="confirm-hint">完成该项 → 自动高亮下一项 · 回来弹补记时长</div>
+            </div>
+          </div>
+        </div>
+        <!-- 路线/AI 完整保留（沉底，不折叠） -->
+        <div class="row2">
+          <div class="aux-card">
+            <div class="aux-head"><span class="dot"></span>今日路线<span class="count">4 段</span></div>
+            <div class="aux-body" style="padding-top:8px">
+              <div class="route-item"><span class="t">09:00</span><span style="flex:1">画原理图 · 主攻</span><span class="bar" style="width:32px;background:var(--brand)"></span></div>
+              <div class="route-item"><span class="t">11:00</span><span style="flex:1">背单词 · 打卡</span><span class="bar" style="width:22px;background:var(--green)"></span></div>
+              <div class="route-item"><span class="t">14:00</span><span style="flex:1">PCB 布线</span><span class="bar" style="width:26px;background:var(--purple)"></span></div>
+              <div class="route-item"><span class="t">18:30</span><span style="flex:1">夜跑 5km</span><span class="bar" style="width:18px;background:#0d9488"></span></div>
+            </div>
+          </div>
+          <div class="aux-card">
+            <div class="ai-title" style="font-size:12px"><span class="dot"></span>AI 调整助手</div>
+            <div class="ai-input"><div class="box" style="border-radius:7px;padding:7px 10px;font-size:11px">帮我调整排期<span class="go">提问</span></div></div>
+            <div class="aux-body">
+              <div class="sugg" style="border-radius:7px"><span class="no">1</span><span>电源模块先做，卡口最少</span><span class="adopt">采纳</span></div>
+              <div class="sugg" style="border-radius:7px"><span class="no">2</span><span>剩余 7 项建议拆两段做</span><span class="adopt">采纳</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="state-fold">
+          <span class="arr">▾</span><span class="lbl">今日状态</span>
+          <span class="sum"><span>精力 正常</span><span>专注 一般</span><span>情绪 平稳</span></span>
+        </div>
+      </div></div>
+      <div class="fl"><span class="fl-tag over">首屏 = 主卡占满 · 辅助让位</span></div>
+    </div>
+  </div>
+
+  <div class="notes" style="max-width:880px">
+    <div class="notes-title">方案 B · 弹性让位 —— 设计逻辑</div>
+    <div class="note"><span class="nno">1</span><span><b>宽度随内容弹性：简单 760px ↔ 复杂 880px</b>：任务轻时页面收窄（阅读更聚拢、两侧留白更大）；任务重时主卡放宽（多出来的清单行更舒展，视觉密度更低）。以任务内容量为标尺自适应。<span class="spec">（需求②：760-880 在 880–960 附近浮动，可按视觉再调）</span></span></div>
+    <div class="note"><span class="nno">2</span><span><b>简单任务 → 更紧凑的三卡一屏</b>：760px + 精简元信息（去掉 AI 条、地点），整页更轻快，一屏内还有富余。<span class="spec">（需求③）</span></span></div>
+    <div class="note"><span class="nno">3</span><span><b>复杂任务 → 路线/AI 完整保留、整体沉底</b>：不折叠、信息不丢，只是首屏完全让位给主卡；滚动后路线和 AI 建议仍在原位置等你。适合"任务重但晚上还想看路线/AI"的场景。<span class="spec">（需求③复杂分支：优先任务卡 + 辅助不消失）</span></span></div>
+    <div class="note"><span class="nno">4</span><span><b>同一套 14px 圆角、轻量质感</b>：整页视觉密度低于方案 A（更"白"），元信息更克制——A 重、B 轻。<span class="spec">（需求⑥：主角靠面积，不靠装饰）</span></span></div>
+  </div>
+</div>
+
+<!-- ═══ 对比表 ═══ -->
+<div class="cmp">
+  <h3>两版速览 · 怎么选</h3>
+  <table>
+    <tr><th style="width:16%">维度</th><th>方案 A · 一屏锁定</th><th>方案 B · 弹性让位</th></tr>
+    <tr><td>宽度策略</td><td><b>恒定 880px</b>，简单/复杂不变形</td><td><b>弹性 760↔880px</b>，随内容量自适应</td></tr>
+    <tr><td>简单任务</td><td>三块一屏全见 · 标准密度</td><td>三块一屏 · 更紧凑宽松</td></tr>
+    <tr><td>复杂任务</td><td>路线/AI <b>收成折叠横幅</b>（最小入口）</td><td>路线/AI <b>完整沉底</b>（信息不丢）</td></tr>
+    <tr><td>首屏焦点</td><td>任务卡 100% 专注，辅助降级为入口</td><td>任务卡占满，辅助完整让位到下方</td></tr>
+    <tr><td>气质</td><td>重一点、聚焦感强（阴影 8-24px）</td><td>轻一点、更"白"（阴影弱）</td></tr>
+    <tr><td>适合谁</td><td>想要"打开就是干"、辅助信息能收就收</td><td>想保底看到路线/AI、任务重也不丢上下文</td></tr>
+    <tr><td>实现成本</td><td>低：宽度 + 折叠横幅一个组件</td><td>中：宽度自适应 + 段落顺序调整</td></tr>
+    <tr><td>共同点</td><td colspan="2">纵向布局不变 · 主卡左右栏结构不动 · 字号统一（20/14/12.5/10）· AI 输入框上移 · 状态条沉底折叠</td></tr>
+  </table>
+</div>
+
+<div class="foot">Task OS · Today 页视觉方案 v2 · 2026-08-03 · 选定后由 FrontendDeveloper 落地（判断逻辑：清单项数 ≥5 视为复杂，切换对应状态）</div>
+
+</div>
+<script>
+function showPlan(key){
+  document.querySelectorAll('.plan-wrap').forEach(function(w){w.classList.remove('on')});
+  document.getElementById(key).classList.add('on');
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('on', b.dataset.p===key)});
+}
+function showScene(key){
+  var wrap = document.getElementById(key).closest('.plan-wrap');
+  wrap.querySelectorAll('.scene-wrap').forEach(function(s){s.classList.remove('on')});
+  document.getElementById(key).classList.add('on');
+  wrap.querySelectorAll('.sub-btn').forEach(function(b){b.classList.toggle('on', b.dataset.s===key)});
+}
+document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('click', function(){showPlan(this.dataset.p)})});
+document.querySelectorAll('.sub-btn').forEach(function(b){b.addEventListener('click', function(){showScene(this.dataset.s)})});
+</script>
+</body>
+</html>

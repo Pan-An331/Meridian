@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Review · 任务时段偏好 新方案预览</title>
+<style>
+  :root {
+    --card: #ffffff; --border: #e5e7eb;
+    --text: #111827; --text2: #6b7280; --text3: #9ca3af;
+    --brand: #6366f1; --brand-deep: #4338ca; --brand-bg: #eef2ff;
+    --green: #16a34a; --green-bg: #f0fdf4;
+    --amber: #d97706; --amber-bg: #fffbeb;
+    --purple: #7c3aed; --purple-bg: #f5f3ff;
+    --bg: #f8fafc;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); }
+
+  .browser { max-width: 900px; margin: 28px auto; background: #fff; border-radius: 14px; box-shadow: 0 8px 30px rgba(16,24,40,.10); overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f1f2f4; border-bottom: 1px solid #e2e4e8; }
+  .bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .bar i:nth-child(1) { background: #ff5f57; } .bar i:nth-child(2) { background: #febc2e; } .bar i:nth-child(3) { background: #28c840; }
+  .bar-url { flex: 1; margin-left: 8px; background: #fff; border-radius: 7px; padding: 5px 12px; font-size: 12px; color: #6b7280; max-width: 380px; }
+  .bar-ver { font-size: 11px; color: #9ca3af; margin-left: auto; }
+
+  .content { padding: 26px 28px 34px; }
+
+  .col-title { font-size: 16px; font-weight: 600; margin-bottom: 18px; }
+
+  /* ── 对比框 ── */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .cmp { border-radius: 12px; padding: 14px 16px; font-size: 12px; line-height: 1.8; }
+  .cmp-old { background: #fafafa; border: 1px dashed #d1d5db; color: var(--text3); }
+  .cmp-new { background: var(--green-bg); border: 1px solid #bbf7d0; color: #166534; }
+  .cmp b { font-size: 12.5px; }
+
+  /* ── 时段热度矩阵 ── */
+  .matrix-title { font-size: 13.5px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .matrix-title .tip { font-size: 11px; color: var(--text3); font-weight: 400; }
+  .heat { width: 100%; border-collapse: separate; border-spacing: 6px; }
+  .heat th { font-size: 11.5px; color: var(--text3); font-weight: 500; padding: 2px 0 6px; }
+  .heat th .sub { font-size: 10px; color: #cbd5e1; }
+  .heat td.row-label { font-size: 12.5px; font-weight: 500; color: var(--text2); white-space: nowrap; width: 64px; text-align: right; padding-right: 8px; }
+  .heat td.row-label .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .heat td.cell { height: 40px; border-radius: 9px; background: #f8fafc; text-align: center; position: relative; min-width: 88px; }
+  .heat td.cell .bar { position: absolute; bottom: 5px; left: 10px; right: 10px; height: 20px; border-radius: 6px; opacity: .85; }
+  .heat td.cell .n { position: relative; z-index: 1; font-size: 11px; font-weight: 600; line-height: 40px; }
+  .heat td.cell.peak { box-shadow: 0 0 0 2px var(--brand), 0 0 0 4px rgba(99,102,241,.18); }
+  .heat td.cell.zero { opacity: .35; }
+  .heat td.cell.zero .n { color: var(--text3); }
+  .legend { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 10.5px; color: var(--text3); }
+  .legend .sw { display: inline-block; width: 34px; height: 8px; border-radius: 4px; }
+  .legend .peak-mark { display: inline-block; width: 12px; height: 12px; border-radius: 4px; box-shadow: 0 0 0 2px var(--brand); vertical-align: -2px; margin-right: 2px; }
+
+  /* ── 洞察结论 ── */
+  .ins-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0 16px; }
+  .ins-sec { font-size: 13.5px; font-weight: 600; margin-bottom: 10px; }
+  .ins-sec .sub { font-size: 11px; color: var(--text3); font-weight: 400; margin-left: 6px; }
+
+  .ins-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #fafbfc; border: 1px solid var(--border); margin-bottom: 8px; }
+  .ins-row.hot { background: #fff; border-color: rgba(99,102,241,.35); box-shadow: var(--shadow); }
+  .ai-tag { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 7px; white-space: nowrap; flex: none; margin-top: 1px; }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-blue { background: #eff6ff; color: #2563eb; }
+  .tag-pink { background: #fdf2f8; color: #db2777; }
+  .tag-amber { background: var(--amber-bg); color: #b45309; }
+  .ins-main { flex: 1; min-width: 0; }
+  .ins-text { font-size: 13px; line-height: 1.65; color: var(--text2); }
+  .ins-text b { color: var(--text); font-weight: 600; }
+  .ins-evidence { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ev { font-size: 11px; color: var(--text2); background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+  .ev .t { color: var(--text3); }
+
+  /* ── 设计稿对照（右侧小图） ── */
+  .mock-ref { margin-top: 22px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .mock-ref .head { font-size: 11.5px; color: var(--text2); background: #f8f9fb; padding: 7px 14px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .mock-ref .body { padding: 12px 14px; font-size: 11.5px; line-height: 1.75; color: var(--text3); }
+  .mock-ref .body .ai-line { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: var(--text2); font-size: 12px; }
+  .mock-ref .body .ai-tag2 { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 6px; white-space: nowrap; }
+
+  .note { margin-top: 18px; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 13px 18px; font-size: 12.5px; line-height: 1.9; color: #4338ca; }
+  .note b { }
+</style>
+</head>
+<body>
+
+<div class="browser">
+  <div class="bar">
+    <i></i><i></i><i></i>
+    <div class="bar-url">taskos.local/review</div>
+    <div class="bar-ver">Review · 任务时段偏好 新方案预览</div>
+  </div>
+
+  <div class="content">
+    <div class="col-title">本周洞察 · 任务时段偏好（新方案）</div>
+
+    <!-- 新旧对比 -->
+    <div class="compare-grid">
+      <div class="cmp cmp-old">
+        <b>旧版问题</b><br>
+        ① 只分「上午/下午/晚上」三个大桶，粒度太粗<br>
+        ② 每条都是「XX 更喜欢在下午完成——任务 15:00、任务 14:00」纯文字<br>
+        ③ 所有分类全列出来，无重点；打断提醒混在末尾
+      </div>
+      <div class="cmp cmp-new">
+        <b>新版思路</b><br>
+        ① <b>时段热度矩阵</b>一眼看分布（清晨/上午/下午/晚上）<br>
+        ② 峰值格自动高亮 → 结论精确到<b>小时窗口</b>（如「下午 14-17 点」）<br>
+        ③ 只保留 2-3 条<b>最有信息量的结论</b> + 任务证据标签，不再全列
+      </div>
+    </div>
+
+    <!-- ① 时段热度矩阵 -->
+    <div class="matrix-title">
+      时段热度矩阵
+      <span class="tip">横轴 = 一天四个时段 · 格子 = 该分类的专注次数（色块越满越频繁）</span>
+    </div>
+    <table class="heat">
+      <thead>
+        <tr>
+          <th></th>
+          <th>清晨 <span class="sub">6-9 点</span></th>
+          <th>上午 <span class="sub">9-12 点</span></th>
+          <th>下午 <span class="sub">12-18 点</span></th>
+          <th>晚上 <span class="sub">18-24 点</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label"><span class="dot" style="background:#7C3AED"></span>实践</td>
+          <td class="cell zero"><span class="n">0</span></td>
+          <td class="cell"><span class="bar" style="background:#7C3AED;width:22%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#7C3AED">2</span></td>
+          <td class="cell peak"><span class="bar" style="background:#7C3AED;width:96%;"></span><span class="n" style="color:#fff">19</span></td>
+          <td class="cell"><span class="bar" style="background:#7C3AED;width:38%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#7C3AED">4</span></td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="dot" style="background:#2563EB"></span>学习</td>
+          <td class="cell zero"><span class="n">0</span></td>
+          <td class="cell"><span class="bar" style="background:#2563EB;width:30%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#2563EB">3</span></td>
+          <td class="cell"><span class="bar" style="background:#2563EB;width:45%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#2563EB">6</span></td>
+          <td class="cell peak"><span class="bar" style="background:#2563EB;width:88%;"></span><span class="n" style="color:#fff">14</span></td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="dot" style="background:#DB2777"></span>竞赛</td>
+          <td class="cell"><span class="bar" style="background:#DB2777;width:40%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#DB2777">4</span></td>
+          <td class="cell peak"><span class="bar" style="background:#DB2777;width:92%;"></span><span class="n" style="color:#fff">11</span></td>
+          <td class="cell zero"><span class="n">0</span></td>
+          <td class="cell zero"><span class="n">0</span></td>
+        </tr>
+        <tr>
+          <td class="row-label"><span class="dot" style="background:#475569"></span>课程</td>
+          <td class="cell zero"><span class="n">0</span></td>
+          <td class="cell"><span class="bar" style="background:#475569;width:26%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#475569">2</span></td>
+          <td class="cell"><span class="bar" style="background:#475569;width:24%;left:auto;right:auto;transform:translateX(-50%);"></span><span class="n" style="color:#475569">2</span></td>
+          <td class="cell zero"><span class="n">0</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      <span><span class="sw" style="background:#7C3AED"></span> 色块长度 = 专注次数</span>
+      <span><span class="peak-mark"></span> 蓝框 = 该分类峰值时段</span>
+      <span style="margin-left:auto">数据：本周 TimeLog 按开始时间统计</span>
+    </div>
+
+    <hr class="ins-divider">
+
+    <!-- ② 洞察结论 -->
+    <div class="ins-sec">洞察结论 <span class="sub">只列最有信息量的 · 精确到小时窗口</span></div>
+
+    <div class="ins-row hot">
+      <span class="ai-tag tag-purple">实践 · 下午</span>
+      <div class="ins-main">
+        <div class="ins-text">更喜欢在<b>下午 14-17 点</b>完成，占本周实践的 <b>76%</b> —— 这段时间你的实践类专注最密集</div>
+        <div class="ins-evidence">
+          <span class="ev">画原理图 <span class="t">15:00</span></span>
+          <span class="ev">PCB 布线 <span class="t">14:00</span></span>
+          <span class="ev">提交报告 <span class="t">16:20</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ins-row hot">
+      <span class="ai-tag tag-blue">学习 · 晚上</span>
+      <div class="ins-main">
+        <div class="ins-text">集中在<b>晚上 19-21 点</b>，占学习的 <b>61%</b> —— 适合把阅读/背单词这类固定积累排晚上</div>
+        <div class="ins-evidence">
+          <span class="ev">背英语单词 <span class="t">20:30</span></span>
+          <span class="ev">精读论文 <span class="t">19:10</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ins-row">
+      <span class="ai-tag tag-pink">竞赛 · 上午</span>
+      <div class="ins-main">
+        <div class="ins-text">固定<b>上午 9-11 点</b>，与你的精力高峰重合 —— 竞赛冲刺排上午效率最高</div>
+        <div class="ins-evidence">
+          <span class="ev">电赛调试 <span class="t">9:30</span></span>
+          <span class="ev">写方案文档 <span class="t">10:15</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ins-row">
+      <span class="ai-tag tag-amber">注意</span>
+      <div class="ins-main">
+        <div class="ins-text">本周 <b>12 次打断</b>全部集中在下午 —— 和你的实践高峰重叠，建议把深度工作换成完整时间块</div>
+      </div>
+    </div>
+
+    <hr class="ins-divider">
+
+    <!-- ③ 设计稿对照 -->
+    <div class="ins-sec">对照 · Review 设计稿原始形态</div>
+    <div class="mock-ref">
+      <div class="head">UI 示例 · Review 的 UI 设计（原稿）</div>
+      <div class="body">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">任务时段偏好</div>
+        <div class="ai-line"><span class="ai-tag2" style="background:var(--green-bg);color:var(--green)">实践类</span><span>更喜欢在上午完成——画原理图 9:00、PCB 布线 10:00</span></div>
+        <div class="ai-line"><span class="ai-tag2" style="background:var(--purple-bg);color:var(--purple)">学习类</span><span>更喜欢在晚上完成——背单词两次都在 20-21 点</span></div>
+        <div class="ai-line"><span class="ai-tag2" style="background:var(--amber-bg);color:#b45309">注意</span><span>12 次打断全在下午</span></div>
+        <div style="margin-top:8px;color:#cbd5e1">→ 新方案保留 ai-tag 胶囊语言，但升级：① 时段粒度 3→4 并精确到小时窗口 ② 前置热度矩阵可视化 ③ 结论只挑重点</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>📐 本方案要点：</b><br>
+      ① <b>热度矩阵</b>：分类 × 四时段（清晨/上午/下午/晚上），色块长度 = 专注次数，峰值格蓝框高亮 —— 解决"全是文字没重点"<br>
+      ② <b>结论精确到小时窗口</b>（下午 14-17 点 / 晚上 19-21 点 / 上午 9-11 点）—— 解决"上午/下午太粗"<br>
+      ③ 结论行 = 设计稿 ai-tag 胶囊 + 自然语言 + <b>任务证据标签</b>（任务名+时间），最多 3 条 + 1 条打断注意 —— 不再全分类堆砌<br>
+      ④ 数据全部来自现有 /api/views/stats 的 completedTasks.timeLogs，无需新 API
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

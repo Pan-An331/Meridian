@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task OS 预览</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style id="theme-vars">
+/* ═══════════════════════════════════════════
+   Task OS — Design Token System
+   Indigo brand + neutral gray scale + semantic states
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* ── Brand Primary (Indigo) ── */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+
+  /* ── Neutral Scale ── */
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* ── Semantic States ── */
+  --state-success: #16a34a;
+  --state-success-bg: #f0fdf4;
+  --state-success-border: #bbf7d0;
+  --state-warning: #d97706;
+  --state-warning-bg: #fffbeb;
+  --state-warning-border: #fde68a;
+  --state-error: #dc2626;
+  --state-error-bg: #fef2f2;
+  --state-error-border: #fecaca;
+  --state-info: #0ea5e9;
+  --state-info-bg: #f0f9ff;
+  --state-info-border: #bae6fd;
+
+  /* ── Semantic Aliases (required) ── */
+  --brand-background: #f8fafc;
+  --brand-foreground: #0f172a;
+  --brand-card: #ffffff;
+  --brand-card-foreground: #0f172a;
+  --brand-primary: #4f46e5;
+  --brand-primary-foreground: #ffffff;
+  --brand-muted: #f1f5f9;
+  --brand-muted-foreground: #64748b;
+  --brand-border: #e2e8f0;
+  --brand-input: #e2e8f0;
+  --brand-ring: #6366f1;
+  --brand-radius-sm: 0.375rem;
+  --brand-radius-md: 0.5rem;
+  --brand-radius-lg: 0.75rem;
+  --brand-radius-xl: 1rem;
+
+  /* ── Sidebar ── */
+  --sidebar-bg: #0f172a;
+  --sidebar-fg: #e2e8f0;
+  --sidebar-muted: #64748b;
+  --sidebar-active-bg: #4f46e5;
+  --sidebar-active-fg: #ffffff;
+  --sidebar-border: rgba(255,255,255,0.08);
+  --sidebar-hover: rgba(255,255,255,0.08);
+
+  /* ── Surface Layers ── */
+  --surface-elevated: #ffffff;
+  --surface-ai: #eef2ff;
+  --surface-ai-border: #c7d2fe;
+
+  /* ── Typography ── */
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+
+  /* ── Animation ── */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--brand-background);
+    --color-foreground: var(--brand-foreground);
+    --color-card: var(--brand-card);
+    --color-card-foreground: var(--brand-card-foreground);
+    --color-primary: var(--brand-primary);
+    --color-primary-foreground: var(--brand-primary-foreground);
+    --color-muted: var(--brand-muted);
+    --color-muted-foreground: var(--brand-muted-foreground);
+    --color-border: var(--brand-border);
+    --color-input: var(--brand-input);
+    --color-ring: var(--brand-ring);
+    --radius-sm: var(--brand-radius-sm);
+    --radius-md: var(--brand-radius-md);
+    --radius-lg: var(--brand-radius-lg);
+    --radius-xl: var(--brand-radius-xl);
+  }
+  @layer base {
+    body { background: var(--brand-background); color: var(--brand-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--brand-background); }
+      .text-background { color: var(--brand-background); }
+      .border-background { border-color: var(--brand-background); }
+      .ring-background { --tw-ring-color: var(--brand-background); }
+      .bg-foreground { background-color: var(--brand-foreground); }
+      .text-foreground { color: var(--brand-foreground); }
+      .border-foreground { border-color: var(--brand-foreground); }
+      .ring-foreground { --tw-ring-color: var(--brand-foreground); }
+      .bg-card { background-color: var(--brand-card); }
+      .text-card { color: var(--brand-card); }
+      .border-card { border-color: var(--brand-card); }
+      .ring-card { --tw-ring-color: var(--brand-card); }
+      .bg-card-foreground { background-color: var(--brand-card-foreground); }
+      .text-card-foreground { color: var(--brand-card-foreground); }
+      .border-card-foreground { border-color: var(--brand-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--brand-card-foreground); }
+      .bg-primary { background-color: var(--brand-primary); }
+      .text-primary { color: var(--brand-primary); }
+      .border-primary { border-color: var(--brand-primary); }
+      .ring-primary { --tw-ring-color: var(--brand-primary); }
+      .bg-primary-foreground { background-color: var(--brand-primary-foreground); }
+      .text-primary-foreground { color: var(--brand-primary-foreground); }
+      .border-primary-foreground { border-color: var(--brand-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--brand-primary-foreground); }
+      .bg-muted { background-color: var(--brand-muted); }
+      .text-muted { color: var(--brand-muted); }
+      .border-muted { border-color: var(--brand-muted); }
+      .ring-muted { --tw-ring-color: var(--brand-muted); }
+      .bg-muted-foreground { background-color: var(--brand-muted-foreground); }
+      .text-muted-foreground { color: var(--brand-muted-foreground); }
+      .border-muted-foreground { border-color: var(--brand-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--brand-muted-foreground); }
+      .bg-border { background-color: var(--brand-border); }
+      .text-border { color: var(--brand-border); }
+      .border-border { border-color: var(--brand-border); }
+      .ring-border { --tw-ring-color: var(--brand-border); }
+      .bg-input { background-color: var(--brand-input); }
+      .text-input { color: var(--brand-input); }
+      .border-input { border-color: var(--brand-input); }
+      .ring-input { --tw-ring-color: var(--brand-input); }
+      .bg-ring { background-color: var(--brand-ring); }
+      .text-ring { color: var(--brand-ring); }
+      .border-ring { border-color: var(--brand-ring); }
+      .ring-ring { --tw-ring-color: var(--brand-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main class="flex h-screen overflow-hidden">
+      <style>
+        .sidebar-nav-item { color: var(--sidebar-fg); transition: all var(--duration-fast) var(--ease-out); cursor: pointer; }
+        .sidebar-nav-item:hover { background-color: var(--sidebar-hover); }
+        .sidebar-nav-item.active { background-color: var(--sidebar-active-bg); color: var(--sidebar-active-fg); }
+        .tab-content.hidden { display: none; }
+        .progress-bar { transition: width var(--duration-slow) var(--ease-out); }
+        .stat-card-icon { width: 2.5rem; height: 2.5rem; border-radius: var(--brand-radius-lg); display: flex; align-items: center; justify-content: center; }
+        .toggle-switch { position: relative; width: 2.75rem; height: 1.5rem; background-color: var(--brand-border); border-radius: 9999px; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
+        .toggle-switch.active { background-color: var(--brand-primary); }
+        .toggle-switch::after { content: ''; position: absolute; top: 0.125rem; left: 0.125rem; width: 1.25rem; height: 1.25rem; background-color: white; border-radius: 9999px; transition: transform var(--duration-fast) var(--ease-out); box-shadow: var(--shadow-sm); }
+        .toggle-switch.active::after { transform: translateX(1.25rem); }
+        .timeline-dot { position: absolute; width: 0.75rem; height: 0.75rem; border-radius: 9999px; flex-shrink: 0; left: -0.375rem; top: 0.125rem; }
+        .timeline-item { position: relative; padding-left: 2rem; padding-bottom: 1.25rem; border-left: 2px solid var(--brand-border); }
+        .timeline-item:last-child { border-left-color: transparent; }
+      </style>
+      <!-- Sidebar -->
+      <aside id="sidebar-nav" class="w-60 flex flex-col shrink-0" style="background-color: var(--sidebar-bg);">
+        <div class="flex items-center gap-3 px-5 py-5" style="border-bottom: 1px solid var(--sidebar-border);">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background-color: var(--sidebar-active-bg);">
+            <i data-lucide="check-square" class="w-5 h-5" style="color: var(--sidebar-active-fg);"></i>
+          </div>
+          <span class="text-lg font-semibold tracking-tight" style="color: var(--sidebar-fg);">Task OS</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <button data-tab="tab-login" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="log-in" class="w-[18px] h-[18px]"></i>
+            <span>登录</span>
+          </button>
+          <button data-tab="tab-today" class="sidebar-nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="calendar-days" class="w-[18px] h-[18px]"></i>
+            <span>今日</span>
+          </button>
+          <button data-tab="tab-inbox" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="inbox" class="w-[18px] h-[18px]"></i>
+            <span>收件箱</span>
+          </button>
+          <button data-tab="tab-plan" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="clipboard-list" class="w-[18px] h-[18px]"></i>
+            <span>计划</span>
+          </button>
+          <button data-tab="tab-review" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>
+            <span>回顾</span>
+          </button>
+          <button data-tab="tab-settings" class="sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+            <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+            <span>设置</span>
+          </button>
+        </nav>
+        <div class="px-5 py-4" style="border-top: 1px solid var(--sidebar-border);">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background-color: var(--sidebar-active-bg); color: var(--sidebar-active-fg);">张</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate" style="color: var(--sidebar-fg);">张明</p>
+              <p class="text-xs truncate" style="color: var(--sidebar-muted);">zhangming@taskos.com</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col overflow-hidden bg-background">
+        <div class="flex-1 overflow-y-auto">
+          <!-- Tab: 登录 -->
+          <div id="tab-login" class="tab-content hidden h-full flex items-center justify-center p-8">
+            <div class="w-full max-w-md mx-auto">
+              <div class="bg-card rounded-xl border border-border shadow-lg p-8">
+                <div class="text-center mb-8">
+                  <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4" style="background-color: var(--brand-100);">
+                    <i data-lucide="check-square" class="w-7 h-7 text-primary"></i>
+                  </div>
+                  <h1 class="text-2xl font-semibold text-foreground mb-2">欢迎回来</h1>
+                  <p class="text-muted-foreground text-sm">登录你的 Task OS 账户</p>
+                </div>
+                <form class="space-y-5" onsubmit="return false">
+                  <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">邮箱 / 用户名</label>
+                    <input type="text" placeholder="请输入邮箱或用户名" class="w-full px-3.5 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-foreground mb-1.5">密码</label>
+                    <input type="password" placeholder="请输入密码" class="w-full px-3.5 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-shadow">
+                  </div>
+                  <button type="button" class="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">登录</button>
+                </form>
+                <p class="text-center text-sm text-muted-foreground mt-6">
+                  还没有账户？<a href="#" class="text-primary font-medium hover:underline">注册</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: 今日 -->
+          <div id="tab-today" class="tab-content p-8">
+            <div class="mb-8">
+              <p class="text-sm text-muted-foreground mb-1" id="today-date"></p>
+              <h1 class="text-2xl font-semibold text-foreground">早上好，张明</h1>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-8">
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm text-muted-foreground">总任务</span>
+                  <div class="stat-card-icon" style="background-color: var(--brand-100);"><i data-lucide="list-checks" class="w-5 h-5 text-primary"></i></div>
+                </div>
+                <p class="text-2xl font-semibold text-foreground">12</p>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm text-muted-foreground">进行中</span>
+                  <div class="stat-card-icon" style="background-color: var(--state-warning-bg);"><i data-lucide="clock" class="w-5 h-5" style="color: var(--state-warning);"></i></div>
+                </div>
+                <p class="text-2xl font-semibold text-foreground">5</p>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm text-muted-foreground">已完成</span>
+                  <div class="stat-card-icon" style="background-color: var(--state-success-bg);"><i data-lucide="check-circle-2" class="w-5 h-5" style="color: var(--state-success);"></i></div>
+                </div>
+                <p class="text-2xl font-semibold text-foreground">7</p>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl border border-border shadow-sm">
+              <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-foreground">今日任务</h2>
+                <button class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">
+                  <i data-lucide="plus" class="w-4 h-4"></i> 添加任务
+                </button>
+              </div>
+              <div class="divide-y divide-border">
+                <div class="px-6 py-4 flex items-center gap-3">
+                  <input type="checkbox" class="w-4 h-4 rounded accent-primary">
+                  <span class="flex-1 text-sm text-foreground">完成产品需求文档评审</span>
+                  <span class="px-2 py-0.5 rounded text-xs font-medium" style="background-color: var(--state-error-bg); color: var(--state-error);">高</span>
+                  <span class="text-xs text-muted-foreground">今天 15:00</span>
+                </div>
+                <div class="px-6 py-4 flex items-center gap-3">
+                  <input type="checkbox" class="w-4 h-4 rounded accent-primary">
+                  <span class="flex-1 text-sm text-foreground">优化首页加载性能</span>
+                  <span class="px-2 py-0.5 rounded text-xs font-medium" style="background-color: var(--state-warning-bg); color: var(--state-warning);">中</span>
+                  <span class="text-xs text-muted-foreground">今天 17:00</span>
+                </div>
+                <div class="px-6 py-4 flex items-center gap-3">
+                  <input type="checkbox" class="w-4 h-4 rounded accent-primary" checked>
+                  <span class="flex-1 text-sm text-muted-foreground line-through">回复用户反馈邮件</span>
+                  <span class="px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">低</span>
+                  <span class="text-xs text-muted-foreground">今天 10:00</span>
+                </div>
+                <div class="px-6 py-4 flex items-center gap-3">
+                  <input type="checkbox" class="w-4 h-4 rounded accent-primary">
+                  <span class="flex-1 text-sm text-foreground">准备周报演示文稿</span>
+                  <span class="px-2 py-0.5 rounded text-xs font-medium" style="background-color: var(--state-warning-bg); color: var(--state-warning);">中</span>
+                  <span class="text-xs text-muted-foreground">明天 9:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: 收件箱 -->
+          <div id="tab-inbox" class="tab-content hidden p-8">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-semibold text-foreground">收件箱</h1>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground">3</span>
+              </div>
+            </div>
+            <div class="flex gap-1 mb-6 bg-muted rounded-lg p-1 w-fit">
+              <button class="px-4 py-1.5 rounded-md text-sm font-medium bg-card text-foreground shadow-sm">全部</button>
+              <button class="px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">未读</button>
+              <button class="px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">已读</button>
+            </div>
+            <div class="space-y-3">
+              <div class="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--brand-100);"><i data-lucide="bell" class="w-5 h-5 text-primary"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-sm font-semibold text-foreground">系统更新通知</h3>
+                      <span class="text-xs text-muted-foreground shrink-0 ml-2">10 分钟前</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground line-clamp-1">Task OS v2.4 已发布，包含多项性能优化和新功能</p>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--state-warning-bg);"><i data-lucide="alert-circle" class="w-5 h-5" style="color: var(--state-warning);"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-sm font-semibold text-foreground">任务逾期提醒</h3>
+                      <span class="text-xs text-muted-foreground shrink-0 ml-2">1 小时前</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground line-clamp-1">"产品需求文档评审" 任务已逾期，请及时处理</p>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--state-info-bg);"><i data-lucide="message-square" class="w-5 h-5" style="color: var(--state-info);"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-sm font-semibold text-foreground">李华评论了你的任务</h3>
+                      <span class="text-xs text-muted-foreground shrink-0 ml-2">3 小时前</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground line-clamp-1">我觉得这个方案可以优化一下，建议考虑</p>
+                  </div>
+                  <div class="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-4 shadow-sm">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--state-success-bg);"><i data-lucide="refresh-cw" class="w-5 h-5" style="color: var(--state-success);"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-sm font-semibold text-foreground">计划进度更新</h3>
+                      <span class="text-xs text-muted-foreground shrink-0 ml-2">昨天</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground line-clamp-1">"Q3 产品迭代" 计划完成度已达 75%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: 计划 -->
+          <div id="tab-plan" class="tab-content hidden p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h1 class="text-2xl font-semibold text-foreground">计划</h1>
+              <button class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4"></i> 新建计划
+              </button>
+            </div>
+            <div class="space-y-4">
+              <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-foreground">Q3 产品迭代</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: var(--state-info-bg); color: var(--state-info);">进行中</span>
+                </div>
+                <div class="mb-3">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-sm text-muted-foreground">进度</span>
+                    <span class="text-sm font-medium text-foreground">75%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-muted overflow-hidden">
+                    <div class="progress-bar h-full rounded-full" style="width: 75%; background: linear-gradient(90deg, var(--brand-primary), var(--brand-400));"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                  <span>截止日期：2026-09-30</span>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-foreground">用户体验优化</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: var(--state-success-bg); color: var(--state-success);">已完成</span>
+                </div>
+                <div class="mb-3">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-sm text-muted-foreground">进度</span>
+                    <span class="text-sm font-medium text-foreground">100%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-muted overflow-hidden">
+                    <div class="progress-bar h-full rounded-full" style="width: 100%; background: linear-gradient(90deg, var(--state-success), #22c55e);"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                  <span>截止日期：2026-07-15</span>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-foreground">后端架构升级</h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">待开始</span>
+                </div>
+                <div class="mb-3">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-sm text-muted-foreground">进度</span>
+                    <span class="text-sm font-medium text-foreground">0%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-muted overflow-hidden">
+                    <div class="progress-bar h-full rounded-full" style="width: 0%; background: linear-gradient(90deg, var(--brand-primary), var(--brand-400));"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                  <span>截止日期：2026-10-15</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: 回顾 -->
+          <div id="tab-review" class="tab-content hidden p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h1 class="text-2xl font-semibold text-foreground">回顾</h1>
+              <div class="flex gap-1 bg-muted rounded-lg p-1">
+                <button class="px-3.5 py-1.5 rounded-md text-sm font-medium bg-card text-foreground shadow-sm">本周</button>
+                <button class="px-3.5 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">本月</button>
+                <button class="px-3.5 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">本季度</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mb-8">
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <p class="text-sm text-muted-foreground mb-1">完成率</p>
+                <p class="text-2xl font-semibold text-foreground">85<span class="text-lg text-muted-foreground font-normal">%</span></p>
+                <p class="text-xs mt-1" style="color: var(--state-success);"><i data-lucide="trending-up" class="w-3 h-3 inline"></i> 5% 较上周</p>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <p class="text-sm text-muted-foreground mb-1">专注时长</p>
+                <p class="text-2xl font-semibold text-foreground">32.5<span class="text-lg text-muted-foreground font-normal">h</span></p>
+                <p class="text-xs mt-1" style="color: var(--state-success);"><i data-lucide="trending-up" class="w-3 h-3 inline"></i> 3.2h 较上周</p>
+              </div>
+              <div class="bg-card rounded-xl border border-border p-5 shadow-sm">
+                <p class="text-sm text-muted-foreground mb-1">完成任务</p>
+                <p class="text-2xl font-semibold text-foreground">24</p>
+                <p class="text-xs mt-1" style="color: var(--state-success);"><i data-lucide="trending-up" class="w-3 h-3 inline"></i> 4 较上周</p>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl border border-border shadow-sm p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-5">最近活动</h2>
+              <div>
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="background-color: var(--state-success);"></div>
+                  <p class="text-sm text-foreground font-medium">完成了"用户体验优化"计划</p>
+                  <p class="text-xs text-muted-foreground mt-1">今天 14:30</p>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="background-color: var(--brand-primary);"></div>
+                  <p class="text-sm text-foreground font-medium">创建了 3 个新任务</p>
+                  <p class="text-xs text-muted-foreground mt-1">今天 10:15</p>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="background-color: var(--state-warning);"></div>
+                  <p class="text-sm text-foreground font-medium">将"产品需求文档评审"标记为高优先级</p>
+                  <p class="text-xs text-muted-foreground mt-1">昨天 16:45</p>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="background-color: var(--brand-300);"></div>
+                  <p class="text-sm text-foreground font-medium">更新了"Q3 产品迭代"的进度</p>
+                  <p class="text-xs text-muted-foreground mt-1">昨天 9:00</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Tab: 设置 -->
+          <div id="tab-settings" class="tab-content hidden p-8">
+            <h1 class="text-2xl font-semibold text-foreground mb-6">设置</h1>
+            <div class="space-y-6">
+              <div class="bg-card rounded-xl border border-border shadow-sm">
+                <div class="px-6 py-4 border-b border-border">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="user" class="w-5 h-5 text-primary"></i>
+                    <h2 class="text-lg font-semibold text-foreground">个人资料</h2>
+                  </div>
+                </div>
+                <div class="divide-y divide-border">
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">姓名</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">你的显示名称</p>
+                    </div>
+                    <span class="text-sm text-foreground">张明</span>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">邮箱</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">用于登录和通知</p>
+                    </div>
+                    <span class="text-sm text-muted-foreground">zhangming@taskos.com</span>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">部门</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">所属团队</p>
+                    </div>
+                    <span class="text-sm text-foreground">产品研发部</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border shadow-sm">
+                <div class="px-6 py-4 border-b border-border">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="bell" class="w-5 h-5 text-primary"></i>
+                    <h2 class="text-lg font-semibold text-foreground">通知偏好</h2>
+                  </div>
+                </div>
+                <div class="divide-y divide-border">
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">任务提醒</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">任务到期前发送通知</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">邮件通知</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">通过邮件接收重要更新</p>
+                    </div>
+                    <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">桌面推送</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">接收浏览器推送通知</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border shadow-sm">
+                <div class="px-6 py-4 border-b border-border">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="palette" class="w-5 h-5 text-primary"></i>
+                    <h2 class="text-lg font-semibold text-foreground">外观</h2>
+                  </div>
+                </div>
+                <div class="divide-y divide-border">
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">主题</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">选择界面配色方案</p>
+                    </div>
+                    <select class="px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option>浅色</option>
+                      <option>深色</option>
+                      <option>跟随系统</option>
+                    </select>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">语言</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">界面显示语言</p>
+                    </div>
+                    <select class="px-3 py-1.5 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                      <option>简体中文</option>
+                      <option>English</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-card rounded-xl border border-border shadow-sm">
+                <div class="px-6 py-4 border-b border-border">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="lock" class="w-5 h-5 text-primary"></i>
+                    <h2 class="text-lg font-semibold text-foreground">账户安全</h2>
+                  </div>
+                </div>
+                <div class="divide-y divide-border">
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">修改密码</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">上次修改 30 天前</p>
+                    </div>
+                    <a href="#" class="text-sm font-medium text-primary hover:underline">修改</a>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">两步验证</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">增加账户安全性</p>
+                    </div>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                  </div>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-foreground">登录设备</p>
+                      <p class="text-xs text-muted-foreground mt-0.5">管理已登录的设备</p>
+                    </div>
+                    <a href="#" class="text-sm font-medium text-primary hover:underline">管理</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function() {
+          function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+            var tab = document.getElementById(tabId);
+            if (tab) tab.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-nav-item').forEach(function(el) { el.classList.remove('active'); });
+            var navItem = document.querySelector('[data-tab="' + tabId + '"]');
+            if (navItem) navItem.classList.add('active');
+          }
+          window.switchTab = switchTab;
+          document.querySelectorAll('.sidebar-nav-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              switchTab(this.getAttribute('data-tab'));
+            });
+          });
+          switchTab('tab-today');
+          var dateEl = document.getElementById('today-date');
+          if (dateEl) {
+            var now = new Date();
+            var days = ['日', '一', '二', '三', '四', '五', '六'];
+            dateEl.textContent = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 星期' + days[now.getDay()];
+          }
+        })();
+      </script>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

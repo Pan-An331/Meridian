@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Card V2 · UI 副本（按规格实现）</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af;
+  --brand:#6366f1; --brand-deep:#4f46e5; --brand-bg:#eef2ff;
+  --success:#16a34a; --success-bg:#f0fdf4; --warning:#d97706; --warning-bg:#fffbeb;
+  --error:#dc2626; --error-bg:#fef2f2;
+  --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --indigo:#4338ca; --indigo-bg:#eef2ff;
+  --orange:#c2410c; --orange-bg:#fff0e6;
+  --green:#059669; --green-bg:#ecfdf5;
+  --cyan:#0891b2; --cyan-bg:#ecfeff;
+  --radius-lg:14px; --radius-md:10px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#eef1f6;color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:80px}
+.page{max-width:980px;margin:0 auto;padding:32px 20px}
+.page-head{text-align:center;margin-bottom:36px}
+.page-head h1{font-size:24px;font-weight:700;letter-spacing:-0.3px}
+.page-head .sub{font-size:12.5px;color:var(--text2);margin-top:8px}
+.page-head .tags{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--brand-bg);color:var(--brand-deep);border:1px solid #c7d2fe}
+
+.section-title{display:flex;align-items:center;gap:10px;margin:44px 0 18px;padding-left:12px;border-left:4px solid var(--brand);font-size:17px;font-weight:700}
+.section-title small{font-size:11px;color:var(--text3);font-weight:400}
+.section-desc{font-size:12px;color:var(--text2);background:#fff;border:1px dashed var(--border);border-radius:8px;padding:8px 14px;margin:-6px 0 18px}
+
+/* ═══════ 一栏卡片 ═══════ */
+.col1-wrap{max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:22px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.card-label{font-size:10px;color:var(--text3);text-align:center;margin:6px 0 -14px;letter-spacing:1px}
+.card-label b{color:var(--brand-deep)}
+
+/* A 动机行 */
+.motive{display:flex;align-items:center;gap:7px;background:var(--purple-bg);padding:7px 16px;font-size:11.5px;color:var(--purple);border-bottom:1px solid #ede9fe}
+.motive .ico{flex-shrink:0;display:flex}
+.motive .hint-txt{color:#8b5cf6}
+/* B 行动区 */
+.action{display:flex;align-items:center;justify-content:space-between;padding:13px 16px 11px;gap:10px}
+.action h3{font-size:17.5px;font-weight:700;letter-spacing:-0.2px;line-height:1.3}
+.action .right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn{border:none;border-radius:8px;font-size:12.5px;font-weight:600;padding:8px 16px;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary.going{background:var(--brand);opacity:.85}
+.btn-primary.done{background:#d1d5db;color:#6b7280}
+.btn-ghost{background:#f3f4f6;color:var(--text3)}
+.type-tag{font-size:9.5px;font-weight:600;padding:2px 9px;border-radius:12px}
+.tt-indigo{background:var(--indigo-bg);color:var(--indigo)}
+.tt-orange{background:var(--orange-bg);color:var(--orange)}
+.tt-purple{background:var(--purple-bg);color:var(--purple)}
+.tt-green{background:var(--green-bg);color:var(--green)}
+.tt-cyan{background:var(--cyan-bg);color:var(--cyan)}
+/* C 执行工具 */
+.tool{padding:0 16px}
+/* D 回来确认 */
+.confirm{padding:10px 16px}
+/* E 元信息行 */
+.meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 16px 12px;border-top:1px solid #f1f5f9;font-size:10px;color:var(--text3)}
+.meta .sep{color:#e5e7eb}
+.meta .add-note{color:var(--brand);font-weight:500;cursor:pointer}
+
+/* 时间块（固定时间型） */
+.time-block{display:flex;align-items:baseline;gap:10px;padding:2px 0 6px}
+.time-block .big{font-size:30px;font-weight:700;letter-spacing:-0.5px;font-variant-numeric:tabular-nums}
+.time-block .range{font-size:13px;color:var(--text2)}
+.loc{font-size:11px;color:var(--text3);margin-bottom:8px}
+.progress-track{height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden;margin:10px 0 8px}
+.progress-fill{height:100%;border-radius:3px}
+.timer-row{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text3);margin-bottom:2px}
+.auto-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;color:var(--green);background:var(--green-bg);border-radius:10px;padding:2px 8px;font-weight:500}
+
+/* 清单区（对齐真实项目 v2-memo token：bg #fff9e6 / border #f5a623 / text #8b6914 / check #d4a853） */
+.checklist{list-style:none;background:#fff9e6;border-left:3px solid #f5a623;border-radius:8px;padding:7px 6px;margin-top:6px}
+.checklist::before,.ex-list::before{content:attr(data-title);display:block;font-size:10.5px;font-weight:600;color:#8b6914;padding:2px 4px 6px;letter-spacing:.3px;border-bottom:1px dashed rgba(139,105,20,.3);margin-bottom:5px}
+.checklist li{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;margin-bottom:2px;background:rgba(255,255,255,.55)}
+.checklist li.done{color:var(--text3);opacity:.65}
+.checklist li.done .txt{text-decoration:line-through}
+.checklist li.next{background:var(--brand-bg);border-left:4px solid var(--brand);padding-left:8px;font-weight:600;color:var(--text)}
+.checklist li.pending{color:var(--text2)}
+.ck-box{width:15px;height:15px;border-radius:4px;border:1.5px solid #d4a853;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff}
+.ck-box.on{background:var(--success);border-color:var(--success)}
+.ck-box.next{border-color:var(--brand)}
+.item-time{margin-left:auto;font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums}
+.list-progress{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text3);margin:6px 0 2px}
+.list-progress b{color:var(--text2)}
+
+/* 统计三格（积累·每日） */
+.stats3{display:flex;gap:10px;padding:4px 0 10px}
+.stat-cell{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
+.stat-cell .num{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat-cell .lbl{font-size:9px;color:var(--text3);margin-top:1px}
+.mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:2px 0 8px}
+.mc-day{width:100%;aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8.5px;color:var(--text3)}
+.mc-day.filled{background:var(--green-bg);color:var(--green);font-weight:600}
+.mc-day.today{border:1.5px solid var(--green);background:#fff}
+
+/* 动作清单（积累·频次，对齐 v2-memo token） */
+.ex-list{list-style:none;background:#fff9e6;border-left:3px solid #f5a623;border-radius:8px;padding:7px 6px;margin-top:6px}
+.ex-list li{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;font-size:12.5px;margin-bottom:2px;background:rgba(255,255,255,.55)}
+.ex-list li .name{font-weight:500}
+.ex-list li .sets{font-size:10.5px;color:var(--text3);font-variant-numeric:tabular-nums}
+.ex-list li .ck-box{margin-left:auto}
+.week-goal{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text3);padding:2px 0 8px}
+.week-goal b{color:var(--text2)}
+.mini-week{display:flex;gap:4px;margin-left:auto}
+.mw-dot{width:16px;height:16px;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--text3);border:1px solid var(--border)}
+.mw-dot.filled{background:var(--cyan);border-color:var(--cyan);color:#fff;font-weight:600}
+
+/* AI 提醒条 */
+.ai-line{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--purple);background:var(--purple-bg);border-radius:7px;padding:6px 10px;margin:8px 0 4px}
+.ai-line .lbl{font-weight:600;font-size:9px;letter-spacing:.3px;flex-shrink:0}
+
+/* 确认区按钮行 */
+.confirm-row{display:flex;gap:8px}
+.confirm-row .btn{flex:1;text-align:center}
+.done-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);background:#f8fafc;border-radius:8px;padding:8px 12px;border:1px dashed var(--border)}
+
+/* ═══════ 两栏卡片 ═══════ */
+.col2-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:26px;box-shadow:0 2px 8px rgba(16,24,40,.06)}
+.col2-card .motive{padding:8px 20px}
+.col2-body{display:flex}
+.col2-left{flex:0.72;background:#fafafa;padding:16px 18px;border-right:1px solid var(--border);min-width:0}
+.col2-right{flex:1.28;padding:16px 20px;min-width:0}
+.c2-label{font-size:9px;color:var(--text3);letter-spacing:.4px;margin-bottom:5px}
+.c2-project{font-size:13px;font-weight:600;color:var(--text)}
+.c2-proj-progress{margin:8px 0 14px}
+.c2-stage-list{list-style:none}
+.c2-stage-list li{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:4px 8px;border-radius:6px;color:var(--text2)}
+.c2-stage-list li.done{color:var(--text3);text-decoration:line-through}
+.c2-stage-list li.done .chk{color:var(--text3);font-size:9px}
+.c2-stage-list li.current{background:var(--brand-bg);border-left:3px solid var(--brand);font-weight:600;color:var(--text);font-size:11.5px}
+.c2-stage-list li.future{padding-left:14px;color:var(--text3)}
+.c2-divider{height:1px;background:#f0f0f0;margin:12px 0}
+.c2-meta-line{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--text3)}
+.c2-meta-line b{color:var(--text2);font-weight:600}
+.c2-ai{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--purple);background:var(--purple-bg);border-radius:7px;padding:5px 9px;margin:10px 0 0}
+.c2-ai .lbl{font-weight:600;font-size:8.5px}
+
+/* ═══════ 组件展示 ═══════ */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.comp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.comp-head{font-size:11px;font-weight:600;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fafafa;color:var(--text2)}
+.comp-body{padding:16px}
+.comp-desc{font-size:10.5px;color:var(--text3);margin-top:10px;line-height:1.5}
+
+/* 弹窗 */
+.modal{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(16,24,40,.14);max-width:340px;margin:0 auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px 9px;font-size:13px;font-weight:600}
+.modal-head .x{color:var(--text3);font-size:15px;cursor:pointer}
+.modal-body{padding:4px 16px 14px;font-size:12px;color:var(--text2)}
+.dur-options{display:flex;gap:8px;margin-top:9px}
+.dur-opt{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:8px;padding:9px 4px;font-size:11px;font-weight:600;cursor:pointer}
+.dur-opt.on{border-color:var(--brand);background:var(--brand-bg);color:var(--brand-deep)}
+.dur-opt input{display:block;width:100%;border:none;outline:none;background:transparent;text-align:center;font-size:12px;font-weight:600;color:var(--text);margin-top:2px}
+.modal-foot{padding:0 16px 14px;display:flex;gap:8px}
+.modal-foot .btn{flex:1;text-align:center}
+.from-line{font-size:10px;color:var(--text3);margin-top:7px}
+.reason-list{list-style:none;margin-top:6px}
+.reason-list li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer}
+.reason-list li.on{background:var(--brand-bg);color:var(--brand-deep);font-weight:500}
+.radio{width:14px;height:14px;border-radius:50%;border:1.5px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.reason-list li.on .radio{border-color:var(--brand)}
+.reason-list li.on .radio::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--brand)}
+
+/* 忘记确认提示条 */
+.forget-banner{display:flex;align-items:center;gap:10px;background:var(--warning-bg);border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:11.5px;color:#92400e;margin-bottom:14px}
+.forget-banner .btns{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+.mini-btn{font-size:10.5px;border-radius:6px;padding:5px 10px;border:1px solid #fcd34d;background:#fff;color:#92400e;cursor:pointer;font-weight:500}
+.mini-btn.pri{background:var(--warning);border-color:var(--warning);color:#fff}
+
+/* 打卡输入 */
+.checkin-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:12px;font-family:var(--font);outline:none;color:var(--text)}
+.checkin-input:focus{border-color:var(--brand)}
+.checkin-input::placeholder{color:#c0c5cf}
+
+/* 状态条 */
+.state-tag{display:inline-block;font-size:9.5px;font-weight:600;padding:2px 9px;border-radius:12px;margin-left:8px;vertical-align:1px}
+.st-unstarted{background:#f3f4f6;color:var(--text3)}
+.st-going{background:var(--brand-bg);color:var(--brand-deep)}
+.st-confirm{background:var(--orange-bg);color:var(--orange)}
+.st-done{background:var(--green-bg);color:var(--green)}
+
+@media(max-width:720px){.comp-grid{grid-template-columns:1fr}.col2-body{flex-direction:column}.col2-left{border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-head">
+  <h1>Focus Card V2 · UI 副本</h1>
+  <div class="sub">依据《docs/FocusCard-V2-UI设计规格.html》逐条实现 · 一栏 + 两栏 + 五种卡片 + 新增组件 · mock 数据渲染全部状态</div>
+  <div class="tags">
+    <span class="tag">A 动机行</span><span class="tag">B 行动区</span><span class="tag">C 执行工具</span>
+    <span class="tag">D 回来确认</span><span class="tag">E 元信息行</span><span class="tag">4 态状态机</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ 方案一 · 一栏布局 ═══════════════════ -->
+<div class="section-title">方案一 · 一栏布局 <small>480px 居中 · 自上而下 5 区</small></div>
+<div class="section-desc">共性结构：A 动机行（紫）→ B 行动区（标题+主按钮）→ C 执行工具（类型专属）→ D 回来确认 → E 元信息行。主按钮文案随状态切换：未出发=出发 / 出发中=进行中… / 完成态=已完成✓。出发中显示「暂停」。</div>
+
+<div class="col1-wrap">
+
+<!-- ─── 1. 固定时间型 · 出发中 ─── -->
+<p class="card-label">3.1 固定时间型（上课/开会）· <b>出发中</b><span class="state-tag st-going">自动计时</span></p>
+<div class="card" style="margin-top:8px">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>专业必修课，电路基础核心</span></div>
+  <div class="action">
+    <h3>数字电路</h3>
+    <div class="right">
+      <span class="type-tag tt-indigo">固定时间</span>
+      <button class="btn btn-primary">完成</button>
+    </div>
+  </div>
+  <div class="tool">
+    <div class="time-block">
+      <span class="big">09:00</span><span class="range">— 10:30</span>
+    </div>
+    <div class="loc">📍 教 301 · 第三教学楼</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+      <span class="auto-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>到点自动完成</span>
+      <span style="font-size:10px;color:var(--text3)">已过 62 分钟 · 剩余 28 分钟</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:65%;background:var(--indigo)"></div></div>
+    <div class="timer-row"><span>进度 65%</span><span>无计时器 · 时间由系统结算</span></div>
+  </div>
+  <div class="meta">
+    <span>课表</span><span class="sep">·</span><span>预计 90 分钟</span><span class="sep">·</span><span class="add-note">＋备注</span>
+  </div>
+</div>
+
+<!-- ─── 2. 清单型 · 出发中（核心卡） ─── -->
+<p class="card-label">3.2 清单型（产出类）· <b>出发中</b><span class="state-tag st-going">高亮下一项</span></p>
+<div class="card" style="margin-top:8px">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为四轴飞行器打好电路基础</span></div>
+  <div class="action">
+    <h3>画原理图</h3>
+    <div class="right">
+      <span class="type-tag tt-orange">清单型</span>
+      <button class="btn btn-ghost">暂停</button>
+      <button class="btn btn-primary going">进行中…</button>
+    </div>
+  </div>
+  <div class="tool">
+    <div class="list-progress">执行清单 <b>1/3 已完成</b><span style="margin-left:auto">总耗时 45 分钟</span></div>
+    <div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:33%;background:var(--orange)"></div></div>
+    <ul class="checklist" style="margin-top:8px" data-title="执行清单">
+      <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+      <li class="next"><span class="ck-box next"></span><span>MPU6050 传感器</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+      <li class="pending"><span class="ck-box"></span><span>L298N 电机驱动</span></li>
+    </ul>
+  </div>
+  <div class="confirm">
+    <div class="confirm-row">
+      <button class="btn btn-primary">该项完成</button>
+      <button class="btn btn-ghost">跳过后一项</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">完成该项 → 自动高亮下一项 · 回来弹补记时长</div>
+  </div>
+  <div class="meta">
+    <span>四轴飞行器</span><span class="sep">·</span><span>预计 120 分钟</span><span class="sep">·</span><span>已用 45 分钟</span><span class="sep">·</span><span class="add-note">＋备注</span>
+  </div>
+</div>
+
+<!-- ─── 3. 学习型 · 未出发 ─── -->
+<p class="card-label">3.2 学习型（产出类）· <b>未出发</b><span class="state-tag st-unstarted">知识点清单</span></p>
+<div class="card" style="margin-top:8px">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为考研数学打下基础</span></div>
+  <div class="action">
+    <h3>学线性代数 · 第 3 章</h3>
+    <div class="right">
+      <span class="type-tag tt-purple">学习型</span>
+      <button class="btn btn-primary">出发</button>
+    </div>
+  </div>
+  <div class="tool">
+    <div class="list-progress">知识点 <b>0/3 已学</b></div>
+    <div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:0%;background:var(--purple)"></div></div>
+    <ul class="checklist" style="margin-top:8px" data-title="知识点">
+      <li class="next"><span class="ck-box next"></span><span>3.1 行列式</span></li>
+      <li class="pending"><span class="ck-box"></span><span>3.2 逆矩阵</span></li>
+      <li class="pending"><span class="ck-box"></span><span>3.3 秩</span></li>
+    </ul>
+  </div>
+  <div class="confirm">
+    <div class="done-item">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M12 16v-4m0-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z"/></svg>
+      出发后回来点「知识点完成」→ 自动高亮下一节
+    </div>
+  </div>
+  <div class="meta">
+    <span>线性代数</span><span class="sep">·</span><span>预计 90 分钟</span><span class="sep">·</span><span class="add-note">＋拆成小节</span><span class="sep">·</span><span class="add-note">＋备注</span>
+  </div>
+</div>
+
+<!-- ─── 4. 积累型 · 每日（背单词）· 回来确认 ─── -->
+<p class="card-label">3.3 积累型 · 每日（背单词）· <b>回来确认</b><span class="state-tag st-confirm">打卡</span></p>
+<div class="card" style="margin-top:8px">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为考研词汇量冲刺</span></div>
+  <div class="action">
+    <h3>背单词</h3>
+    <div class="right">
+      <span class="type-tag tt-green">积累·每日</span>
+      <button class="btn btn-primary going">进行中…</button>
+    </div>
+  </div>
+  <div class="tool">
+    <div class="stats3">
+      <div class="stat-cell"><div class="num" style="color:var(--green)">12</div><div class="lbl">连续天数</div></div>
+      <div class="stat-cell"><div class="num">21</div><div class="lbl">最长记录</div></div>
+      <div class="stat-cell"><div class="num">7</div><div class="lbl">本周次数</div></div>
+    </div>
+    <div class="mini-cal">
+      <span class="mc-day">日</span><span class="mc-day">一</span><span class="mc-day">二</span><span class="mc-day">三</span><span class="mc-day">四</span><span class="mc-day filled">五</span><span class="mc-day">六</span>
+      <span class="mc-day filled">7</span><span class="mc-day filled">8</span><span class="mc-day filled">9</span><span class="mc-day filled">10</span><span class="mc-day filled">11</span><span class="mc-day filled">12</span><span class="mc-day filled">13</span>
+      <span class="mc-day filled">14</span><span class="mc-day filled">15</span><span class="mc-day filled">16</span><span class="mc-day filled">17</span><span class="mc-day filled">18</span><span class="mc-day filled">19</span><span class="mc-day filled">20</span>
+      <span class="mc-day filled">21</span><span class="mc-day filled">22</span><span class="mc-day filled">23</span><span class="mc-day filled">24</span><span class="mc-day filled">25</span><span class="mc-day filled">26</span><span class="mc-day filled">27</span>
+      <span class="mc-day">28</span><span class="mc-day">29</span><span class="mc-day today">30</span><span class="mc-day">31</span><span class="mc-day"></span><span class="mc-day"></span><span class="mc-day"></span>
+    </div>
+    <div class="ai-line"><span class="lbl">AI 提醒</span><span>连续 12 天，再坚持 3 天刷新个人纪录</span></div>
+  </div>
+  <div class="confirm">
+    <div class="confirm-row">
+      <button class="btn btn-primary">打卡</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">打卡时弹「今天背了哪些词？」（可选）→ 存 TimeLog.detail</div>
+  </div>
+  <div class="meta">
+    <span>考研词汇</span><span class="sep">·</span><span>每日任务</span><span class="sep">·</span><span class="add-note">＋备注</span>
+  </div>
+</div>
+
+<!-- ─── 5. 积累型 · 频次（健身）· 出发中 ─── -->
+<p class="card-label">3.4 积累型 · 频次（健身）· <b>出发中</b><span class="state-tag st-going">动作勾选</span></p>
+<div class="card" style="margin-top:8px">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>保持身体状态，支撑高强度学习</span></div>
+  <div class="action">
+    <h3>力量训练</h3>
+    <div class="right">
+      <span class="type-tag tt-cyan">积累·频次</span>
+      <button class="btn btn-ghost">暂停</button>
+      <button class="btn btn-primary going">进行中…</button>
+    </div>
+  </div>
+  <div class="tool">
+    <div class="week-goal">今日练 <b>3 个动作</b> · 周目标 <b>1/3</b>
+      <div class="mini-week">
+        <span class="mw-dot filled">1</span><span class="mw-dot">2</span><span class="mw-dot">3</span>
+      </div>
+    </div>
+    <ul class="ex-list" data-title="今日动作">
+      <li><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="name">引体向上</span><span class="sets">4×10</span></li>
+      <li><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="name">划船</span><span class="sets">4×12</span></li>
+      <li><span class="ck-box"></span><span class="name">深蹲</span><span class="sets">3×15</span></li>
+    </ul>
+  </div>
+  <div class="confirm">
+    <div class="confirm-row">
+      <button class="btn btn-primary">打卡</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center">勾选内容存 TimeLog.detail · 默认全勾可改</div>
+  </div>
+  <div class="meta">
+    <span>健身</span><span class="sep">·</span><span>本周 1 次</span><span class="sep">·</span><span>累计 45 分钟</span><span class="sep">·</span><span class="add-note">＋备注</span>
+  </div>
+</div>
+
+</div><!-- /col1-wrap -->
+
+<!-- ═══════════════════ 方案二 · 两栏布局 ═══════════════════ -->
+<div class="section-title">方案二 · 两栏布局 <small>视口 ≥860px · 左栏数据区 + 右栏执行区</small></div>
+<div class="section-desc">沿用两栏骨架：动机行<b>横跨两栏顶部</b>（保持「第一视觉」）；左栏（灰底）= 数据区（项目/阶段/时间/统计）；右栏（白底）= 执行区（标题+按钮+工具+确认）。窄屏自动折叠为单栏。</div>
+
+<!-- 两栏 · 清单型 -->
+<p class="card-label" style="margin-bottom:8px">两栏 · 清单型（画原理图）<span class="state-tag st-going">出发中</span></p>
+<div class="col2-card">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为四轴飞行器打好电路基础</span></div>
+  <div class="col2-body">
+    <div class="col2-left">
+      <div class="c2-label">所属项目</div>
+      <div class="c2-project">四轴飞行器</div>
+      <div class="c2-proj-progress">
+        <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>项目进度</span><b style="color:var(--text2)">3/6 阶段</b></div>
+        <div class="progress-track" style="margin:0"><div class="progress-fill" style="width:50%;background:var(--brand)"></div></div>
+      </div>
+      <div class="c2-label">项目阶段</div>
+      <ul class="c2-stage-list">
+        <li class="done"><span class="chk">✓</span>需求分析</li>
+        <li class="done"><span class="chk">✓</span>元件调研</li>
+        <li class="current"><span class="chk"></span>画原理图</li>
+        <li class="future">选型元器件</li>
+        <li class="future">PCB 布局</li>
+        <li class="future">焊接调试</li>
+      </ul>
+      <div class="c2-divider"></div>
+      <div class="c2-meta-line">
+        <span><b>时段</b> 9:00 - 11:00</span>
+        <span><b>预计</b> 120 分钟 · <b>已用</b> 45 分钟</span>
+      </div>
+    </div>
+    <div class="col2-right">
+      <div class="action" style="padding:0 0 10px">
+        <h3 style="font-size:16px">画原理图</h3>
+        <div class="right">
+          <span class="type-tag tt-orange">清单型</span>
+          <button class="btn btn-ghost">暂停</button>
+          <button class="btn btn-primary going">进行中…</button>
+        </div>
+      </div>
+      <div class="list-progress">执行清单 <b>1/3 已完成</b><span style="margin-left:auto">总耗时 45 分钟</span></div>
+      <div class="progress-track" style="margin-top:4px"><div class="progress-fill" style="width:33%;background:var(--orange)"></div></div>
+      <ul class="checklist" style="margin-top:8px" data-title="执行清单">
+        <li class="done"><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="txt">STM32 最小系统</span><span class="item-time">18分</span></li>
+        <li class="next"><span class="ck-box next"></span><span>MPU6050 传感器</span><span class="item-time" style="color:var(--brand)">进行中</span></li>
+        <li class="pending"><span class="ck-box"></span><span>L298N 电机驱动</span></li>
+      </ul>
+      <div class="c2-ai"><span class="lbl">AI 执行</span><span>上次类似任务你用了 90 分钟，按当前节奏可提前完成</span></div>
+      <div class="confirm" style="padding:10px 0 0">
+        <div class="confirm-row">
+          <button class="btn btn-primary">该项完成</button>
+          <button class="btn btn-ghost">跳过</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 两栏 · 固定时间型 -->
+<p class="card-label" style="margin-bottom:8px">两栏 · 固定时间型（数字电路）<span class="state-tag st-going">自动计时</span></p>
+<div class="col2-card">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>专业必修课，电路基础核心</span></div>
+  <div class="col2-body">
+    <div class="col2-left">
+      <div class="c2-label">所属</div>
+      <div class="c2-project">课表</div>
+      <div class="c2-divider"></div>
+      <div class="c2-meta-line">
+        <span><b>时段</b> 09:00 - 10:30</span>
+        <span><b>预计</b> 90 分钟</span>
+        <span><b>地点</b> 教 301 · 第三教学楼</span>
+      </div>
+      <div class="c2-ai"><span class="lbl">状态</span><span>已过 62 分钟 · 剩余 28 分钟 · 到点自动完成</span></div>
+    </div>
+    <div class="col2-right">
+      <div class="action" style="padding:0 0 10px">
+        <h3 style="font-size:16px">数字电路</h3>
+        <div class="right">
+          <span class="type-tag tt-indigo">固定时间</span>
+          <button class="btn btn-primary">完成</button>
+        </div>
+      </div>
+      <div class="time-block"><span class="big" style="font-size:26px">09:00</span><span class="range">— 10:30</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <span class="auto-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>到点自动完成</span>
+        <span style="font-size:10px;color:var(--text3)">进度 65%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:65%;background:var(--indigo)"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 两栏 · 学习型 -->
+<p class="card-label" style="margin-bottom:8px">两栏 · 学习型（线性代数）<span class="state-tag st-unstarted">未出发</span></p>
+<div class="col2-card">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为考研数学打下基础</span></div>
+  <div class="col2-body">
+    <div class="col2-left">
+      <div class="c2-label">所属项目</div>
+      <div class="c2-project">考研数学</div>
+      <div class="c2-proj-progress">
+        <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);margin-bottom:4px"><span>章节进度</span><b style="color:var(--text2)">2/5 章</b></div>
+        <div class="progress-track" style="margin:0"><div class="progress-fill" style="width:40%;background:var(--purple)"></div></div>
+      </div>
+      <div class="c2-divider"></div>
+      <div class="c2-meta-line">
+        <span><b>预计</b> 90 分钟</span>
+      </div>
+      <div class="c2-ai"><span class="lbl">AI 执行</span><span>本章重点是逆矩阵，建议先做 3 道例题</span></div>
+    </div>
+    <div class="col2-right">
+      <div class="action" style="padding:0 0 10px">
+        <h3 style="font-size:16px">学线性代数 · 第 3 章</h3>
+        <div class="right">
+          <span class="type-tag tt-purple">学习型</span>
+          <button class="btn btn-primary">出发</button>
+        </div>
+      </div>
+      <div class="list-progress">知识点 <b>0/3 已学</b></div>
+      <ul class="checklist" style="margin-top:8px" data-title="知识点">
+        <li class="next"><span class="ck-box next"></span><span>3.1 行列式</span></li>
+        <li class="pending"><span class="ck-box"></span><span>3.2 逆矩阵</span></li>
+        <li class="pending"><span class="ck-box"></span><span>3.3 秩</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 两栏 · 积累·每日 -->
+<p class="card-label" style="margin-bottom:8px">两栏 · 积累·每日（背单词）<span class="state-tag st-confirm">回来确认</span></p>
+<div class="col2-card">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>为考研词汇量冲刺</span></div>
+  <div class="col2-body">
+    <div class="col2-left">
+      <div class="c2-label">统计</div>
+      <div class="stats3" style="padding:0">
+        <div class="stat-cell"><div class="num" style="color:var(--green)">12</div><div class="lbl">连续天数</div></div>
+        <div class="stat-cell"><div class="num">21</div><div class="lbl">最长记录</div></div>
+        <div class="stat-cell"><div class="num">7</div><div class="lbl">本周次数</div></div>
+      </div>
+      <div class="c2-divider"></div>
+      <div class="c2-meta-line">
+        <span><b>频率</b> 每日</span>
+      </div>
+      <div class="c2-ai"><span class="lbl">AI 提醒</span><span>连续 12 天，再坚持 3 天刷新纪录</span></div>
+    </div>
+    <div class="col2-right">
+      <div class="action" style="padding:0 0 10px">
+        <h3 style="font-size:16px">背单词</h3>
+        <div class="right">
+          <span class="type-tag tt-green">积累·每日</span>
+          <button class="btn btn-primary going">进行中…</button>
+        </div>
+      </div>
+      <div class="mini-cal">
+        <span class="mc-day">日</span><span class="mc-day">一</span><span class="mc-day">二</span><span class="mc-day">三</span><span class="mc-day">四</span><span class="mc-day filled">五</span><span class="mc-day">六</span>
+        <span class="mc-day filled">7</span><span class="mc-day filled">8</span><span class="mc-day filled">9</span><span class="mc-day filled">10</span><span class="mc-day filled">11</span><span class="mc-day filled">12</span><span class="mc-day filled">13</span>
+        <span class="mc-day filled">14</span><span class="mc-day filled">15</span><span class="mc-day filled">16</span><span class="mc-day filled">17</span><span class="mc-day filled">18</span><span class="mc-day filled">19</span><span class="mc-day filled">20</span>
+        <span class="mc-day filled">21</span><span class="mc-day filled">22</span><span class="mc-day filled">23</span><span class="mc-day filled">24</span><span class="mc-day filled">25</span><span class="mc-day filled">26</span><span class="mc-day filled">27</span>
+        <span class="mc-day">28</span><span class="mc-day">29</span><span class="mc-day today">30</span><span class="mc-day">31</span><span class="mc-day"></span><span class="mc-day"></span><span class="mc-day"></span>
+      </div>
+      <div class="confirm" style="padding:6px 0 0">
+        <div class="confirm-row"><button class="btn btn-primary">打卡</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 两栏 · 积累·频次 -->
+<p class="card-label" style="margin-bottom:8px">两栏 · 积累·频次（健身）<span class="state-tag st-going">出发中</span></p>
+<div class="col2-card">
+  <div class="motive"><span class="ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#7c3aed"/></svg></span><span>保持身体状态，支撑高强度学习</span></div>
+  <div class="col2-body">
+    <div class="col2-left">
+      <div class="c2-label">周目标</div>
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px">
+        <div style="font-size:22px;font-weight:700;color:var(--text)">1<span style="font-size:12px;color:var(--text3)">/3 次</span></div>
+        <div class="mini-week">
+          <span class="mw-dot filled">1</span><span class="mw-dot">2</span><span class="mw-dot">3</span>
+        </div>
+      </div>
+      <div class="c2-divider"></div>
+      <div class="c2-meta-line">
+        <span><b>本周累计</b> 45 分钟</span>
+      </div>
+      <div class="c2-ai"><span class="lbl">AI 提醒</span><span>建议周五练第 2 次，间隔刚好</span></div>
+    </div>
+    <div class="col2-right">
+      <div class="action" style="padding:0 0 10px">
+        <h3 style="font-size:16px">力量训练</h3>
+        <div class="right">
+          <span class="type-tag tt-cyan">积累·频次</span>
+          <button class="btn btn-ghost">暂停</button>
+          <button class="btn btn-primary going">进行中…</button>
+        </div>
+      </div>
+      <div class="week-goal" style="padding:0 0 6px">今日练 <b>3 个动作</b></div>
+      <ul class="ex-list" data-title="今日动作">
+        <li><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="name">引体向上</span><span class="sets">4×10</span></li>
+        <li><span class="ck-box on"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="name">划船</span><span class="sets">4×12</span></li>
+        <li><span class="ck-box"></span><span class="name">深蹲</span><span class="sets">3×15</span></li>
+      </ul>
+      <div class="confirm" style="padding:6px 0 0">
+        <div class="confirm-row"><button class="btn btn-primary">打卡</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ 新增组件 ═══════════════════ -->
+<div class="section-title">新增组件 <small>规格 §4</small></div>
+<div class="comp-grid">
+
+  <div class="comp-card">
+    <div class="comp-head">补记时长弹窗 · 回来确认时弹出</div>
+    <div class="comp-body">
+      <div class="modal">
+        <div class="modal-head"><span>刚才做了多久？</span><span class="x">✕</span></div>
+        <div class="modal-body">
+          从 <b>14:32</b> 出发 · 默认按到现在计算
+          <div class="dur-options">
+            <div class="dur-opt on">30 分钟</div>
+            <div class="dur-opt">1 小时</div>
+            <div class="dur-opt"><input value="45" placeholder="自定义">分</div>
+          </div>
+          <div class="from-line">默认 = 现在 − 出发时刻，可修改</div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-primary">确定</button>
+          <button class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+      <div class="comp-desc">数据：Task.departureAt 计算默认值 · TimeLog 记录实际时长</div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">暂停原因弹窗 · 点「暂停」时弹出</div>
+    <div class="comp-body">
+      <div class="modal">
+        <div class="modal-head"><span>为什么暂停？</span><span class="x">✕</span></div>
+        <div class="modal-body">
+          <ul class="reason-list">
+            <li class="on"><span class="radio"></span>太难了</li>
+            <li><span class="radio"></span>注意力下降</li>
+            <li><span class="radio"></span>临时有事</li>
+            <li><span class="radio"></span>估时错误</li>
+            <li><span class="radio"></span>其他</li>
+          </ul>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-primary">确定</button>
+          <button class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+      <div class="comp-desc">数据：UserObservation type=pause + detail.reason（已有链路 Rule9）</div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">忘记确认提示条 · Today 顶部</div>
+    <div class="comp-body">
+      <div class="forget-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>「画原理图」出发后未确认，已过去 <b>7 小时</b></span>
+        <div class="btns">
+          <button class="mini-btn pri">① 完成了，补记</button>
+          <button class="mini-btn">② 没做完，继续</button>
+        </div>
+      </div>
+      <div class="comp-desc">固定时间型：scheduledEnd 过了未确认 → 自动完成（TimeLog detail='auto'，惰性结算）</div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">打卡内容输入 · 积累型打卡弹窗内</div>
+    <div class="comp-body">
+      <div class="modal">
+        <div class="modal-head"><span>打卡 · 背单词</span><span class="x">✕</span></div>
+        <div class="modal-body">
+          <input class="checkin-input" placeholder="今天背了哪些词？（可空）" value="Unit 12 · 高频词 30 个">
+          <div class="from-line">填写内容 → TimeLog.detail · Review 可回顾「这周背了：xxx」</div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-primary">打卡完成</button>
+          <button class="btn btn-ghost">取消</button>
+        </div>
+      </div>
+      <div class="comp-desc">健身版：动作勾选列表（默认全勾，可改）→ 勾选内容存 TimeLog.detail</div>
+    </div>
+  </div>
+
+</div><!-- /comp-grid -->
+
+</div><!-- /page -->
+</body>
+</html>

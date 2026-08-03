@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan 周计划 UI</title>
+<style>
+:root{--bg:#f8fafc;--brd:#e5e7eb;--brl:#f3f4f6;--t:#111827;--t2:#6b7280;--t3:#9ca3af;--t4:#b0b7c3;--b:#6366f1;--bb:#eef2ff;--bl:#f5f3ff;--pk:#ec4899;--rd:#dc2626;--rb:#fef2f2;--gn:#16a34a;--hour-h:56px;--s:8;--th:14;--f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--f);background:var(--bg);color:var(--t);-webkit-font-smoothing:antialiased;padding:24px}
+.wrap{max-width:1100px;margin:0 auto}
+
+.sec-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;user-select:none}
+.sec-title .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500}
+.sec-title .arr{font-size:10px;color:var(--t3);margin-left:4px}
+
+.plan-header{text-align:center;margin-bottom:14px}
+.plan-header .ph-title{font-size:18px;font-weight:600}
+.plan-header .ph-date{font-size:13px;color:var(--t2);margin:4px 0 6px}
+.plan-header .ph-week{display:flex;align-items:center;justify-content:center;gap:12px}
+.plan-header .ph-week .ph-arr{font-size:14px;color:var(--t3);cursor:pointer;padding:2px 6px;border-radius:4px;border:none;background:transparent;font-family:var(--f)}
+.plan-header .ph-week .ph-arr:hover{color:var(--b);background:var(--bb)}
+.plan-header .ph-week .ph-label{font-size:13px;font-weight:500;color:var(--t);min-width:3em;text-align:center}
+
+.tgl{display:inline-flex;background:#fff;border:.5px solid var(--brd);border-radius:20px;padding:2px;cursor:pointer}
+.tgl button{font-size:12px;padding:5px 16px;border-radius:18px;border:none;cursor:pointer;background:transparent;color:var(--t3);font-weight:500;transition:all .2s;font-family:var(--f)}
+.tgl button.ac{background:var(--b);color:#fff}
+.gld{display:flex;align-items:center;gap:8px;padding:4px 12px;background:var(--bl);border:.5px solid #c4b5fd;border-radius:6px;font-size:11px}
+.gld-d{width:12px;height:12px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gld-d::after{content:'';width:4px;height:4px;background:#fff;border-radius:50%}
+
+.cs{background:#fff;border-radius:12px;overflow:hidden;border:.5px solid var(--brd)}
+.cs-meta{padding:6px 14px 0;display:flex;align-items:center;justify-content:space-between}
+.dhr{display:flex;border-bottom:.5px solid var(--brl)}
+.dhg{width:32px;flex-shrink:0}.dht{width:52px;flex-shrink:0;border-right:.5px solid var(--brl)}
+.dhc{flex:1;text-align:center;padding:8px 3px 6px;border-left:.5px solid var(--brl);min-width:0}
+.dhc.td{background:var(--bb)}.dhc .dw{font-size:10px;color:var(--t3)}.dhc.td .dw{color:var(--b);font-weight:500}
+.dhc .num{font-size:14px;font-weight:500;color:var(--t);margin:2px 0}.dhc.td .num{color:var(--b)}
+.dbar{height:4px;background:#f3f4f6;border-radius:2px;margin:4px 8px 0;overflow:hidden}
+.dbarf{height:100%;border-radius:2px}.dtxt{font-size:9px;color:var(--t4);margin-top:2px}
+.ddl{display:inline-block;font-size:8px;color:#fff;background:var(--rd);border-radius:8px;padding:1px 6px;margin-top:2px;font-weight:500}
+.cb{display:flex;overflow-x:auto}.cb:not(.fm) .dc{flex:1 0 0;min-width:80px}.cb.fm .dc{flex:1 0 0;min-width:120px}
+.pcol{width:32px;flex-shrink:0;position:relative}.pblk{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500}
+.tcol{width:52px;flex-shrink:0;position:relative;border-right:.5px solid var(--brl)}
+.tlbl{position:absolute;left:4px;right:0;transform:translateY(-50%);font-size:10px;color:var(--t4);padding-left:2px}
+.tln{position:absolute;left:0;right:0;height:.5px;background:var(--brl)}
+.dc{position:relative;border-left:.5px solid var(--brl)}.dc.td{background:#fafafe}
+.dc .bgp{position:absolute;left:0;right:0}.dc .grl{position:absolute;left:0;right:0;height:.5px;background:var(--brl)}
+.dc .grl.ps{height:1.5px;background:#d1d5db}
+.nl{position:absolute;left:-4px;right:-2px;height:1px;background:var(--pk);z-index:10;pointer-events:none}
+.nd{position:absolute;left:-4px;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:var(--pk);z-index:11}
+.nlb{position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--pk);font-weight:500;background:#fff;padding:0 3px;z-index:11}
+.tsk{position:absolute;left:4px;right:4px;border-radius:0 6px 6px 3px;padding:6px 8px;font-size:11px;cursor:pointer;overflow:hidden;border-left:4px solid;transition:box-shadow .15s}
+.tsk:hover{box-shadow:0 1px 4px rgba(0,0,0,.08);z-index:5}
+.tsk .tt{font-weight:500;color:var(--t);font-size:11px;line-height:1.3}
+.tsk .ttm{font-size:9px;color:var(--t4);margin-top:1px}
+.tsk .tmt{position:absolute;right:5px;bottom:4px;font-size:9px;color:var(--t3)}
+.tsk .tbr{position:absolute;right:5px;font-size:8px;padding:1px 5px;border-radius:5px;font-weight:500}
+.tsk .tbr.ai{top:4px;background:var(--bl);color:var(--b)}
+.tsk .tbr.dl{top:4px;background:var(--rb);color:var(--rd);border:.5px solid #fecaca}
+.cb.fm .tsk{padding:8px 10px}.cb.fm .tsk .tt{font-size:12px}.cb.fm .tsk .ttm{font-size:10px;margin-top:2px}.cb.fm .tsk .tmt{font-size:10px}
+.mt{width:100%;text-align:center;padding:6px;font-size:11px;color:var(--t3);cursor:pointer;border:none;background:transparent;font-family:var(--f)}
+.mt:hover{color:var(--t2)}
+.tp{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding:10px 14px;background:#fff;border:.5px solid var(--brd);border-radius:10px;align-items:center}
+.ptag{font-size:10px;padding:3px 10px;border-radius:6px;font-weight:500;border-left:3px solid}
+.fn{display:none;padding:6px 12px;background:var(--bb);border-radius:8px;font-size:11px;color:#4338ca;margin-bottom:8px}
+.lr{display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--t2);align-items:center;flex-wrap:wrap}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.6}}
+.nl,.nd,.nlb{animation:pl 2s ease-in-out infinite}
+
+/* 本周截止 & 收集箱 卡片 */
+.dcard{width:210px;border:.5px solid var(--brd);border-radius:10px;overflow:hidden;flex-shrink:0;scroll-snap-align:start}
+.dch{padding:16px;cursor:pointer;min-height:100px}
+.dcb{display:none;padding:0 14px 14px;border-top:.5px solid var(--brl);background:#fff}
+.cr{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.timeline-row{display:flex;align-items:center;justify-content:center;gap:0;padding:0 8px}
+.tlnode{display:flex;flex-direction:column;align-items:center;gap:2px}
+.tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff}
+.tl-arrow{flex:1;min-width:24px;height:1.5px;position:relative}
+.tl-arrow-head{position:absolute;right:-2px;top:-3px;width:0;height:0;border-left:6px solid;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
+
+/* 任务详情三种类型 */
+.detail-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:700px){.detail-grid{grid-template-columns:1fr 1fr 1fr}}
+.detail-card{background:#fff;border:.5px solid var(--brd);border-radius:10px;padding:16px;margin-bottom:14px}
+.detail-card h4{font-size:14px;font-weight:600;margin-bottom:8px}
+.card-type{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;margin-left:8px;display:inline-block}
+.chk-row{display:flex;align-items:center;gap:8px;font-size:11px;padding:4px 0}
+.chk-box{width:14px;height:14px;border-radius:3px;border:1.5px solid #d1d5db;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:9px}
+.chk-box.done{border-color:#16a34a;background:#f0fdf4;color:#16a34a}
+.chk-act{font-size:10px;color:var(--t4);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══════════════ 1. 本周截止（可收起，横滑方块） ═══════════════ -->
+<div class="sec-title" onclick="t('deadBody','deadArr')">本周截止 <span class="badge" style="background:var(--rb);color:var(--rd);">3 个任务</span><span class="arr" id="deadArr">▼</span></div>
+<div id="deadBody" style="background:#fff;border:.5px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:20px;">
+<div class="cr">
+  <div class="dcard"><div class="dch" style="border-left:4px solid #DB2777;background:#FDF2F8;cursor:pointer;" onclick="t('db1','da1')">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;"><span style="font-size:14px;font-weight:500;">电赛方案设计</span><span style="font-size:12px;color:var(--t3);" id="da1">▼</span></div>
+    <div style="font-size:18px;font-weight:500;color:#dc2626;margin:4px 0;">7/31 周五 23:59</div>
+    <div style="font-size:10px;color:var(--t3);"><span style="color:#dc2626;font-weight:500;">还剩 1 天</span> · 竞赛冲刺 · 需再排 1h</div>
+  </div>
+  <div class="dcb" id="db1"><div style="font-size:10px;color:var(--t2);margin:8px 0;">需求分析 30m · 方案撰写 40m · 评审提交 20m</div><div class="timeline-row"><div class="tlnode"><div class="tl-dot" style="background:#16a34a;box-shadow:0 0 0 1.5px #16a34a;"></div><span style="font-size:8px;color:#16a34a;">7/29 完成</span></div><div class="tl-arrow" style="background:#16a34a;"><div class="tl-arrow-head" style="border-left-color:#16a34a;"></div></div><div class="tlnode"><div class="tl-dot" style="background:#fff;border:2px solid #d1d5db;"></div><span style="font-size:8px;color:var(--t3);">待安排</span></div><div class="tl-arrow" style="background:#d1d5db;"><div class="tl-arrow-head" style="border-left-color:#d1d5db;"></div></div><div class="tlnode"><div class="tl-dot" style="background:#fff;border:2px solid #d1d5db;"></div><span style="font-size:8px;color:var(--t3);">待安排</span></div><div class="tl-arrow" style="border-top:1.5px dashed #d1d5db;background:none;"></div><div class="tlnode"><div class="tl-dot" style="background:#fff;border:2px solid #dc2626;"></div><span style="font-size:8px;color:#dc2626;">7/31 截止</span></div></div></div></div>
+  <div class="dcard"><div class="dch" style="border-left:4px solid #7C3AED;background:#F5F3FF;cursor:pointer;" onclick="t('db2','da2')">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;"><span style="font-size:14px;font-weight:500;">代码审查 PR#42</span><span style="font-size:12px;color:var(--t3);" id="da2">▼</span></div>
+    <div style="font-size:18px;font-weight:500;color:#dc2626;margin:4px 0;">7/31 周五 18:00</div>
+    <div style="font-size:10px;color:var(--t3);"><span style="color:#dc2626;font-weight:500;">还剩 1 天</span> · 专业实践 · 已排满 1.5h</div>
+  </div><div class="dcb" id="db2"><div style="font-size:10px;color:var(--t2);margin:8px 0;">逐文件 Review 50m · 写 Comments 25m · 提交通知 15m</div></div></div>
+  <div class="dcard"><div class="dch" style="border-left:4px solid #7C3AED;background:#F5F3FF;cursor:pointer;" onclick="t('db3','da3')">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;"><span style="font-size:14px;font-weight:500;">PCB Layout 定稿</span><span style="font-size:12px;color:var(--t3);" id="da3">▼</span></div>
+    <div style="font-size:18px;font-weight:500;color:#b45309;margin:4px 0;">8/2 周日 23:59</div>
+    <div style="font-size:10px;color:var(--t3);"><span style="color:#b45309;font-weight:500;">还剩 3 天</span> · 专业实践 · 已排满 2h</div>
+  </div><div class="dcb" id="db3"><div style="font-size:10px;color:var(--t2);margin:8px 0;">布线优化 1h · DRC 检查 40m · 导出 Gerber 20m</div></div></div>
+  <div class="dcard" style="opacity:.5;"><div class="dch" style="border-left:4px solid #475569;background:#E2E8F0;"><div style="font-size:14px;font-weight:500;margin-bottom:3px;">模拟电路考试</div><div style="font-size:18px;font-weight:500;color:var(--t2);margin:4px 0;">8/5 周二 14:00</div><div style="font-size:10px;color:var(--t3);"><span style="color:var(--t2);">还剩 5 天</span> · 课程 · 未安排</div></div></div>
+  <div class="dcard" style="opacity:.5;"><div class="dch" style="border-left:4px solid #2563EB;background:#EFF6FF;"><div style="font-size:14px;font-weight:500;margin-bottom:3px;">英语期末论文</div><div style="font-size:18px;font-weight:500;color:var(--t2);margin:4px 0;">8/6 周三 23:59</div><div style="font-size:10px;color:var(--t3);"><span style="color:var(--t2);">还剩 6 天</span> · 学习成长 · 未安排</div></div></div>
+</div>
+<div style="font-size:10px;color:var(--t3);margin-top:6px;">左→右按剩余天数排 · 红色=1天内 · 橙色=2-3天 · 灰色=4天以上 · 点▼展开子任务+时间轴</div>
+</div>
+
+<!-- ═══════════════ 2. 周计划（不可收起） ═══════════════ -->
+<div class="plan-header">
+  <div class="ph-title">周计划</div>
+  <div class="ph-date">2026.07.27 - 2026.08.02</div>
+  <div class="ph-week">
+    <button class="ph-arr" onclick="shiftWeek(-1)">←</button>
+    <span class="ph-label">本周</span>
+    <button class="ph-arr" onclick="shiftWeek(1)">→</button>
+  </div>
+</div>
+<div class="cs">
+  <div class="cs-meta">
+    <div class="gld" id="gldBar"><div class="gld-d"></div><span><strong>高效时段</strong> 9时 / 15时</span><span style="font-size:10px;color:var(--t3);">来自你的行为数据</span></div>
+    <div class="tgl" id="toggle" onclick="tm()"><button class="ac" data-m="week">周</button><button data-m="focus">聚焦</button></div>
+  </div>
+  <div class="fn" id="fn">聚焦：今天(周三) + 周四 + 周五 · 卡片加大 · 实时时间线</div>
+  <div class="dhr" id="dh"></div>
+  <div class="cb" id="cb"></div>
+  <button class="mt" onclick="tmid()" id="mbtn">展开凌晨 22:00 - 02:00 ▼</button>
+</div>
+<div class="tp"><span style="font-size:11px;color:var(--t3);margin-right:4px;">分类：</span><span class="ptag" style="border-color:#475569;background:#E2E8F0;color:#475569;">课程</span><span class="ptag" style="border-color:#2563EB;background:#EFF6FF;color:#2563EB;">学习成长</span><span class="ptag" style="border-color:#7C3AED;background:#F5F3FF;color:#7C3AED;">专业实践</span><span class="ptag" style="border-color:#DB2777;background:#FDF2F8;color:#DB2777;">竞赛冲刺</span><span class="ptag" style="border-color:#16A34A;background:#F0FDF4;color:#16A34A;">健康生活</span><span style="font-size:10px;color:var(--t3);margin-left:auto;">11 个任务 · 3 个有截止日期</span></div>
+<div class="lr"><span><span class="ld" style="background:#475569;"></span> 灰色=课程 上午</span><span><span class="ld" style="background:#2563EB;"></span> 蓝色=学习</span><span><span class="ld" style="background:#7C3AED;"></span> 紫色=实践</span><span><span class="ld" style="background:#DB2777;"></span> 粉色=竞赛</span><span><span class="ld" style="background:#16A34A;"></span> 绿色=健身</span><span><span class="ld" style="background:var(--rd);"></span> 红标=截止日期</span></div>
+
+<!-- ═══════════════ 3. 收集箱（可收起，横滑方块） ═══════════════ -->
+<div class="sec-title" onclick="t('inboxBody','inboxArr')" style="margin-top:24px;">收集箱 <span class="badge" style="background:#f0fdf4;color:#16a34a;">4 条想法</span><span class="arr" id="inboxArr">▼</span></div>
+<div id="inboxBody" style="background:#fff;border:.5px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:20px;">
+<div class="cr">
+  <div class="dcard"><div class="dch" style="border-left:4px solid #2563EB;background:#EFF6FF;cursor:grab;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bl);color:#7c3aed;">AI 解析</span><span style="margin-left:auto;display:flex;gap:2px;opacity:.5;"><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span></span></div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">GD32 vs STM32 调研</div><div style="font-size:10px;color:var(--t3);">学习成长 · 预估 2h</div></div></div>
+  <div class="dcard"><div class="dch" style="border-left:4px solid #7C3AED;background:#F5F3FF;cursor:grab;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#fffbeb;color:#b45309;">手动</span><span style="margin-left:auto;display:flex;gap:2px;opacity:.5;"><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span></span></div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">找师兄要电赛方案</div><div style="font-size:10px;color:var(--t3);">专业实践 · 未评估</div></div></div>
+  <div class="dcard"><div class="dch" style="border-left:4px solid #2563EB;background:#EFF6FF;cursor:grab;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bl);color:#7c3aed;">AI 解析</span><span style="margin-left:auto;display:flex;gap:2px;opacity:.5;"><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span></span></div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">课程笔记电子化</div><div style="font-size:10px;color:var(--t3);">课程 · 预估 4h</div></div></div>
+  <div class="dcard"><div class="dch" style="border-left:4px solid #F97316;background:#FFF7ED;cursor:grab;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#fffbeb;color:#b45309;">手动</span><span style="margin-left:auto;display:flex;gap:2px;opacity:.5;"><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span><span style="width:3px;height:11px;background:var(--t3);border-radius:1px;"></span></span></div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">买示波器探头</div><div style="font-size:10px;color:var(--t3);">社团/学校 · 未评估</div></div></div>
+</div>
+<div style="font-size:10px;color:var(--t3);margin-top:6px;">收集箱 = taskType: inbox · 无截止日 · AI/手动标签 · 拖拽手柄 · 拖到日历自动转为时间块</div>
+</div>
+
+<!-- ═══════════════ 4. 任务详情面板 — 三种类型 ═══════════════ -->
+<div style="margin-top:28px;"><div style="font-size:15px;font-weight:600;margin-bottom:10px;">任务详情面板 — 三种类型</div>
+<div style="font-size:11px;color:var(--t3);margin-bottom:14px;">点开日历上的任务卡片后，右侧抽屉展示详情。三种 taskType 共用外壳，中间主视觉区不同。</div>
+
+<div class="detail-grid">
+
+<div class="detail-card">
+  <h4>截止日<span class="card-type" style="background:var(--rb);color:var(--rd);">planned</span></h4>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+    <span style="font-size:15px;font-weight:500;">电赛方案设计</span>
+    <button style="font-size:10px;padding:3px 8px;background:transparent;color:var(--t2);border:.5px solid var(--brd);border-radius:5px;">更多编辑 →</button>
+  </div>
+  <div style="display:flex;align-items:stretch;gap:10px;margin:8px 0;">
+    <div style="text-align:center;min-width:40px;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:32px;font-weight:500;color:#dc2626;line-height:1;">1</div><div style="font-size:10px;color:#dc2626;">天</div></div>
+    <div style="width:0.5px;background:var(--brl);"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+      <div style="padding:7px 10px;background:#fef2f2;border-radius:6px;"><span style="font-size:10px;color:#dc2626;font-weight:500;">截止</span> <span style="font-size:12px;font-weight:500;color:#dc2626;">7/31 周五 23:59</span></div>
+      <div style="padding:7px 10px;background:#f0fdf4;border-radius:6px;"><span style="font-size:10px;color:#16a34a;font-weight:500;">计划</span> <span style="font-size:12px;font-weight:500;">周一 15:00 - 16:30</span></div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t2);margin:6px 0 3px;"><span>竞赛冲刺</span><span style="color:#b45309;">还需 1h</span><span>预估 1.5h</span></div>
+  <div style="height:4px;background:#f3f4f6;border-radius:2px;overflow:hidden;"><div style="width:33%;height:100%;background:#fbbf24;border-radius:2px;"></div></div>
+  <div style="border:.5px solid var(--brl);border-radius:6px;padding:6px;margin-top:8px;font-size:10px;color:var(--t3);">子任务 3项 · <span style="color:#16a34a;">1 完成</span> · <span style="color:#dc2626;">7/31 截止</span></div>
+</div>
+
+<div class="detail-card">
+  <h4>时间块<span class="card-type" style="background:var(--bb);color:var(--b);">scheduled</span></h4>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+    <span style="font-size:15px;font-weight:500;">周报复盘 + 总结</span>
+    <button style="font-size:10px;padding:3px 8px;background:transparent;color:var(--t2);border:.5px solid var(--brd);border-radius:5px;">更多编辑 →</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+    <div style="padding:10px;background:#f9fafb;border-radius:8px;"><div style="font-size:9px;color:var(--t2);margin-bottom:2px;">日期</div><div style="font-size:14px;font-weight:500;">7/29 周三</div></div>
+    <div style="padding:10px;background:#f9fafb;border-radius:8px;"><div style="font-size:9px;color:var(--t2);margin-bottom:2px;">时间</div><div style="font-size:14px;font-weight:500;">14:00 - 16:00</div></div>
+    <div style="padding:10px;background:#f9fafb;border-radius:8px;"><div style="font-size:9px;color:var(--t2);margin-bottom:2px;">时长</div><div style="font-size:14px;font-weight:500;">2h</div></div>
+    <div style="padding:10px;background:#f9fafb;border-radius:8px;"><div style="font-size:9px;color:var(--t2);margin-bottom:2px;">分类</div><div style="font-size:14px;font-weight:500;">学习成长</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f9fafb;border-radius:6px;font-size:10px;">
+    <span style="color:var(--t2);">状态</span><select style="border:.5px solid var(--brd);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;"><option>未开始</option><option>进行中</option><option>已完成</option></select>
+    <span style="color:var(--t2);margin-left:8px;">AI</span><span style="font-size:9px;padding:2px 6px;border-radius:4px;background:var(--bl);color:#7c3aed;">AI 生成</span>
+  </div>
+</div>
+
+<div class="detail-card">
+  <h4>子任务<span class="card-type" style="background:#f0fdf4;color:var(--gn);">breakdown</span></h4>
+  <div style="margin-bottom:8px;"><span style="font-size:15px;font-weight:500;">电赛方案设计</span><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#16a34a;margin-left:6px;">阶段 1/3</span></div>
+  <div style="display:flex;gap:4px;margin-bottom:8px;">
+    <div style="flex:1;padding:8px;background:#f0fdf4;border:1.5px solid #16a34a;border-radius:6px;text-align:center;"><div style="font-size:16px;font-weight:500;">1</div><div style="font-size:10px;font-weight:500;">需求分析</div><div style="font-size:8px;color:#16a34a;">30m · 7/29</div></div>
+    <div style="flex:1;padding:8px;background:#f9fafb;border:.5px solid var(--brl);border-radius:6px;text-align:center;opacity:.7;"><div style="font-size:16px;font-weight:500;color:var(--t2);">2</div><div style="font-size:10px;color:var(--t2);">方案撰写</div><div style="font-size:8px;color:var(--t3);">40m · 待排</div></div>
+    <div style="flex:1;padding:8px;background:#f9fafb;border:.5px solid var(--brl);border-radius:6px;text-align:center;opacity:.7;"><div style="font-size:16px;font-weight:500;color:var(--t2);">3</div><div style="font-size:10px;color:var(--t2);">评审提交</div><div style="font-size:8px;color:var(--t3);">20m · 待排</div></div>
+  </div>
+  <div style="border:.5px solid var(--brl);border-radius:6px;padding:6px;margin-bottom:6px;">
+    <div style="font-size:10px;color:var(--t2);margin-bottom:4px;">进度时间轴</div>
+    <div style="display:flex;align-items:flex-start;gap:0;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px;"><div style="width:12px;height:12px;border-radius:50%;background:#16a34a;border:2px solid #fff;box-shadow:0 0 0 1px #16a34a;"></div><span style="font-size:7px;color:#16a34a;">完成</span></div>
+      <div style="flex:1;height:2px;background:#16a34a;margin:5px 2px 0;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px;"><div style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #d1d5db;"></div><span style="font-size:7px;color:var(--t3);">待排</span></div>
+      <div style="flex:1;height:2px;background:#d1d5db;margin:5px 2px 0;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px;"><div style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #d1d5db;"></div><span style="font-size:7px;color:var(--t3);">待排</span></div>
+      <div style="flex:1;height:0;border-top:1.5px dashed #d1d5db;margin:5px 2px 0;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px;"><div style="width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #dc2626;"></div><span style="font-size:7px;color:#dc2626;">截止</span></div>
+    </div>
+  </div>
+  <div style="border:.5px solid var(--brl);border-radius:6px;overflow:hidden;">
+    <div style="padding:6px 10px;background:#f0fdf4;font-size:10px;font-weight:500;">需求分析 — 执行清单</div>
+    <div style="padding:8px 10px;display:flex;flex-direction:column;gap:3px;">
+      <div class="chk-row"><span class="chk-box done">✓</span><span style="flex:1;">查阅 GD32 和 STM32 规格书</span><span class="chk-act">✎</span><span class="chk-act">✕</span></div>
+      <div class="chk-row"><span class="chk-box"></span><span style="flex:1;">对比关键性能参数</span><span class="chk-act">✎</span><span class="chk-act">✕</span></div>
+      <div class="chk-row"><span class="chk-box"></span><span style="flex:1;">整理选型结论 2-3 条</span><span class="chk-act">✎</span><span class="chk-act">✕</span></div>
+      <div style="display:flex;gap:4px;margin-top:2px;"><input placeholder="+ 添加清单项" style="flex:1;font-size:10px;padding:3px 6px;border:.5px solid var(--brd);border-radius:4px;outline:none;"><button style="font-size:10px;padding:3px 6px;background:#16a34a;color:#fff;border:none;border-radius:4px;">+</button></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+var S=8,TH=14,H=56,mo=!1,fm=!1;
+function d(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e}
+var DOMS={course:{label:"课程",border:"#475569",bg:"#E2E8F0"},learning:{label:"学习成长",border:"#2563EB",bg:"#EFF6FF"},practice:{label:"专业实践",border:"#7C3AED",bg:"#F5F3FF"},competition:{label:"竞赛冲刺",border:"#DB2777",bg:"#FDF2F8"},health:{label:"健康生活",border:"#16A34A",bg:"#F0FDF4"}};
+var DAYS=[{dow:"周一",date:"7/27",num:27,it:!1,ts:3,fl:42,dd:0},{dow:"周二",date:"7/28",num:28,it:!1,ts:3,fl:38,dd:0},{dow:"周三",date:"7/29",num:29,it:!0,ts:3,fl:65,dd:1},{dow:"周四",date:"7/30",num:30,it:!1,ts:1,fl:20,dd:0},{dow:"周五",date:"7/31",num:31,it:!1,ts:1,fl:28,dd:1},{dow:"周六",date:"8/1",num:1,it:!1,ts:0,fl:0,dd:0},{dow:"周日",date:"8/2",num:2,it:!1,ts:0,fl:0,dd:0}];
+var TI=2;
+var PS=[{nm:["上","午"],s:8,e:13,bg:"#fef9e7",tx:"#b45309"},{nm:["下","午"],s:13,e:18,bg:"#fff",tx:"#6b7280"},{nm:["晚","上"],s:18,e:22,bg:"#f5f3ff",tx:"#7c3aed"},{nm:["凌","晨"],s:22,e:26,bg:"#f3f4f6",tx:"#6b7280"}];
+var TS=[{id:1,ti:"通信原理作业",dm:"course",di:0,sh:8,sm:0,eh:9,em:30,ai:!1,dl:""},{id:2,ti:"电赛方案设计",dm:"competition",di:0,sh:15,sm:0,eh:16,em:30,ai:!0,dl:"7/31 23:59"},{id:3,ti:"英语阅读训练",dm:"learning",di:0,sh:19,sm:0,eh:20,em:30,ai:!1,dl:""},{id:4,ti:"嵌入式实验报告",dm:"course",di:1,sh:8,sm:0,eh:9,em:30,ai:!1,dl:""},{id:5,ti:"午间拉伸放松",dm:"health",di:1,sh:12,sm:0,eh:12,em:45,ai:!1,dl:""},{id:6,ti:"PCB 草图绘制",dm:"practice",di:1,sh:20,sm:0,eh:21,em:30,ai:!1,dl:""},{id:7,ti:"代码审查 PR#42",dm:"practice",di:2,sh:10,sm:0,eh:11,em:30,ai:!1,dl:"7/31 18:00"},{id:8,ti:"周报复盘 + 总结",dm:"learning",di:2,sh:14,sm:0,eh:16,em:0,ai:!0,dl:""},{id:9,ti:"力量训练",dm:"health",di:2,sh:18,sm:0,eh:19,em:0,ai:!1,dl:""},{id:10,ti:"算法导论学习",dm:"learning",di:3,sh:19,sm:30,eh:21,em:0,ai:!1,dl:""},{id:11,ti:"PCB Layout 定稿",dm:"practice",di:4,sh:9,sm:0,eh:11,em:0,ai:!1,dl:"8/2 23:59"}];
+function dc(l){if(l>=85)return{bar:"#f87171",tx:"#dc2626"};if(l>=60)return{bar:"#fbbf24",tx:"#b45309"};if(l>=30)return{bar:"#86efac",tx:"#16a34a"};return{bar:"#d1d5db",tx:"#9ca3af"}}
+function vd(){return fm?DAYS.slice(TI,TI+3):DAYS}
+function rdh(){var r=document.getElementById('dh');r.innerHTML='';r.appendChild(d('div','dhg'));r.appendChild(d('div','dht'));vd().forEach(function(day){var c=dc(day.fl);var e=d('div','dhc'+(day.it?' td':''));e.innerHTML='<div class="dw">'+day.dow+(day.it?' · 今天':'')+'</div><div class="num">'+day.date+'</div><div class="dbar"><div class="dbarf" style="width:'+Math.max(3,day.fl)+'%;background:'+c.bar+';"></div></div><div class="dtxt">'+(day.ts===0?'空闲':day.ts+'项 · '+day.fl+'%')+'</div>'+(day.dd>0?'<div class="ddl">'+day.dd+'个到期</div>':'');r.appendChild(e)})}
+function rc(){var b=document.getElementById('cb');b.innerHTML='';var v=vd();var ch=(TH+(mo?4:0))*H;b.className='cb'+(fm?' fm':'');
+var pc=d('div','pcol');pc.style.height=ch+'px';PS.forEach(function(p){var t=Math.max(0,(p.s-S)*H);var h=(Math.min(p.e,S+TH+(mo?4:0))-Math.max(p.s,S))*H;if(h<=0)return;var e=d('div','pblk');e.style.top=t+'px';e.style.height=h+'px';e.style.background=p.bg;e.style.color=p.tx;e.innerHTML=p.nm[0]+'<br>'+p.nm[1];pc.appendChild(e)});b.appendChild(pc);
+var tc=d('div','tcol');tc.style.height=ch+'px';for(var h=S;h<S+TH+(mo?4:0);h++){var dh2=h>=24?h-24:h;var y=(h-S)*H;var lb=d('div','tlbl');lb.style.top=y+'px';lb.textContent=String(dh2).padStart(2,'0')+':00';tc.appendChild(lb);var ln=d('div','tln');ln.style.top=(y+H)+'px';if(PS.some(function(p){return p.s===h+1}))ln.className='grl ps';tc.appendChild(ln)}b.appendChild(tc);
+v.forEach(function(day,di){var rd=DAYS.indexOf(day);var dc2=d('div','dc'+(day.it?' td':''));dc2.style.height=ch+'px';
+PS.forEach(function(p){var t=Math.max(0,(p.s-S)*H);var h2=(Math.min(p.e,S+TH+(mo?4:0))-Math.max(p.s,S))*H;if(h2<=0)return;var bg=d('div','bgp');bg.style.top=t+'px';bg.style.height=h2+'px';bg.style.background=p.bg;bg.style.opacity='.4';dc2.appendChild(bg)});
+for(var h=S;h<=S+TH+(mo?4:0);h++){var y=(h-S)*H;var ln2=d('div','grl');ln2.style.top=y+'px';if(PS.some(function(p){return p.s===h}))ln2.className='grl ps';dc2.appendChild(ln2)}
+TS.filter(function(t){return t.di===rd}).forEach(function(t){var dk=t.dm in DOMS?t.dm:'course';var dc3=DOMS[dk];var top=(t.sh-S+t.sm/60)*H;var dur=(t.eh-t.sh)+(t.em-t.sm)/60;var hh=Math.max(dur*H,22);var tm=String(t.sh).padStart(2,'0')+':'+String(t.sm).padStart(2,'0')+' - '+String(t.eh).padStart(2,'0')+':'+String(t.em).padStart(2,'0');var te=d('div','tsk');te.style.top=top+'px';te.style.height=hh+'px';te.style.borderLeftColor=dc3.border;te.style.background=dc3.bg;var ds=dur>=1?Math.floor(dur)+'h':Math.round(dur*60)+'m';te.title=t.ti+'\n'+tm+' · '+dc3.label+'\n'+(t.ai?'AI 辅助生成\n':'')+(t.dl?'截止: '+t.dl:'无截止');var ht='<div class="tt">'+t.ti+'</div>';if(hh>=46)ht+='<div class="ttm">'+tm+'</div>';if(hh>=32)ht+='<div class="tmt">'+ds+'</div>';if(t.ai&&t.dl){ht+='<div class="tbr ai">AI</div><div class="tbr dl" style="top:18px;">'+t.dl+'截止</div>'}else if(t.ai){ht+='<div class="tbr ai">AI</div>'}else if(t.dl){ht+='<div class="tbr dl">'+t.dl+'截止</div>'}te.innerHTML=ht;dc2.appendChild(te)});
+if(fm&&day.it){var n=new Date();var nth=n.getHours()+n.getMinutes()/60;if(nth>=S&&nth<=S+TH+(mo?4:0)){var tp=(nth-S)*H;dc2.appendChild(d('div','nl'));dc2.lastChild.style.top=tp+'px';dc2.appendChild(d('div','nd'));dc2.lastChild.style.top=tp+'px';var lb2=d('div','nlb');lb2.style.top=tp+'px';lb2.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');dc2.appendChild(lb2)}}b.appendChild(dc2)})}
+function ra(){rdh();rc();document.getElementById('fn').style.display=fm?'block':'none';document.getElementById('gldBar').style.display=fm?'none':'flex'}
+function tm(){fm=!fm;var btns=document.querySelectorAll('#toggle button');btns.forEach(function(b){b.classList.remove('ac')});btns[fm?1:0].classList.add('ac');ra()}
+function tmid(){mo=!mo;document.getElementById('mbtn').innerHTML=mo?'收起凌晨 ▲':'展开凌晨 22:00 - 02:00 ▼';rc()}
+function shiftWeek(dir){var ph=document.querySelector('.ph-label');ph.textContent=dir<0?'上周':dir>0?'下周':'本周';}
+function t(bid,aid){var e=document.getElementById(bid);var a=document.getElementById(aid);
+  if(e===document.getElementById('deadBody')){if(e.style.display==='none'){e.style.display='block';a.textContent='▼';}else{e.style.display='none';a.textContent='▶';}}
+  else if(e===document.getElementById('inboxBody')){if(e.style.display==='none'){e.style.display='block';a.textContent='▼';}else{e.style.display='none';a.textContent='▶';}}
+  else{if(e.style.display==='none'){e.style.display='block';a.textContent='▲';}else{e.style.display='none';a.textContent='▼';}}}
+ra();
+</script>
+</body>
+</html>

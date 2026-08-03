@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task OS — Inbox UI</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card-bg: #ffffff; --border: #e5e7eb;
+    --text: #111827; --text2: #6b7280; --text3: #9ca3af;
+    --brand: #6366f1; --brand-bg: #eef2ff; --brand-deep: #4338ca;
+    --green: #16a34a; --amber: #d97706; --red: #dc2626;
+
+    --radius-lg: 12px; --radius-md: 8px; --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; padding: 32px 24px; max-width: 720px; margin: 0 auto; }
+
+  /* Input Canvas */
+  .canvas {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow);
+    min-height: 200px; display: flex; flex-direction: column; cursor: text; margin-bottom: 24px;
+  }
+  .canvas-inner { flex: 1; padding: 32px 36px 10px; display: flex; flex-direction: column; }
+  .canvas-greeting { font-size: 19px; font-weight: 400; color: var(--text); line-height: 1.7; margin-bottom: 16px; }
+  .canvas-cursor-line { display: flex; align-items: flex-start; }
+  .canvas-cursor { width: 1.5px; height: 20px; background: var(--brand); animation: blink 1s step-end infinite; margin-right: 10px; flex-shrink: 0; margin-top: 3px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .canvas-placeholder { font-size: 14px; color: var(--text3); padding-top: 3px; }
+  .canvas-footer { border-top: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text3); }
+  .canvas-footer kbd { font-family: var(--font); font-size: 10px; padding: 2px 5px; border-radius: 3px; background: #f3f4f6; border: 0.5px solid var(--border); color: var(--text2); margin: 0 1px; }
+
+  /* AI Results Header */
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .results-title { font-size: 14px; font-weight: 600; }
+  .results-badge { font-size: 11px; color: var(--text3); margin-left: 4px; }
+  .results-header-acts { display: flex; gap: 6px; }
+  .results-header-acts button { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: var(--card-bg); color: var(--text2); cursor: pointer; font-family: var(--font); }
+  .results-header-acts button:hover { background: #f9fafb; }
+  .results-understand { font-size: 12px; color: var(--brand-deep); padding: 10px 14px; background: var(--brand-bg); border-radius: var(--radius-sm); margin-bottom: 16px; line-height: 1.5; font-weight: 500; }
+
+  /* Task Card */
+  .r-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; margin-bottom: 10px; }
+  .r-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .r-card .r-icon { width: 30px; height: 30px; border-radius: var(--radius-sm); background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .r-card .r-body { flex: 1; min-width: 0; }
+  .r-card .r-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .r-card .r-meta { font-size: 11px; color: var(--text3); display: flex; flex-wrap: wrap; gap: 6px; }
+  .r-card .r-meta span { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; background: #f9fafb; border-radius: 4px; }
+  .r-card .r-ai { font-size: 11px; color: var(--brand-deep); padding: 7px 10px; background: var(--brand-bg); border-radius: var(--radius-sm); line-height: 1.5; margin-bottom: 0; }
+
+  /* Simple card actions */
+  .r-simple-acts { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+  .btn-confirm { padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: var(--radius-sm); border: none; background: var(--brand); color: white; cursor: pointer; font-family: var(--font); }
+  .btn-confirm:hover { background: #4f46e5; }
+  .btn-edit { padding: 6px 10px; font-size: 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: white; color: var(--text2); cursor: pointer; font-family: var(--font); }
+  .btn-edit:hover { background: #f9fafb; }
+  .btn-dismiss { padding: 6px 10px; font-size: 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--text3); cursor: pointer; font-family: var(--font); }
+  .btn-dismiss:hover { color: var(--red); }
+
+  /* Expandable Review Panel */
+  .review-panel { border-top: 0.5px solid var(--border); padding-top: 12px; margin-top: 10px; }
+
+  .phase { margin-bottom: 14px; }
+  .phase-label { font-size: 11px; font-weight: 500; color: var(--text2); margin-bottom: 6px; padding: 3px 8px; background: var(--brand-bg); border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; }
+  .phase-label input { border: none; background: transparent; font-size: 11px; font-weight: 500; color: var(--text2); outline: none; font-family: var(--font); width: auto; min-width: 80px; }
+  .phase-label input:focus { border-bottom: 1px solid var(--brand); }
+
+  .sub-row { border: 0.5px solid var(--border); border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+  .sub-row.open { border-color: var(--brand); }
+  .sub-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; }
+  .sub-head:hover { background: #fafbfc; }
+  .sub-head .st-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+  .sub-head .st-num.ok { background: #DCFCE7; color: #166534; }
+  .sub-head .st-num.edit { background: #FEF3C7; color: #92400E; }
+  .sub-head .st-num.new { background: var(--brand-bg); color: #4338CA; }
+  .sub-head .st-info { flex: 1; min-width: 0; }
+  .sub-head .st-info .st-name { font-size: 13px; font-weight: 500; }
+  .sub-head .st-info .st-meta { font-size: 11px; color: var(--text3); }
+  .sub-head .st-chevron { font-size: 10px; color: var(--text3); flex-shrink: 0; transition: transform 0.15s; }
+  .sub-row.open .sub-head .st-chevron { transform: rotate(180deg); }
+
+  .sub-body { display: none; padding: 0 12px 14px 12px; border-top: 0.5px solid var(--border); background: #FAFBFC; }
+  .sub-row.open .sub-body { display: block; }
+
+  .sb-field { margin-top: 12px; }
+  .sb-field label { font-size: 11px; font-weight: 500; color: var(--text2); display: block; margin-bottom: 4px; }
+  .sb-field input[type=text] { width: 100%; padding: 6px 10px; border: 0.5px solid var(--border); border-radius: 4px; font-size: 12px; font-family: var(--font); outline: none; background: var(--card-bg); }
+  .sb-field input[type=text]:focus { border-color: var(--brand); }
+  .sb-field textarea { width: 100%; min-height: 48px; padding: 8px 10px; border: 0.5px solid var(--border); border-radius: 4px; font-size: 12px; font-family: var(--font); outline: none; resize: none; background: var(--card-bg); }
+  .sb-field textarea:focus { border-color: var(--brand); }
+  .sb-slider { display: flex; align-items: center; gap: 8px; }
+  .sb-slider input[type=range] { flex: 1; accent-color: var(--brand); }
+  .sb-slider .val { font-size: 13px; font-weight: 500; min-width: 40px; text-align: right; }
+
+  .sb-memo-type { display: flex; gap: 4px; }
+  .sb-memo-type button { padding: 4px 10px; font-size: 11px; border: 0.5px solid var(--border); border-radius: 12px; background: var(--card-bg); color: var(--text2); cursor: pointer; font-family: var(--font); }
+  .sb-memo-type button.active { background: var(--brand-bg); color: #4338CA; border-color: var(--brand); }
+
+  .sb-checklist { display: flex; flex-direction: column; gap: 4px; }
+  .sb-checklist .chk-row { display: flex; align-items: center; gap: 8px; }
+  .sb-checklist .chk-box { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #D1D5DB; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: white; }
+  .sb-checklist .chk-box.checked { background: var(--green); border-color: var(--green); }
+  .sb-checklist .chk-box.checked::after { content: ''; width: 6px; height: 3px; border-left: 1.5px solid white; border-bottom: 1.5px solid white; transform: rotate(-45deg) translateY(-0.5px); }
+  .sb-checklist .chk-text { font-size: 12px; color: var(--text); flex: 1; }
+  .sb-checklist .chk-input { padding: 4px 8px; border: 0.5px solid var(--border); border-radius: 4px; font-size: 11px; font-family: var(--font); outline: none; width: 100%; }
+  .sb-checklist .chk-input:focus { border-color: var(--brand); }
+
+  .review-actions { display: flex; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+  .review-actions button { padding: 7px 18px; font-size: 12px; font-weight: 500; border-radius: 6px; cursor: pointer; font-family: var(--font); }
+  .review-actions .btn-add-phase { border: 0.5px solid var(--border); background: var(--card-bg); color: var(--text2); }
+  .review-actions .btn-add-phase:hover { background: #f9fafb; }
+  .review-actions .btn-create { border: none; background: var(--brand); color: white; margin-left: auto; }
+  .review-actions .btn-create:hover { background: #4F46E5; }
+  .review-actions .btn-cancel { border: none; background: transparent; color: var(--text3); }
+  .review-actions .btn-cancel:hover { color: var(--red); }
+
+  /* Recent */
+  .recent { margin-top: 16px; }
+  .recent-title { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+  .recent-item { font-size: 12px; color: var(--text2); padding: 4px 0; display: flex; align-items: center; justify-content: space-between; }
+  .recent-undo { font-size: 11px; color: var(--brand); cursor: pointer; border: none; background: none; font-family: var(--font); font-weight: 500; }
+  .recent-undo:hover { text-decoration: underline; }
+
+  /* Mobile */
+  .divider { border-top: 1px solid var(--border); margin: 32px 0 16px; }
+  .mobile-preview { width: 320px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+  .mob-top { padding: 20px 16px 12px; border-bottom: 0.5px solid var(--border); }
+  .mob-top h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .mob-top p { font-size: 11px; color: var(--text3); }
+  .mob-content { padding: 16px; min-height: 180px; }
+  .mob-msg { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 8px; }
+  .mob-msg.user { text-align: right; color: var(--text); }
+  .mob-msg.ai { color: var(--brand-deep); }
+  .mob-bar-wrap { padding: 8px 12px; border-top: 0.5px solid var(--border); }
+  .mob-bar { display: flex; align-items: center; gap: 6px; background: #f3f4f6; border-radius: 22px; padding: 3px 5px 3px 16px; border: 0.5px solid var(--border); transition: all 0.2s; cursor: text; }
+  .mob-bar input { flex: 1; border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; font-family: var(--font); padding: 7px 0; }
+  .mob-bar input::placeholder { color: var(--text3); }
+  .mob-toggle { width: 30px; height: 30px; border-radius: 50%; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: var(--text2); }
+  .mob-toggle:hover { background: rgba(0,0,0,0.05); }
+  .mob-toggle svg { width: 15px; height: 15px; }
+  .mob-bar.voice { background: var(--brand-bg); border-color: transparent; justify-content: center; padding: 12px 18px; cursor: pointer; border-radius: 22px; }
+  .mob-bar.voice .vl { font-size: 14px; color: var(--brand); font-weight: 600; user-select: none; }
+  .mob-bar.voice .vw { display: flex; gap: 3px; align-items: flex-end; height: 16px; margin-right: 8px; }
+  .mob-bar.voice .vw span { width: 2.5px; border-radius: 2px; background: var(--brand); animation: vw 1s ease-in-out infinite; }
+  .mob-bar.voice .vw span:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .mob-bar.voice .vw span:nth-child(2) { height: 11px; animation-delay: 0.1s; }
+  .mob-bar.voice .vw span:nth-child(3) { height: 16px; animation-delay: 0.2s; }
+  .mob-bar.voice .vw span:nth-child(4) { height: 11px; animation-delay: 0.3s; }
+  .mob-bar.voice .vw span:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+  @keyframes vw { 0%,100% { transform: scaleY(0.4); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; } }
+  .mob-bar.voice.pressing { background: var(--brand); }
+  .mob-bar.voice.pressing .vl { color: white; }
+  .mob-bar.voice.pressing .vw span { background: white; }
+  .mob-card { background: white; border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 8px; }
+  .mob-card .mc-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .mob-card .mc-meta { font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+  .mob-card .mc-sub { font-size: 10px; padding: 3px 6px; margin-left: 12px; display: flex; align-items: center; justify-content: space-between; color: var(--text2); }
+  .mob-card .mc-check { font-size: 10px; padding: 2px 8px; border-radius: 8px; border: 0.5px solid var(--border); background: white; color: var(--text2); cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- Input Canvas -->
+<div class="canvas">
+  <div class="canvas-inner">
+    <p class="canvas-greeting">下午好。你现在脑子里有什么？</p>
+    <div class="canvas-cursor-line">
+      <span class="canvas-cursor"></span>
+      <span class="canvas-placeholder">直接打字，或者 Ctrl+Shift+V 语音输入</span>
+    </div>
+  </div>
+  <div class="canvas-footer">
+    <span><kbd>Enter</kbd> 发送  <kbd>Shift+Enter</kbd> 换行  <kbd>Esc</kbd> 清空</span>
+    <span style="display:flex;gap:6px;">
+      <button class="btn-edit" style="font-size:11px;">清空</button>
+      <button class="btn-confirm" style="font-size:11px;padding:5px 14px;">AI 整理</button>
+    </span>
+  </div>
+</div>
+
+<!-- AI Results -->
+<div class="results-header">
+  <div><span class="results-title">AI 整理结果</span><span class="results-badge">3 项</span></div>
+  <div class="results-header-acts">
+    <button>全部创建</button>
+    <button>全部忽略</button>
+  </div>
+</div>
+<div class="results-understand">
+  我理解你想为电赛做准备，同时还有实验报告要交，另外想学 Python。以下是整理后的建议：
+</div>
+
+<!-- Card 1: with phase breakdown + memo editing -->
+<div class="r-card">
+  <div class="r-card-top">
+    <div class="r-icon">🎯</div>
+    <div class="r-body">
+      <div class="r-title">准备电赛</div>
+      <div class="r-meta"><span>竞赛</span><span>时间块</span><span>约 120min</span><span>置信度高</span></div>
+    </div>
+  </div>
+  <div class="r-ai">这是当前最重要的事，建议按阶段拆分执行。点击子任务展开后可编辑标题、时长、备忘录。</div>
+
+  <div class="review-panel">
+
+    <div class="phase">
+      <div class="phase-label">
+        Phase <input type="text" value="1" style="width:20px;" />: <input type="text" value="确定选题方向" />
+      </div>
+
+      <div class="sub-row">
+        <div class="sub-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="st-num ok">1</span>
+          <div class="st-info"><div class="st-name">调研往年题目</div><div class="st-meta">30min · 已采纳 · 备忘录: 执行清单</div></div>
+          <span class="st-chevron">▼</span>
+        </div>
+        <div class="sub-body">
+          <div class="sb-field"><label>标题</label><input type="text" value="调研往年题目" /></div>
+          <div class="sb-field"><label>时长</label><div class="sb-slider"><input type="range" min="5" max="120" value="30" oninput="this.nextElementSibling.textContent=this.value+'min'" /><span class="val">30min</span></div></div>
+          <div class="sb-field"><label>备忘录</label><div class="sb-memo-type"><button class="active">执行清单</button><button onclick="return false">备注</button><button onclick="return false">知识点</button></div></div>
+          <div class="sb-field"><label>执行清单</label><div class="sb-checklist">
+            <div class="chk-row"><span class="chk-box checked"></span><span class="chk-text">查2024年电赛题目</span></div>
+            <div class="chk-row"><span class="chk-box checked"></span><span class="chk-text">查2023年电赛题目</span></div>
+            <div class="chk-row"><span class="chk-box"></span><span class="chk-text">整理题型分类</span></div>
+            <div class="chk-row"><input class="chk-input" placeholder="添加清单项..." /></div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="sub-row open">
+        <div class="sub-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="st-num edit">2</span>
+          <div class="st-info"><div class="st-name">确定技术路线和方案</div><div class="st-meta">25min · 已改标题和时长 · 备忘录: 备注</div></div>
+          <span class="st-chevron">▼</span>
+        </div>
+        <div class="sub-body">
+          <div class="sb-field"><label>标题</label><input type="text" value="确定技术路线和方案" /></div>
+          <div class="sb-field"><label>时长</label><div class="sb-slider"><input type="range" min="5" max="120" value="25" oninput="this.nextElementSibling.textContent=this.value+'min'" /><span class="val">25min</span></div></div>
+          <div class="sb-field"><label>备忘录</label><div class="sb-memo-type"><button onclick="return false">执行清单</button><button class="active">备注</button><button onclick="return false">知识点</button></div></div>
+          <div class="sb-field"><label>备注</label><textarea>参考 STM32 Nucleo-F411RE 方案。注意: 需要支持 MPU6050 和 L298N 的 IO 口数量。</textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-label">
+        Phase <input type="text" value="2" style="width:20px;" />: <input type="text" value="准备元器件清单" />
+      </div>
+
+      <div class="sub-row">
+        <div class="sub-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="st-num ok">3</span>
+          <div class="st-info"><div class="st-name">列出所需元件</div><div class="st-meta">15min · 已采纳 · 备忘录: 执行清单</div></div>
+          <span class="st-chevron">▼</span>
+        </div>
+        <div class="sub-body">
+          <div class="sb-field"><label>标题</label><input type="text" value="列出所需元件" /></div>
+          <div class="sb-field"><label>时长</label><div class="sb-slider"><input type="range" min="5" max="120" value="15" oninput="this.nextElementSibling.textContent=this.value+'min'" /><span class="val">15min</span></div></div>
+          <div class="sb-field"><label>备忘录</label><div class="sb-memo-type"><button class="active">执行清单</button><button onclick="return false">备注</button><button onclick="return false">知识点</button></div></div>
+          <div class="sb-field"><label>执行清单</label><div class="sb-checklist">
+            <div class="chk-row"><span class="chk-box"></span><span class="chk-text">MCU: STM32F411CEU6</span></div>
+            <div class="chk-row"><span class="chk-box"></span><span class="chk-text">传感器: MPU6050 模块</span></div>
+            <div class="chk-row"><span class="chk-box"></span><span class="chk-text">电机驱动: L298N</span></div>
+            <div class="chk-row"><span class="chk-box"></span><span class="chk-text">电源: 5V/3.3V 稳压</span></div>
+            <div class="chk-row"><input class="chk-input" placeholder="添加清单项..." /></div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="sub-row">
+        <div class="sub-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="st-num new">4</span>
+          <div class="st-info"><div class="st-name">整理 BOM 表</div><div class="st-meta">20min · 手动添加 · 备忘录: 知识点</div></div>
+          <span class="st-chevron">▼</span>
+        </div>
+        <div class="sub-body">
+          <div class="sb-field"><label>标题</label><input type="text" value="整理 BOM 表" /></div>
+          <div class="sb-field"><label>时长</label><div class="sb-slider"><input type="range" min="5" max="120" value="20" oninput="this.nextElementSibling.textContent=this.value+'min'" /><span class="val">20min</span></div></div>
+          <div class="sb-field"><label>备忘录</label><div class="sb-memo-type"><button onclick="return false">执行清单</button><button onclick="return false">备注</button><button class="active">知识点</button></div></div>
+          <div class="sb-field"><label>知识点</label><textarea>BOM = Bill of Materials。整理时需标注: 元件名称、型号、封装、数量、供应商、单价。</textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-actions">
+      <button class="btn-add-phase">+ 添加阶段</button>
+      <button class="btn-cancel">忽略</button>
+      <button class="btn-create">确认创建 4 个子任务</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card 2 -->
+<div class="r-card">
+  <div class="r-card-top">
+    <div class="r-icon">📝</div>
+    <div class="r-body">
+      <div class="r-title">实验报告</div>
+      <div class="r-meta"><span>课程</span><span>截止日</span><span>8月5日</span><span>置信度高</span></div>
+    </div>
+    <div class="r-simple-acts">
+      <button class="btn-confirm">确认</button>
+      <button class="btn-edit">编辑</button>
+      <button class="btn-dismiss">忽略</button>
+    </div>
+  </div>
+  <div class="r-ai">有明确截止日期，建议尽快安排。预计需要完整的一个下午。</div>
+</div>
+
+<!-- Card 3 -->
+<div class="r-card">
+  <div class="r-card-top">
+    <div class="r-icon">💡</div>
+    <div class="r-body">
+      <div class="r-title">学 Python</div>
+      <div class="r-meta"><span>学习</span><span>收集箱</span><span>置信度中</span></div>
+    </div>
+    <div class="r-simple-acts">
+      <button class="btn-confirm">确认</button>
+      <button class="btn-edit">编辑</button>
+      <button class="btn-dismiss">忽略</button>
+    </div>
+  </div>
+  <div class="r-ai">暂时没有时间约束，先放入收集箱。可以之后再安排具体学习计划。</div>
+</div>
+
+<!-- Recent -->
+<div class="recent">
+  <div class="recent-title">刚刚处理</div>
+  <div class="recent-item"><span>背单词 → 截止日 · 每天早上 8:00</span><button class="recent-undo">撤销</button></div>
+  <div class="recent-item"><span>健身计划 → 收集箱 · 待安排</span><button class="recent-undo">撤销</button></div>
+</div>
+
+<!-- Mobile -->
+<div class="divider"></div>
+<div class="mobile-preview">
+  <div class="mob-top"><h3>下午好</h3><p>你现在脑子里有什么？</p></div>
+  <div class="mob-content">
+    <p class="mob-msg user">准备电赛，但最近还有实验报告要交</p>
+    <p class="mob-msg ai">好的，我整理了 3 个任务。点击展开查看子任务和备忘录：</p>
+
+    <div class="mob-card">
+      <div class="mc-title">🎯 准备电赛</div>
+      <div class="mc-meta">竞赛 · 时间块 · 约 120min · 4 个子任务</div>
+      <div style="font-size:10px;color:var(--text3);padding-left:8px;margin-bottom:2px;">Phase 1 · 确定选题方向</div>
+      <div class="mc-sub"><span>调研往年题目</span><span style="font-size:10px;color:var(--text3);">30min</span><span class="mc-check" style="background:var(--green);color:white;">已确认</span></div>
+      <div class="mc-sub"><span>确定技术路线</span><span style="font-size:10px;color:var(--text3);">25min</span><span class="mc-check" style="background:#FEF3C7;color:#92400E;">已修改</span></div>
+      <div style="font-size:10px;color:var(--text3);padding-left:8px;margin:4px 0 2px;">Phase 2 · 准备元器件清单</div>
+      <div class="mc-sub"><span>列出所需元件</span><span style="font-size:10px;color:var(--text3);">15min</span><span class="mc-check">确认</span></div>
+      <div class="mc-sub"><span>整理 BOM 表</span><span style="font-size:10px;color:var(--text3);">20min</span><span class="mc-check" style="background:var(--brand-bg);color:#4338CA;">新增</span></div>
+      <div style="display:flex;gap:4px;margin-top:6px;">
+        <button style="flex:1;padding:6px;font-size:11px;border:none;background:var(--brand);color:white;border-radius:6px;cursor:pointer;font-family:var(--font);">确认全部</button>
+        <button style="padding:6px 10px;font-size:11px;border:0.5px solid var(--border);background:white;color:var(--text2);border-radius:6px;cursor:pointer;font-family:var(--font);">忽略</button>
+      </div>
+    </div>
+
+    <div class="mob-card">
+      <div class="mc-title">📝 实验报告</div>
+      <div class="mc-meta">课程 · 截止日 · 8月5日</div>
+      <div style="display:flex;gap:4px;">
+        <button style="flex:1;padding:6px;font-size:11px;border:none;background:var(--brand);color:white;border-radius:6px;cursor:pointer;font-family:var(--font);">确认</button>
+        <button style="padding:6px 10px;font-size:11px;border:0.5px solid var(--border);background:white;color:var(--text2);border-radius:6px;cursor:pointer;font-family:var(--font);">忽略</button>
+      </div>
+    </div>
+  </div>
+  <div class="mob-bar-wrap">
+    <div class="mob-bar">
+      <input type="text" placeholder="继续描述你的想法..." />
+      <button class="mob-toggle" onclick="toggleVoice()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var voiceOn = false;
+  function toggleVoice() {
+    voiceOn = !voiceOn;
+    var bar = document.querySelector('.mob-bar');
+    if (voiceOn) {
+      bar.classList.add('voice');
+      bar.innerHTML = '<div class="vw"><span></span><span></span><span></span><span></span><span></span></div><span class="vl">按住说话</span>';
+      bar.onpointerdown = function(e){ e.preventDefault(); bar.classList.add('pressing'); bar.querySelector('.vl').textContent='松开发送...'; };
+      bar.onpointerup   = function(e){ e.preventDefault(); bar.classList.remove('pressing'); bar.querySelector('.vl').textContent='按住说话'; };
+      bar.onpointerleave= function(e){ bar.classList.remove('pressing'); bar.querySelector('.vl').textContent='按住说话'; };
+    } else {
+      bar.classList.remove('voice','pressing');
+      bar.innerHTML = '<input type="text" placeholder="继续描述你的想法..." /><button class="mob-toggle" onclick="toggleVoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>';
+    }
+  }
+</script>
+</body>
+</html>

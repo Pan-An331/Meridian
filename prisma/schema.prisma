@@ -1,0 +1,446 @@
+// Prisma Schema - Personal Task OS V2.0
+
+generator client {
+  provider = "prisma-client-js"
+  // Vercel 构建环境保险：本地 native + 构建机 debian-openssl-3.0.x（云部署方案 §2.1）
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  nickname     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tasks           Task[]
+  timeLogs        TimeLog[]
+  dailySummaries  DailySummary[]
+  dailyNotes      DailyNote[]
+  aiConfig        AIConfig?
+  schedules       Schedule[]
+  execFeedbacks   TaskExecutionFeedback[]
+  profile         UserProfile?
+  states          UserState[]
+  memories        AgentMemory[]
+  feedbacks       AgentFeedback[]
+  todayDecisions  TodayDecision[]
+  dailyBriefs     DailyBrief[]
+  drafts          TaskDraft[]
+  observations    UserObservation[]
+  patterns        UserPattern[]
+  userModel       UserModel?
+
+  @@map("users")
+}
+
+model Task {
+  id               String    @id @default(uuid())
+  userId           String
+  parentId         String?
+  title            String
+  description      String?
+
+  taskType         String    @default("inbox")
+  status           String    @default("not_started")
+
+  deadline         DateTime?
+
+  importance       Int       @default(3)
+
+  estimatedMinutes Int?
+  actualMinutes    Int       @default(0)
+
+  tags             String?
+  snoozeUntil      DateTime?
+
+  sortOrder        Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  category         String?
+
+  // V3：主题（目标，独立字段，自由扩展；预设有 考研/竞赛/身材 + 自定义）
+  theme            String?
+
+  // Focus Card V2：动机文案（身份层，AI 推断+父级继承+Inbox/档案可改，≤50 字）
+  purpose          String?
+
+  // Focus Card V2：出发时刻（执行层，Today「出发」写入；补记时长默认值来源 + 忘记确认兜底）
+  departureAt      DateTime?
+
+  complexity       String?
+  riskLevel        String?
+  dependencies     String?
+  scheduleAdvice   String?
+
+  phaseOrder       Int       @default(0)
+
+  // Phase 3: 任务腐化计数
+  postponedCount   Int       @default(0)
+
+  // 任务来源（user 手动 / ai AI创建）
+  source           String    @default("user")
+
+  // V5 层级重构：层级语义（project 项目根 / phase 阶段 / task 任务锚点）
+  level            String?   @default("task")
+  // V5 层级重构：积累型任务（背单词/健身：打卡制，无"完成"）
+  accumulate       Boolean   @default(false)
+
+  user       User      @relation(fields: [userId], references: [id])
+  parent     Task?     @relation("SubTasks", fields: [parentId], references: [id])
+  children   Task[]    @relation("SubTasks")
+  timeLogs   TimeLog[]
+  schedules  Schedule[]
+  execFeedbacks  TaskExecutionFeedback[]
+
+  @@index([userId, status])
+  @@index([userId, taskType])
+  @@index([userId, category])
+  @@index([userId, deadline])
+  @@index([userId, snoozeUntil])
+  @@index([userId, completedAt])
+  @@index([userId, title])   // resolver 关键词搜索（contains LIKE 扫描加速）
+  @@index([userId, theme])   // V3：主题统计与过滤
+  @@index([parentId])
+  @@map("tasks")
+}
+
+model TimeLog {
+  id              String    @id @default(uuid())
+  taskId          String
+  userId          String
+  startedAt       DateTime
+  endedAt         DateTime?
+  durationSeconds Int       @default(0)
+  type            String
+  // Focus Card V2：打卡内容（背了哪些词/勾选动作）/ 自动完成标记 'auto'
+  detail          String?
+  createdAt       DateTime  @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([taskId, type])
+  @@map("time_logs")
+}
+
+model DailySummary {
+  id             String   @id @default(uuid())
+  userId         String
+  date           String
+  completedCount Int      @default(0)
+  totalMinutes   Int      @default(0)
+  summaryText    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("daily_summaries")
+}
+
+model DailyNote {
+  id        String   @id @default(uuid())
+  userId    String
+  date      String
+  content   String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("daily_notes")
+}
+
+model AIConfig {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  provider  String   @default("openai")
+  baseUrl   String   @default("https://api.openai.com/v1")
+  apiKey    String
+  model     String   @default("gpt-4o")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  @@map("ai_configs")
+}
+
+model Schedule {
+  id             String   @id @default(uuid())
+  taskId         String
+  userId         String
+  scheduledStart DateTime
+  scheduledEnd   DateTime?
+  source         String   @default("manual")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, scheduledStart])
+  @@index([taskId])
+  @@map("schedules")
+}
+
+model UserProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  identity        String?
+  wakeTime        String?
+  sleepTime       String?
+  availableSlots  String?
+  fixedBlocks     String?
+  peakEnergy      String?
+  lowEnergy       String?
+  preferences     String?
+  longTermGoals   String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  @@map("user_profiles")
+}
+
+model UserState {
+  id              String   @id @default(uuid())
+  userId          String
+  stateType       String
+  value           String
+  impactLevel     String?
+  impactHint      String?
+  source          String   @default("user")
+  confidence      Float    @default(0.9)
+  decisionWeight  Float    @default(0.5)
+  evidence        String?
+  validFrom       DateTime @default(now())
+  validUntil      DateTime?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, stateType])
+  @@index([userId, validUntil])
+  @@map("user_states")
+}
+
+model AgentMemory {
+  id              String   @id @default(uuid())
+  userId          String
+  memoryType      String
+  content         String
+  scope           String?
+  importance      Int      @default(3)
+  source          String   @default("system")
+  confidence      Float    @default(0.7)
+  evidence        String?
+  active          Boolean  @default(true)
+  supersededBy    String?
+  validUntil      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Phase 3: AI 知识层升级字段
+  status          String   @default("active")
+  dimension       String?
+  importanceScore Float    @default(0)
+  contextTags     String?
+  evidenceCount   Int      @default(0)
+  lastUsedAt      DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, memoryType, active])
+  @@index([userId, scope])
+  @@map("agent_memories")
+}
+
+model AgentFeedback {
+  id              String   @id @default(uuid())
+  userId          String
+  agentAction     String
+  agentSuggestion String
+  userResponse    String
+  userModification String?
+  decisionLogId   String?
+  modifiedField   String?
+  originalValue   String?
+  userValue       String?
+  taskId          String?
+  context         String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, agentAction])
+  @@index([userId, userResponse])
+  @@index([taskId])
+  @@map("agent_feedbacks")
+}
+
+model DecisionLog {
+  id              String   @id @default(uuid())
+  userId          String
+  action          String
+  actionDetail    String
+  targetId        String?
+  contextUsed     String?
+  reasoning       String?
+  reason          String?
+  userAccepted    Boolean?
+  userFeedback    String?
+
+  // Phase 3: 闭环字段
+  memoryId        String?
+  confidence      Float?
+  outcome         String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([targetId])
+  @@map("decision_logs")
+}
+
+model TodayDecision {
+  id              String   @id @default(uuid())
+  userId          String
+  date            String
+  mustDo          String   @default("[]")
+  recommended     String   @default("[]")
+  reason          String   @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("today_decisions")
+}
+
+model TaskExecutionFeedback {
+  id        String   @id @default(uuid())
+  userId    String
+  taskId    String
+  reason    String
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+  @@map("task_execution_feedback")
+}
+
+model DailyBrief {
+  id        String   @id @default(uuid())
+  userId    String
+  date      String
+  content   String
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  @@unique([userId, date])
+  @@map("daily_briefs")
+}
+
+// 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+// Step48: TaskDraft + TaskDraftItem models
+// 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺?
+
+model TaskDraft {
+  id        String   @id @default(uuid())
+  userId    String
+  content   String
+  status    String   @default("WAIT_CONFIRM")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User           @relation(fields: [userId], references: [id])
+  items TaskDraftItem[]
+
+  @@index([userId, status])
+  @@map("task_drafts")
+}
+
+model TaskDraftItem {
+  id        String   @id @default(uuid())
+  draftId   String
+  title     String
+  category  String?
+  taskType  String   @default("planned")
+  dataJson  String
+  status    String   @default("WAIT_CONFIRM")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  draft TaskDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId, status])
+  @@map("task_draft_items")
+}
+
+// ═══════════════════════════════════════════
+// Phase 3: AI 四层知识模型
+// ═══════════════════════════════════════════
+
+// Layer 1: 事实层 — 原始事件，不做解释
+model UserObservation {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  taskId    String?
+  category  String?
+  detail    String
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, type])
+  @@index([userId, timestamp])
+  @@index([taskId])
+  @@map("user_observations")
+}
+
+// Layer 2: 发现层 — 统计规律（原始统计值）
+model UserPattern {
+  id             String   @id @default(uuid())
+  userId         String
+  pattern        String
+  condition      String
+  metric         String
+  confidence     Float    @default(0.5)
+  evidenceCount  Int      @default(0)
+  lastUpdated    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId, pattern])
+  @@map("user_patterns")
+}
+
+// Layer 4: 用户画像聚合层 — Planner 直接消费
+model UserModel {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+
+  peakHours       String   @default("[]")
+  dailyCapacity   Float    @default(0)
+  taskChunk       String?
+  commonFailures  String   @default("[]")
+  trustScore      Float    @default(0.5)
+
+  lastUpdated     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  @@map("user_models")
+}

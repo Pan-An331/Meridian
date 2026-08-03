@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Card V2 · UI 设计规格</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af;
+  --brand:#6366f1; --brand-deep:#4f46e5; --brand-bg:#eef2ff;
+  --success:#16a34a; --success-bg:#f0fdf4; --warning:#d97706; --warning-bg:#fffbeb;
+  --error:#dc2626; --error-bg:#fef2f2; --purple:#7c3aed; --purple-bg:#f5f3ff; --amber:#d97706; --amber-bg:#fffbeb;
+  --radius-lg:14px; --radius-md:10px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1020px;margin:0 auto;padding:32px 24px 60px}
+h1{font-size:22px;font-weight:700}
+.sub{font-size:13px;color:var(--text2);margin:6px 0 24px}
+h2{font-size:16px;font-weight:700;margin:34px 0 12px;padding-left:12px;border-left:4px solid var(--brand)}
+h3{font-size:14px;font-weight:600;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}
+th{background:#f8fafc;text-align:left;font-weight:600;padding:8px 10px;border:1px solid var(--border)}
+td{padding:7px 10px;border:1px solid var(--border);vertical-align:top}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 9px;border-radius:12px;margin-right:6px}
+.tag.new{background:var(--brand-bg);color:var(--brand-deep);border:1px solid #c7d2fe}
+.tag.have{background:var(--success-bg);color:var(--success);border:1px solid #bbf7d0}
+.tag.warn{background:var(--error-bg);color:var(--error);border:1px solid #fecaca}
+.note{font-size:12px;color:var(--text2);background:#f8fafc;border:1px dashed var(--border);border-radius:8px;padding:8px 12px;margin:8px 0}
+/* 布局示意 */
+.wire{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:10px 0;background:#fff}
+.wire .r{border-bottom:1px dashed #e5e7eb;padding:6px 10px;font-size:11px;display:flex;align-items:center;gap:8px}
+.wire .r:last-child{border-bottom:none}
+.wire .r b{font-size:11px;flex-shrink:0}
+.wire .r .desc{color:var(--text2);font-size:10.5px}
+.wire .r.motive{background:var(--purple-bg)}
+.wire .r.action{background:var(--brand-bg)}
+.wire .r.tool{background:#fafafa}
+.wire .r.confirm{background:var(--success-bg)}
+.wire .r.meta{background:#f8fafc;font-size:10px;color:var(--text3)}
+.step{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:12.5px}
+.step .n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--brand);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.step .c{flex:1}
+.step .c b{font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Focus Card V2 · UI 设计规格</h1>
+<div class="sub">产品逻辑已定稿 · 本规格面向 UI 设计师（视觉稿依据）· 2026-08-03 · 配套：总控 V2.0 / 信息架构 V3 / Today 设计稿（UI示例/Today的UI设计.html）</div>
+
+<h2>0. 设计原则（先读）</h2>
+<div class="card">
+<div class="step"><div class="n">1</div><div class="c"><b>Today 是"启动台"不是执行场</b>——用户打开 → 3 秒内明确"去做什么、为什么做"→ 放下网站去做（背单词开软件、健身去健身房、画图开 EDA）。卡片要"一眼读完就走"。</div></div>
+<div class="step"><div class="n">2</div><div class="c"><b>动机优先于信息</b>——用户要的是"做这件事的理由"，不是"为什么安排在这个点"。理由行（purpose）是卡片第一视觉；排期理由只在 AI 建议条。</div></div>
+<div class="step"><div class="n">3</div><div class="c"><b>进度 = 任务自己的语义</b>——产出型按产出数、积累型按打卡，时间只是辅助。计时器只用于"用户主动挂机"场景，绝不强制。</div></div>
+<div class="step"><div class="n">4</div><div class="c"><b>回来确认是闭环入口</b>——站外任务完成后回来"勾选/打卡/完成"，系统自动算时长；忘了回来有兜底。</div></div>
+</div>
+
+<h2>1. 共性结构（所有卡片通用，自上而下 5 区）</h2>
+<div class="card">
+<div class="wire">
+  <div class="r motive"><b>A 动机行</b><span class="desc">「为四轴飞行器打好电路基础」· 紫色系 · 新字段 purpose（AI 推断/父级继承/可改）</span></div>
+  <div class="r action"><b>B 行动区</b><span class="desc">任务标题（17-18px 粗）+ 主按钮（大、品牌色/类型色）· 跳过/暂停为次级</span></div>
+  <div class="r tool"><b>C 执行工具</b><span class="desc">按类型切换：时间块 / 子项清单（高亮下一个）/ 打卡面板 / 统计</span></div>
+  <div class="r confirm"><b>D 回来确认区</b><span class="desc">补记时长弹窗 / 打卡内容输入 / 勾选动作——"回来报到"的交互都在这层</span></div>
+  <div class="r meta"><b>E 元信息行</b><span class="desc">归属 · 预计/已用时间 · 备注（＋备注）——全部小字角标，不抢视觉</span></div>
+</div>
+<table>
+<tr><th>区</th><th>元素</th><th>状态/文案规格</th><th>数据</th></tr>
+<tr><td>A 动机行</td><td>purpose 文本</td><td>≤50 字；无 purpose 时显示类型提示（"清单型 · 做产品/项目"）；紫色底浅字</td><td class="tag new">新增 Task.purpose</td></tr>
+<tr><td>B 行动区</td><td>标题 + 主按钮</td><td>主按钮文案按状态：<b>未出发=出发</b> / <b>出发中=进行中…</b> / <b>完成态=已完成✓</b>；固定时间型主按钮=完成</td><td class="tag have">已有</td></tr>
+<tr><td>C 执行工具</td><td>类型专属</td><td>见 §3 五卡分案</td><td class="tag have">已有</td></tr>
+<tr><td>D 回来确认</td><td>补记弹窗/打卡内容</td><td>出发后回来：弹"刚才做了多久？[30分][1小时][自定义]"（默认=现在−出发）；打卡型：内容输入框</td><td class="tag new">Task.departureAt / TimeLog.detail</td></tr>
+<tr><td>E 元信息行</td><td>归属/时间/备注</td><td>9-10px 灰字一行或两行小字；备注入口保留（＋备注）</td><td class="tag have">已有</td></tr>
+</table>
+<div class="note">暂停按钮恢复（全部卡通用）：出发中状态下显示「暂停」，点击弹<b>暂停原因</b>（太难/注意力下降/临时有事/估时错误/其他）→ 数据走 UserObservation + Rule9（已有链路）。</div>
+<div class="note">✅ <b>2026-08-03 视觉定稿补充</b>：
+① 执行清单/动作清单颜色 = <b>对齐真实项目 v2-memo token</b>：底 #fff9e6 / 左边条 #f5a623 / 标题字 #8b6914 / 勾选框 #d4a853（副本已按此渲染，落地零转换）
+② 黄框内必须有<b>小标题</b>（memo 纸栏目感）：清单型=「执行清单」、学习型=「知识点」、健身=「今日动作」，标题下虚线分隔
+③ <b>卡片宽度策略</b>：单栏最小宽度 420px（可用空间够时）；视口 ≥860px 自动切两栏；内容少的卡（固定时间型/学习型）可收窄至 360px——宽度匹配内容密度
+④ 固定时间型状态标签统一为「到点自动完成」（不用「自动计时」）</div>
+</div>
+
+<h2>2. 卡片状态机（4 态）</h2>
+<div class="card">
+<table>
+<tr><th>状态</th><th>触发</th><th>UI 表现</th></tr>
+<tr><td>未出发</td><td>任务成为 currentTask</td><td>动机行 + 标题 + 「出发」大按钮；C 区显示工具但可操作区灰化提示</td></tr>
+<tr><td>出发中</td><td>点「出发」→ 记 departureAt</td><td>主按钮变「进行中…」；暂停按钮出现；计时型可挂机计时（手动）</td></tr>
+<tr><td>回来确认</td><td>回来点完成/打卡/勾选</td><td>弹补记时长（默认=现在−出发，可改）；积累型弹内容输入（可选）</td></tr>
+<tr><td>已完成 / 已打卡</td><td>确认后</td><td>按钮变「已完成✓」置灰；卡片自动滑到下一任务</td></tr>
+</table>
+<div class="note"><b>忘记回来兜底</b>：任务出发后一直未确认 → 下次打开 Today 时提示「该任务已过去 X 小时：① 完成了忘了记（补记）② 没做完，继续」。固定时间型到点（scheduledEnd 过）未确认 → 自动完成（TimeLog detail='auto'）。</div>
+</div>
+
+<h2>3. 五卡分案（每种卡的分区规格）</h2>
+
+<h3>3.1 固定时间型（上课/开会）<span class="tag have">低频 · 简化设计</span></h3>
+<div class="card">
+<div class="wire">
+  <div class="r motive"><b>A</b><span class="desc">动机行（可选，如"专业必修课"）</span></div>
+  <div class="r action"><b>B</b><span class="desc">标题「数字电路」+ 主按钮「完成」（提前结束才点）</span></div>
+  <div class="r tool"><b>C</b><span class="desc">时间块：09:00 - 10:30（大字号）· 教室/地点（如有）· 无计时器</span></div>
+  <div class="r meta"><b>E</b><span class="desc">归属 · 预计时长</span></div>
+</div>
+<table>
+<tr><th>元素</th><th>规格</th></tr>
+<tr><td>主视觉</td><td>时间块（开始-结束时间），不显示计时圆环；无出发按钮</td></tr>
+<tr><td>自动完成</td><td>scheduledEnd 过了 → 自动标记完成（惰性结算，打开页面时补算），TimeLog 记计划时长 detail='auto'</td></tr>
+<tr><td>手动完成</td><td>提前结束（早下课）点「完成」</td></tr>
+</table>
+</div>
+
+<h3>3.2 清单型 / 学习型（产出类）<span class="tag have">核心卡</span></h3>
+<div class="card">
+<div class="wire">
+  <div class="r motive"><b>A</b><span class="desc">「为四轴飞行器打好电路基础」</span></div>
+  <div class="r action"><b>B</b><span class="desc">「画原理图」+ 主按钮「出发」（出发中→「进行中…」）</span></div>
+  <div class="r tool"><b>C</b><span class="desc">执行清单：第一个未完成子项<b>高亮</b>（左边条+底色），其余灰字 · 进度 1/3 + 总耗时（系统累计）</span></div>
+  <div class="r confirm"><b>D</b><span class="desc">回来点「该项完成」→ 该项勾掉 → 自动高亮下一项 · 弹补记时长</span></div>
+  <div class="r meta"><b>E</b><span class="desc">归属 · 预计/已用 · ＋备注</span></div>
+</div>
+<table>
+<tr><th>交互</th><th>规格</th></tr>
+<tr><td>子项级出发循环</td><td>点子项（或系统自动高亮第一个未完成项）→ 点「出发」→ 回来点「该项完成」→ 记录该项耗时（出发→完成）→ 自动跳下一项。总耗时=各项累计</td></tr>
+<tr><td>高亮"下一个子项"</td><td>第一个未完成子项：左侧 4px 品牌色条 + 浅色底 + 文字加深；设置里可开关（默认开）</td></tr>
+<tr><td>学习型</td><td>清单=知识点/节次（"3.2 逆矩阵"），同一套交互；无子任务时显示「建议下一步」（executionAdvice）或「＋拆成小节」入口，禁止空壳</td></tr>
+<tr><td>进度条</td><td>产出进度（完成子项数），时间只作为小字"总耗时 X 分钟"</td></tr>
+</table>
+</div>
+
+<h3>3.3 积累型 · 每日（背单词）<span class="tag have">事后反馈模式</span></h3>
+<div class="card">
+<div class="wire">
+  <div class="r motive"><b>A</b><span class="desc">「为考研词汇量冲刺」</span></div>
+  <div class="r action"><b>B</b><span class="desc">「背单词」+ 主按钮「出发」（出发中→「进行中…」）</span></div>
+  <div class="r tool"><b>C</b><span class="desc">连续天数（当前/最长/本周）三格统计 + 小日历（保留现有设计）· 无预设清单</span></div>
+  <div class="r confirm"><b>D</b><span class="desc">回来点「打卡」→ 弹「今天背了哪些词？」输入框（<b>可选</b>，填了存 TimeLog.detail）→ 打卡完成</span></div>
+  <div class="r meta"><b>E</b><span class="desc">AI 提醒（连续 X 天…）· hint</span></div>
+</div>
+<table>
+<tr><th>元素</th><th>规格</th></tr>
+<tr><td>打卡流程</td><td>出发 → 背 → 回来打卡 + 可选输入今日内容（事后反馈：背完才知道背了啥）</td></tr>
+<tr><td>内容输入</td><td>打卡弹窗内：输入框"今天背了哪些词（可空）"→ TimeLog.detail；Review 可回顾"这周背了：xxx"</td></tr>
+<tr><td>清单</td><td>不强制 children；有则显示，无则简化（区别于健身）</td></tr>
+</table>
+</div>
+
+<h3>3.4 积累型 · 频次（健身）<span class="tag have">事前规划模式</span></h3>
+<div class="card">
+<div class="wire">
+  <div class="r motive"><b>A</b><span class="desc">「保持身体状态，支撑高强度学习」</span></div>
+  <div class="r action"><b>B</b><span class="desc">「力量训练」+ 主按钮「出发」</span></div>
+  <div class="r tool"><b>C</b><span class="desc">今日动作清单（提前设好：引体向上 4×10 / 划船 4×12…）+ 周目标 1/3 + 周视图（保留）</span></div>
+  <div class="r confirm"><b>D</b><span class="desc">回来勾选今日动作 → 打卡（勾选内容存 TimeLog.detail）</span></div>
+  <div class="r meta"><b>E</b><span class="desc">AI 提醒（"建议周五练第 2 次"）· hint</span></div>
+</div>
+<table>
+<tr><th>元素</th><th>规格</th></tr>
+<tr><td>动作清单</td><td>提前编辑（Inbox 确认表单/档案面板 children）：今天的训练动作；卡片上提醒"今天练：3 个动作"</td></tr>
+<tr><td>打卡流程</td><td>出发 → 练 → 回来勾选动作（默认全勾，可改）→ 打卡</td></tr>
+<tr><td>统计</td><td>周目标进度 + 本周次数 + 累计时长（保留现有）</td></tr>
+</table>
+</div>
+
+<h3>3.5 两栏版适配（视口 ≥ 860px 时）</h3>
+<div class="card">
+<div class="note">沿用现有两栏骨架：左栏（灰底 flex:0.7-0.8）= 数据区（动机行放左栏顶部 or 右栏标题上方？建议：动机行横跨两栏顶部，保持"第一视觉"）；右栏（白底）= 执行区（标题+按钮+工具+确认）。具体分割由 UI 设计师按 3.1-3.4 内容量裁定。</div>
+</div>
+
+<h2>4. 新增组件规格</h2>
+<div class="card">
+<table>
+<tr><th>组件</th><th>规格</th></tr>
+<tr><td>动机行（purpose）</td><td>全宽细条，紫色浅底（var(--purple-bg)）+ 紫字，≤50 字，可带小图标（如 🎯 由设计师定）；无 purpose 时退化为类型 hint</td></tr>
+<tr><td>补记时长弹窗</td><td>回来确认时弹：标题"刚才做了多久？" + 选项 [30 分钟][1 小时][自定义输入]（默认=现在−出发时刻，标注"从 X:XX 出发"）</td></tr>
+<tr><td>暂停原因弹窗</td><td>点暂停弹：单选（太难/注意力下降/临时有事/估时错误/其他）+ 确定；数据走 UserObservation</td></tr>
+<tr><td>忘记确认提示条</td><td>Today 顶部提示："「画原理图」出发后未确认，已过去 7 小时：① 完成了忘了记 ② 没做完，继续"</td></tr>
+<tr><td>打卡内容输入</td><td>打卡弹窗内文本输入（背单词："今天背了哪些词？"）/ 动作勾选列表（健身）；均可空</td></tr>
+</table>
+</div>
+
+<h2>5. 数据字段（后端契约，UI 先行用 mock）</h2>
+<div class="card">
+<table>
+<tr><th>字段</th><th>类型</th><th>说明</th><th>状态</th></tr>
+<tr><td>Task.purpose</td><td>String? ≤50</td><td>动机行文案；AI 推断+父级继承+Inbox/档案可改</td><td class="tag new">新增</td></tr>
+<tr><td>Task.departureAt</td><td>DateTime?</td><td>出发时刻；补记时长默认值来源；忘记确认兜底</td><td class="tag new">新增</td></tr>
+<tr><td>TimeLog.detail</td><td>String?</td><td>打卡内容（背了哪些词/勾选动作）/ auto 标记</td><td class="tag new">新增</td></tr>
+<tr><td>暂停原因</td><td>UserObservation</td><td>type=pause + detail.reason（已有链路，前端恢复按钮）</td><td class="tag have">已有</td></tr>
+<tr><td>固定时间自动完成</td><td>—</td><td>惰性结算（打开页面补算过期 scheduledEnd）</td><td class="tag new">新增逻辑</td></tr>
+</table>
+<div class="note">实施顺序：<b>① 前端 UI（mock 数据，本文档为视觉稿依据）→ ② 后端字段+逻辑 → ③ 对接</b>。UI 设计师可先用 mock 的 purpose/departureAt/detail 渲染全部状态。</div>
+</div>
+
+</div>
+</body>
+</html>

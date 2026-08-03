@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Logo 锚点 v3 · 规则符号学</title>
+<style>
+:root{
+  --bg:#eef0f4; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --blue:#1e3a8a; --gold:#f59e0b;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;padding-bottom:80px}
+.page{max-width:1000px;margin:0 auto;padding:30px 24px 0}
+h1{font-size:23px;font-weight:700;letter-spacing:-.3px}
+.sub{font-size:12.5px;color:var(--text2);margin-top:6px}
+.std-box{background:linear-gradient(135deg,#1e3a8a,#312e81 60%,#4c1d95);border-radius:16px;padding:20px 24px;color:#fff;margin-top:18px}
+.std-box h3{font-size:14px;font-weight:700;margin-bottom:12px;color:#fcd34d}
+.std-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.std-item{background:rgba(255,255,255,.08);border-radius:10px;padding:11px 13px}
+.std-item .l1{font-size:11px;font-weight:700;margin-bottom:3px}
+.std-item .l2{font-size:10px;color:rgba(255,255,255,.65);line-height:1.5}
+.std-item.bad .l1{color:#fca5a5}
+.std-item.good .l1{color:#6ee7b7}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.card{border:1px solid var(--border);border-radius:16px;background:var(--card);overflow:hidden;display:flex;flex-direction:column}
+.card .stage{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f8f9fb,#f1f3f7);position:relative}
+.card .stage .vtag{position:absolute;top:9px;left:9px;font-size:8.5px;font-weight:700;color:#fff;background:var(--blue);padding:2.5px 8px;border-radius:8px;letter-spacing:.4px}
+.card .stage .vtag.gold{background:var(--gold)}
+.card .body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column}
+.card .body h3{font-size:13px;font-weight:700}
+.card .body .en{font-size:10px;color:var(--text3);margin-top:1px}
+.card .body .concept{font-size:11px;color:var(--text2);margin-top:7px;line-height:1.55}
+.card .body .concept b{color:var(--text)}
+.card .body .meaning{margin-top:7px;font-size:10.5px;background:#eef2ff;border-radius:7px;padding:6px 9px;color:#4338ca;line-height:1.5}
+.card .body .spec{margin-top:7px;font-size:9.8px;color:var(--text3);background:#f7f8fa;border-radius:8px;padding:7px 9px;line-height:1.5;font-family:ui-monospace,Consolas,monospace}
+.card .fav{display:flex;gap:7px;align-items:center;margin-top:9px;padding-top:8px;border-top:1px dashed #e5e7eb}
+.card .fav .fl{font-size:9px;color:var(--text3)}
+.fav-b{width:22px;height:22px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+.fav-b svg{display:block}
+.anchor-box{border:1.5px solid var(--border);border-radius:14px;background:#fff;padding:18px 20px;margin-top:18px}
+.anchor-box h3{font-size:14px;font-weight:700;margin-bottom:8px}
+.anchor-box p{font-size:12.5px;color:var(--text2);line-height:1.75}
+.anchor-box b{color:var(--text)}
+.talk{font-family:ui-monospace,Consolas,monospace;background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:11.5px;line-height:1.8;color:#374151}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:36px}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}.std-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Meridian Logo 锚点 v3 · 规则符号学</h1>
+<div class="sub">产品经理出稿 · 2026-08-03 · 标准：抽象 + 规则 + 有符号意义（像 ChatGPT 六角星那样"规则几何承载意义"）· 纯参考锚，未改码</div>
+
+<div class="std-box">
+  <h3>评判标准（你原话翻译成可执行规格）</h3>
+  <div class="std-grid">
+    <div class="std-item good"><div class="l1">✓ 抽象且规则</div><div class="l2">对称几何（圆环/弧线/菱形/相扣），禁止自由曲线与杂乱堆叠</div></div>
+    <div class="std-item good"><div class="l1">✓ 有符号意义</div><div class="l2">远看一个符号，近看有"结构在思考"——像六角星=交织的结</div></div>
+    <div class="std-item good"><div class="l1">✓ 体现产品内核</div><div class="l2">AI 思考（编织/汇聚/环环相扣）、成长闭环</div></div>
+    <div class="std-item bad"><div class="l1">✗ 拒绝</div><div class="l2">"一个圆一个竖杠"（单层直线组合 = 垃圾感）</div></div>
+    <div class="std-item bad"><div class="l1">✗ 拒绝</div><div class="l2">"奇形怪状噼里啪啦"（自由曲线/不规则 = 神经感）</div></div>
+    <div class="std-item good"><div class="l1">✓ 体现名字内核</div><div class="l2">Meridian：子午线（方向）× 正午（时间）× 中轴</div></div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- V1 经纬之环 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag">1</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3"/>
+        <path d="M 50 12 C 66 20, 66 80, 50 88" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="14" y1="50" x2="86" y2="50" stroke="#1e3a8a" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="4.5" fill="#f59e0b"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>1 · 经纬之环</h3>
+      <div class="en">Meridian Grid</div>
+      <div class="concept">圆环内，<b>弧线经线（子午线）与直线纬线（赤道）正交</b>，交于金心——经纬系统，子午线本义。</div>
+      <div class="meaning">弧线 ≠ 直线：经线是"弧"，避免"圆+竖杠"的单薄感；弧×直×圆三层结构</div>
+      <div class="spec">环 3 / 经弧 4 / 纬线 3.5 / 金心 4.5</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><path d="M 50 10 C 68 18, 68 82, 50 90" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="10" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="5"/><circle cx="50" cy="50" r="5" fill="#fcd34d"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V2 环环相扣 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag gold">2</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="39" cy="50" r="24" fill="none" stroke="#1e3a8a" stroke-width="4"/>
+        <path d="M 45 74 A 24 24 0 0 1 45 26" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="61" cy="50" r="24" fill="none" stroke="#1e3a8a" stroke-width="4"/>
+        <path d="M 55 26 A 24 24 0 0 1 55 74" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>2 · 环环相扣</h3>
+      <div class="en">Linked Rings</div>
+      <div class="concept"><b>两个规则圆环相扣</b>——方向之环 × 时间之环交叠成"结"。你原话"环环相扣让人感觉他在思考"的图形版。</div>
+      <div class="meaning">子午（方向）× 正午（时间）双环互锁 = 产品把时间与方向编织成闭环；金弧=光从环间穿过</div>
+      <div class="spec">双环 4 / 金弧 4（左右各半段）</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="38" cy="50" r="26" fill="none" stroke="#fff" stroke-width="7"/><circle cx="62" cy="50" r="26" fill="none" stroke="#fff" stroke-width="7"/><path d="M 44 76 A 26 26 0 0 1 44 24" fill="none" stroke="#fcd34d" stroke-width="6" stroke-linecap="round"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V3 晨昏分界 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag">3</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3"/>
+        <path d="M 50 14 A 36 36 0 0 0 50 86" fill="#1e3a8a" opacity="0.10"/>
+        <path d="M 50 14 A 36 36 0 0 0 50 86" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="66" cy="38" r="5" fill="#f59e0b"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>3 · 晨昏分界</h3>
+      <div class="en">Terminator</div>
+      <div class="concept"><b>规则半圆弧把圆分成子（暗）午（亮）</b>，金点 = 正午太阳——晨昏线，地球自转的时间边界。</div>
+      <div class="meaning">子夜 × 正午的图形化；弧线分界有"日晷光影"感，比直线分界有设计感</div>
+      <div class="spec">环 3 / 分界弧 4 / 左半淡填 10% / 金点 5</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><path d="M 50 10 A 40 40 0 0 0 50 90" fill="#fff" opacity="0.92"/><path d="M 50 10 A 40 40 0 0 0 50 90" fill="none" stroke="#fcd34d" stroke-width="4"/><circle cx="68" cy="36" r="5" fill="#fcd34d"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V4 菱心中轴 -->
+  <div class="card">
+    <div class="stage">
+      <span class="vtag gold">4</span>
+      <svg width="92" height="92" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#1e3a8a" stroke-width="3"/>
+        <polygon points="50,16 82,50 50,84 18,50" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linejoin="round"/>
+        <line x1="50" y1="6" x2="50" y2="94" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="3.5" fill="#f59e0b"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h3>4 · 菱心中轴</h3>
+      <div class="en">Axis Diamond</div>
+      <div class="concept">圆环内切<b>规则菱形（方向/罗盘）+ 金色中轴穿出上下（子午线贯穿）</b>——方向 × 中轴。</div>
+      <div class="meaning">菱形=罗盘的抽象（方向感），轴穿出圆=子午线突破边界；三层嵌套有结构</div>
+      <div class="spec">环 3 / 菱形 4 / 金轴 3 穿出 / 金心 3.5</div>
+      <div class="fav"><span class="fl">favicon</span>
+        <div class="fav-b"><svg width="15" height="15" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1e3a8a"/><polygon points="50,18 78,50 50,82 22,50" fill="none" stroke="#fff" stroke-width="5"/><line x1="50" y1="4" x2="50" y2="96" stroke="#fcd34d" stroke-width="4" stroke-linecap="round"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="anchor-box">
+  <h3>语义自检（每个都同时满足"产品内核 + 名字内核"）</h3>
+  <p>
+    <b>1 经纬之环</b>：经纬系统 = 子午线本义（名字内核）✓；弧×直×圆的正交结构 = 规则的"思考网格"（产品内核）✓<br>
+    <b>2 环环相扣</b>：双环互锁 = 时间×方向编织成闭环（名字+产品双内核）✓；"环环相扣=思考"是你原话（产品内核）✓<br>
+    <b>3 晨昏分界</b>：子夜×正午 = Meridian 古义（名字内核）✓；明暗分界 = AI 把纷繁分清主次（产品内核）✓<br>
+    <b>4 菱心中轴</b>：菱形罗盘 + 中轴 = 方向感（名字内核）✓；轴穿出环 = 突破边界找主线（产品内核）✓
+  </p>
+</div>
+
+<div class="anchor-box">
+  <h3>给设计师的话术（选定方向后复制）</h3>
+  <div class="talk">
+    产品确定 Logo 方向为「规则符号学」V__（见《Meridian Logo 锚点 v3 · 规则符号学》）。请在<b>这个锚点上精修</b>，不要另起炉灶：<br>
+    ① 保持规则几何（圆环/弧线/菱形/相扣），禁止自由曲线与杂乱元素；每个元素都要能解释意义<br>
+    ② 远看一个符号、近看有结构层次；深蓝 #1E3A8A 主体 + 金色 #F59E0B 点睛<br>
+    ③ 精修范围：曲线曲率 / 粗细比例 / 交叠层次 / 中心细节（±2 稿方向：更流畅 / 更锐利）<br>
+    ④ 交付：主图标 SVG+PNG / 横向带字版 / favicon 16-32-48 / 侧栏 24px 应用
+  </div>
+</div>
+
+<div class="foot">Meridian Logo 锚点 v3 · 规则符号学系列 · 2026-08-03 · 产品经理出稿 · 未改码</div>
+
+</div>
+</body>
+</html>

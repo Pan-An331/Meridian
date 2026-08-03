@@ -1,0 +1,398 @@
+@import "tailwindcss";
+@import "../styles/themes.css";
+
+/* ═══════════════════════════════════════════
+   Task OS Design Token System V3.0
+   Theme-aware + 设计稿对标，支持 data-theme 切换
+   ═══════════════════════════════════════════ */
+
+@theme {
+  /* ── Page Colors (theme-aware) ── */
+  --color-page: var(--page-bg);
+  --color-sidebar: var(--page-sidebar);
+
+  /* ── Neutral 灰阶：gray-* 类统一走 neutral 轴（themes.css AXIS 5）─ */
+  --color-gray-50: var(--neutral-50);
+  --color-gray-100: var(--neutral-100);
+  --color-gray-200: var(--neutral-200);
+  --color-gray-300: var(--neutral-300);
+  --color-gray-400: var(--neutral-400);
+  --color-gray-500: var(--neutral-500);
+  --color-gray-600: var(--neutral-600);
+  --color-gray-700: var(--neutral-700);
+  --color-gray-800: var(--neutral-800);
+  --color-gray-900: var(--neutral-900);
+
+  /* ── Surface Colors (theme-aware) ── */
+  --color-surface: var(--page-surface);
+  --color-surface-hover: var(--page-surface-hover);
+  --color-surface-ai: var(--ai-50);
+
+  /* ── Border Colors (theme-aware) ── */
+  --color-border-default: var(--page-border);
+  --color-border-subtle: var(--page-border-subtle);
+  --color-border-ai: var(--ai-border);
+
+  /* ── Text Colors ── */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #9ca3af;
+  --color-text-disabled: #d1d5db;
+
+  /* ── Brand Colors (theme-aware via CSS variables) ── */
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  /* ── AI Panel Colors (theme-aware, separate from brand) ── */
+  --color-ai-50: var(--ai-50);
+  --color-ai-100: var(--ai-100);
+  --color-ai-200: var(--ai-200);
+  --color-ai-300: var(--ai-300);
+  --color-ai-500: var(--ai-500);
+  --color-ai-600: var(--ai-600);
+
+  /* ── Semantic: Success ── */
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #16a34a;
+  --color-success-border: #bbf7d0;
+
+  /* ── Semantic: Warning ── */
+  --color-warning-bg: #fffbeb;
+  --color-warning-text: #d97706;
+  --color-warning-border: #fde68a;
+
+  /* ── Semantic: Danger ── */
+  --color-danger-bg: #fef2f2;
+  --color-danger-text: #dc2626;
+  --color-danger-border: #fecaca;
+
+  /* ── Semantic: Active ── */
+  --color-active-bg: #fefce8;
+  --color-active-text: #ca8a04;
+  --color-active-ring: #fef08a;
+
+  /* ── Plan Task Source Colors ── */
+  --color-task-user: #3b82f6;
+  --color-task-ai: #a855f7;
+  --color-task-ai-bg: #faf5ff;
+
+  /* ── Design Preview: Global Gradients ── */
+  --color-grad-brand: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --color-grad-brand-light: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  --color-grad-header: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca);
+  --color-grad-login: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  --color-grad-progress: linear-gradient(90deg, #6366f1, #8b5cf6);
+  --color-grad-chart: linear-gradient(180deg, #818cf8, #6366f1);
+
+  /* ── Design Preview: AI Card Panel ── */
+  --color-ai-card-bg: linear-gradient(135deg, #eef2ff, #faf5ff);
+  --color-ai-card-border: #c7d2fe;
+  --color-ai-accent: #6366f1;
+  --color-ai-accent-bg: #eef2ff;
+  --color-ai-advice-item-border: #c7d2fe;
+  --color-ai-advice-item-hover: #fafafe;
+  --color-ai-text: #4338ca;
+  --color-ai-collapse-hover: rgba(99, 102, 241, 0.05);
+
+  /* ── Design Preview: Plan Page ── */
+  --color-plan-today-bg: #eef2ff;
+  --color-plan-task-scheduled: #dbeafe;
+  --color-plan-task-scheduled-text: #1e40af;
+  --color-plan-task-deadline: #fef3c7;
+  --color-plan-task-deadline-text: #92400e;
+  --color-plan-task-idea: #f3f4f6;
+  --color-plan-task-idea-text: #6b7280;
+  --color-plan-task-done: #dcfce7;
+  --color-plan-task-done-text: #166534;
+  --color-plan-period-morning: #f8fafc;
+  --color-plan-period-afternoon: #eff6ff;
+  --color-plan-period-evening: #f5f3ff;
+
+  /* ── Design Preview: Complete Card ── */
+  --color-complete-bg: #dcfce7;
+  --color-complete-border: #bbf7d0;
+  --color-complete-text: #166534;
+  --color-complete-btn: #16a34a;
+  --color-complete-btn-hover: #15803d;
+
+  /* ── Design Preview: Semantic Source ── */
+  --color-source-user: #3b82f6;
+  --color-source-user-bg: #eff6ff;
+  --color-source-ai: #7c3aed;
+  --color-source-ai-bg: #f5f3ff;
+
+  /* ── Design Preview: Priority ── */
+  --color-priority-p4: #f97316;
+  --color-priority-p5: #ef4444;
+
+  /* ── Design Preview: Density ── */
+  --color-density-low: #22c55e;
+  --color-density-medium: #3b82f6;
+  --color-density-high: #f59e0b;
+  --color-density-overload: #ef4444;
+
+  /* ── Design Preview: Stats ── */
+  --color-stat-tasks: #6366f1;
+  --color-stat-time: #10b981;
+  --color-stat-streak: #f59e0b;
+
+  /* ── Radius ── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  /* ── Shadow（双层：接触阴影 + 弥散阴影，卡片更有层次） ── */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 4px 12px -2px rgb(0 0 0 / 0.06);
+  --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 4px 12px -2px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-drag: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-mobile-nav: 0 8px 32px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+
+  /* ── Spacing ── */
+  --spacing-page-px: 2rem;
+
+  /* ── Typography ── */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
+
+  /* ── Animation Duration Tokens ── */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+
+  /* ═══ V2 视觉语言（来自 UI示例 设计稿 · 页面内容专用） ═══ */
+  --v2-bg: #f8fafc;          /* 页面背景 */
+  --v2-card: #ffffff;        /* 卡片 */
+  --v2-border: #e5e7eb;      /* 边框 */
+  --v2-text: #111827;        /* 主文字 */
+  --v2-text2: #6b7280;       /* 次要文字 */
+  --v2-text3: #9ca3af;       /* 提示文字 */
+  --v2-brand: #6366f1;       /* 品牌（全站唯一主色） */
+  --v2-brand-bg: #eef2ff;
+  --v2-brand-deep: #4338ca;
+  --v2-green: #16a34a;       /* 成功 / 完成 */
+  --v2-green-bg: #f0fdf4;
+  --v2-green-deep: #15803d;
+  --v2-amber: #d97706;       /* 琥珀 / 警告 */
+  --v2-amber-bg: #fffbeb;
+  --v2-purple: #7c3aed;      /* AI 语义色 */
+  --v2-purple-bg: #f5f3ff;
+  --v2-purple-text: #6d28d9;
+  --v2-orange: #d85a30;      /* 产出 / 清单型 */
+  --v2-orange-bg: #fff7ed;
+  --v2-memo-bg: #fff9e6;     /* 执行清单 memo */
+  --v2-memo-border: #f5a623;
+  --v2-memo-text: #8b6914;
+  --v2-check-on: #d4a853;    /* 清单勾选 */
+  --v2-check-done: #b09850;
+  --v2-route-active: #3b82f6; /* 路线进行中 */
+  --v2-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+
+  /* ── Animation Easing Tokens ── */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ═══════════════════════════════════════════
+   Base Layer
+   ═══════════════════════════════════════════ */
+
+@layer base {
+  body {
+    background-color: var(--color-page);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ── Focus Ring ── */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Animation Utilities (Step6)
+   ═══════════════════════════════════════════ */
+
+@layer utilities {
+  /* Modal fade+scale enter */
+  @keyframes modal-enter {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .animate-modal-enter {
+    animation: modal-enter var(--duration-normal) var(--ease-spring) forwards;
+  }
+
+  /* Fade in */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fade-in var(--duration-normal) var(--ease-default) forwards;
+  }
+
+  /* Slide up */
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slide-up var(--duration-slow) var(--ease-default) forwards;
+  }
+
+  /* Button press */
+  .active-press:active {
+    transform: scale(0.97);
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  /* Hover lift */
+  .hover-lift {
+    transition: transform var(--duration-normal) var(--ease-default), box-shadow var(--duration-normal) var(--ease-default);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+  }
+
+  /* ═══ 统一卡片三件套（边框 + 阴影 + 圆角）═══ */
+  .card {
+    background-color: var(--v2-card);
+    border: 1px solid var(--page-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--duration-normal) var(--ease-default), border-color var(--duration-normal) var(--ease-default);
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--page-border);
+  }
+  .card-hover.card--lift:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* ═══ 阴影工具类（Tailwind v4 不生成 shadow-[var(--x)] 任意值，必须用类）═══ */
+  .sh-card { box-shadow: var(--shadow-card); }
+  .sh-card-hover { box-shadow: var(--shadow-hover); }
+  .sh-v2 { box-shadow: var(--v2-shadow); }
+  .sh-lift { box-shadow: var(--shadow-hover); }
+  .sh-glow { box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35); }
+  .hover\:sh-card-hover:hover { box-shadow: var(--shadow-hover); }
+
+  /* Drag active */
+  .drag-active {
+    opacity: 0.7;
+    transform: scale(1.03);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+    transition: all var(--duration-fast) var(--ease-default);
+  }
+
+  /* ═══ Design Preview: Breathing Animations ═══ */
+
+  /* Blue breathe — current task */
+  @keyframes breathe-blue {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35); border-color: #3b82f6; }
+    50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); border-color: #60a5fa; }
+  }
+  .animate-breathe-blue {
+    animation: breathe-blue 3s ease-in-out infinite;
+  }
+
+  /* Green breathe — ahead/done task */
+  @keyframes breathe-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.35); border-color: #16a34a; }
+    50% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); border-color: #4ade80; }
+  }
+  .animate-breathe-green {
+    animation: breathe-green 3s ease-in-out infinite;
+  }
+
+  /* Indigo breathe — brand accent */
+  @keyframes breathe-indigo {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.35); }
+    50% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+  }
+  .animate-breathe-indigo {
+    animation: breathe-indigo 3s ease-in-out infinite;
+  }
+
+  /* Paused state — freeze breathing */
+  .animate-breathe-paused {
+    animation-play-state: paused !important;
+  }
+
+  /* ═══ Design Preview: Collapse Animations ═══ */
+
+  @keyframes collapse-open {
+    from { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+    to { max-height: 600px; opacity: 1; }
+  }
+  @keyframes collapse-close {
+    from { max-height: 600px; opacity: 1; }
+    to { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+  }
+  .animate-collapse-in {
+    animation: collapse-open 0.35s ease forwards;
+    overflow: hidden;
+  }
+  .animate-collapse-out {
+    animation: collapse-close 0.35s ease forwards;
+    overflow: hidden;
+  }
+}
+
+/* ═══════ FocusCardV2 · 宽度与断点（规格：单栏 min 420px · 视口 ≥860px 两栏，动机行横跨顶部）
+   单栏：flex-column + order 保证 B 行动区(标题/按钮)在 C 工具(统计/清单)之前，不与数据区错位 */
+.fcv2-grid{display:flex;flex-direction:column}
+.fcv2-left{order:3;background:transparent;border-bottom:1px solid var(--v2-border)}
+.fcv2-right{order:1;min-width:0}
+@media(min-width:860px){
+  .fcv2-grid{flex-direction:row}
+  .fcv2-left{order:0;flex:0.72;background:#fafafa;border-right:1px solid var(--v2-border);border-bottom:none;padding-left:18px;padding-right:18px;padding-top:16px;padding-bottom:16px}
+  .fcv2-right{order:0;flex:1.28;padding-left:20px;padding-right:20px;padding-top:16px;padding-bottom:16px}
+}
+
+/* ═══════ Today 弹性布局 · 简单/复杂双态（V3 §7.1 定稿）
+   简单态 760px 居中三块一屏 / 复杂态 880px 居中主卡优先路线沉底
+   判定由页面用 ResizeObserver 测量「问候语+主卡」实际高度，容器只做宽度切换 + 200ms 过渡 */
+.today-flex{margin-left:auto;margin-right:auto;transition:max-width .2s ease}
+
+/* 路线 | AI 双栏：900px 断点（定稿 A8：<900px 单栏回退） */
+.today-row2{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){
+  .today-row2{grid-template-columns:1fr 1fr}
+}

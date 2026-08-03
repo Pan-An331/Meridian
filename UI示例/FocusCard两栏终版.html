@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task OS · Focus Card 两栏终版 · 三种任务类型</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e5e7eb;
+    --text: #111827; --text2: #6b7280; --text3: #9ca3af;
+    --orange: #d85a30; --orange-bg: #fff7ed;
+    --green: #16a34a;
+    --memo-bg: #fff9e6; --memo-border: #f5a623; --memo-text: #8b6914;
+    --purple-bg: #f5f3ff; --purple-text: #6d28d9; --purple: #7c3aed;
+    --blue: #6366f1; --blue-bg: #eef2ff; --blue-dark: #4338ca;
+    --f: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--f); background: #eef0f4; color: var(--text); -webkit-font-smoothing: antialiased; padding: 36px 20px 120px; }
+  h1 { font-size: 20px; font-weight: 600; text-align: center; letter-spacing: -0.3px; }
+  .sub { text-align: center; font-size: 13px; color: var(--text2); margin: 8px 0 28px; }
+  .viewport { max-width: 860px; margin: 0 auto; background: var(--bg); border-radius: 14px; overflow: hidden; border: 1px solid #d9dce3; box-shadow: 0 12px 40px rgba(0,0,0,0.10); }
+  .bar { height: 42px; background: #f4f5f7; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+  .bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .bar i:nth-child(1) { background: #ff5f57; } .bar i:nth-child(2) { background: #febc2e; } .bar i:nth-child(3) { background: #28c840; }
+  .bar-url { flex:1; max-width: 420px; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 11px; color: var(--text3); text-align: center; }
+  .bar-ver { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .content { padding: 32px 32px 24px; }
+  .card { background: var(--card); border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+  .carousel { position: relative; }
+  .carousel-frame { overflow: hidden; }
+  .carousel-track { display: flex; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .carousel-slide { min-width: 100%; padding: 0 2px; }
+  .carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border);
+    background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text2); z-index: 5; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .carousel-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .carousel-btn:disabled { opacity: 0.25; cursor: default; }
+  .carousel-prev { left: -38px; }
+  .carousel-next { right: -38px; }
+  .carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; border: none; cursor: pointer; padding: 0; transition: all 0.2s; }
+  .carousel-dot.active { background: var(--blue); width: 20px; border-radius: 3px; }
+
+  @media (max-width: 700px) { .carousel-prev { left: 4px; } .carousel-next { right: 4px; } }
+</style>
+</head>
+<body>
+
+<h1>Focus Card · 两栏终版 · 三种任务类型</h1>
+<p class="sub">左右滑动切换 · 计时型 / 清单型 / 学习型</p>
+
+<div class="viewport">
+  <div class="bar"><i></i><i></i><i></i><div class="bar-url">task-os.local / today</div><div class="bar-ver">V3</div></div>
+  <div class="content">
+
+<div class="carousel" id="c2">
+  <button class="carousel-btn carousel-prev" onclick="prev2()">←</button>
+  <button class="carousel-btn carousel-next" onclick="next2()">→</button>
+  <div class="carousel-frame"><div class="carousel-track" id="t2">
+
+    <!-- ═══ 计时型 ═══ -->
+    <div class="carousel-slide">
+      <div class="card" style="padding:0; overflow:hidden; display:flex;">
+        <div style="flex:0.7; background:#fafafa; padding:18px 16px; display:flex; flex-direction:column; gap:8px; border-right:1px solid var(--border); min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--blue);">无归属项目</div>
+          <span style="font-size:9px; padding:1px 7px; border-radius:6px; background:var(--blue-bg); color:#4338ca; font-weight:500; align-self:flex-start;">计时型</span>
+          <div style="font-size:11px; color:var(--text);">9:00 - 11:00</div>
+          <div style="font-size:10px; color:var(--text2); margin-top:-5px;">预计 120 分钟</div>
+          <div style="height:1px; background:#f0f0f0; margin:2px 0;"></div>
+          <div style="font-size:9px; color:var(--text3);">剩余 55 分钟</div>
+          <div style="display:flex; gap:6px; margin-top:auto; margin-bottom:2px;">
+            <div style="flex:1; text-align:center; font-size:10px; padding:8px 0; background:#f3f4f6; border-radius:7px; color:var(--text3); cursor:pointer;">暂停</div>
+            <div style="flex:1; text-align:center; font-size:10px; padding:8px 0; background:var(--blue); border-radius:7px; color:white; cursor:pointer; font-weight:500;">完成</div>
+          </div>
+        </div>
+        <div style="flex:1.3; padding:18px; display:flex; flex-direction:column; gap:8px; min-width:0;">
+          <div style="font-size:17px; font-weight:600;">完成项目方案初稿</div>
+          <div style="display:flex; align-items:center; gap:20px; padding:8px 0;">
+            <div style="position:relative; width:110px; height:110px; flex-shrink:0;">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="48" fill="none" stroke="#f0f0f0" stroke-width="9"/>
+                <circle cx="55" cy="55" r="48" fill="none" stroke="#6366f1" stroke-width="9" stroke-dasharray="301" stroke-dashoffset="166" transform="rotate(-90 55 55)" stroke-linecap="round"/>
+              </svg>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div style="font-size:26px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1;">45:22</div>
+                <div style="font-size:9px; color:var(--text3); margin-top:2px;">已计时</div>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:10px; min-width:0;">
+              <div style="display:flex; align-items:center; gap:6px; font-size:10px; font-weight:500; color:var(--green);">
+                <span style="width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block;"></span>
+                领先计划 15 分钟
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text2);">
+                <span style="width:8px; height:8px; border-radius:50%; background:var(--blue); display:inline-block;"></span>
+                45% 时间已消耗
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text2);">
+                <span style="width:8px; height:8px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
+                剩余 55 分钟
+              </div>
+            </div>
+          </div>
+          <div style="font-size:10px; padding:5px 8px; background:var(--purple-bg); color:var(--purple-text); border-radius:5px; display:flex; align-items:center; gap:4px;">
+            <span style="font-weight:600; font-size:9px;">AI 执行</span><span>已专注 45 分钟 · 建议 5 分钟后短暂休息</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 清单型 ═══ -->
+    <div class="carousel-slide">
+      <div class="card" style="padding:0; overflow:hidden; display:flex;">
+        <div style="flex:0.8; background:#fafafa; padding:16px 14px; display:flex; flex-direction:column; gap:6px; border-right:1px solid var(--border); min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--blue);">四轴飞行器</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="flex:1; height:3px; background:#f0f0f0; border-radius:2px;"><div style="height:3px; background:var(--blue); border-radius:2px; width:50%;"></div></div>
+            <span style="font-size:8px; color:var(--text3);">3/6</span>
+          </div>
+          <div style="height:1px; background:#f0f0f0; margin:2px 0;"></div>
+          <div style="font-size:9px; color:var(--text3); letter-spacing:0.3px;">阶段</div>
+          <div style="font-size:10px; padding:3px 10px; color:var(--text3); display:flex; align-items:center; gap:4px;"><span style="text-decoration:line-through;">需求分析</span><span>&#x2713;</span></div>
+          <div style="font-size:10px; padding:3px 10px; color:var(--text3); display:flex; align-items:center; gap:4px;"><span style="text-decoration:line-through;">元件调研</span><span>&#x2713;</span></div>
+          <div style="font-size:11px; padding:5px 10px; background:var(--blue-bg); border-radius:6px; border-left:4px solid var(--blue); font-weight:500; color:var(--blue-dark);">画原理图</div>
+          <div style="font-size:10px; color:var(--text2); padding:3px 10px;">选型元器件</div>
+          <div style="font-size:10px; color:var(--text2); padding:3px 10px;">PCB 布局</div>
+          <div style="font-size:10px; color:var(--text2); padding:3px 10px;">焊接调试</div>
+          <div style="height:1px; background:#f0f0f0; margin:4px 0;"></div>
+          <span style="font-size:9px; padding:1px 7px; border-radius:6px; background:var(--orange-bg); color:var(--orange); font-weight:500; align-self:flex-start;">清单型</span>
+          <div style="font-size:11px; color:var(--text);">9:00 - 11:00</div>
+          <div style="font-size:10px; color:var(--text2); margin-top:-3px;">预计 90 分钟</div>
+          <div style="height:1px; background:#f0f0f0; margin:2px 0;"></div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text2);"><span>本任务 1/3</span><span style="color:var(--green); font-weight:500;">33%</span></div>
+          <div style="height:3px; background:#f0f0f0; border-radius:2px;"><div style="height:3px; background:var(--green); border-radius:2px; width:33%;"></div></div>
+          <div style="font-size:9px; color:var(--text3);">总耗时 22 分钟</div>
+        </div>
+        <div style="flex:1.4; padding:16px; display:flex; flex-direction:column; gap:8px; min-width:0;">
+          <div style="font-size:17px; font-weight:600;">画原理图</div>
+          <div style="background:var(--memo-bg); border-left:4px solid var(--memo-border); border-radius:6px; padding:10px 10px; flex:1; display:flex; flex-direction:column;">
+            <div style="font-size:9px; font-weight:600; color:var(--memo-text); margin-bottom:6px;">执行清单 · 1/3 已完成</div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; background:#d4a853; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:11px; color:var(--memo-text);">STM32 最小系统原理图</span><span style="font-size:8px; color:#b09850; margin-left:auto;">18分</span></div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; border:1.5px solid #d4a853; background:rgba(99,102,241,0.08); flex-shrink:0;"></div><span style="font-size:11px; font-weight:500; color:var(--memo-text);">MPU6050 传感器模块接线</span><span style="font-size:8px; color:var(--blue); margin-left:auto;">进行中</span></div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; border:1px solid #d4a853; flex-shrink:0;"></div><span style="font-size:11px; color:var(--memo-text);">L298N 电机驱动 — 注意 5V</span><span style="font-size:8px; color:#ccc; margin-left:auto;">待开始</span></div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center;"><div style="font-size:9px; color:var(--blue); cursor:pointer;">+ 追加</div><div style="font-size:9px; color:var(--text3);">·</div><div style="font-size:9px; color:var(--blue); cursor:pointer;">标记完成一项</div></div>
+          <div style="font-size:10px; padding:5px 8px; background:var(--purple-bg); color:var(--purple-text); border-radius:5px; display:flex; align-items:center; gap:4px;"><span style="font-weight:600; font-size:9px;">AI</span>上次类似花了 90 分钟</div>
+          <div style="display:flex; gap:6px;"><div style="flex:1; text-align:center; font-size:10px; padding:7px; background:#f3f4f6; border-radius:7px; color:var(--text3); cursor:pointer;">跳过</div><div style="flex:1; text-align:center; font-size:10px; padding:7px; background:var(--green); border-radius:7px; color:white; cursor:pointer; font-weight:500;">完成</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 学习型 ═══ -->
+    <div class="carousel-slide">
+      <div class="card" style="padding:0; overflow:hidden; display:flex;">
+        <div style="flex:0.7; background:#fafafa; padding:16px 14px; display:flex; flex-direction:column; gap:6px; border-right:1px solid var(--border); min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--purple);">线性代数</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div style="flex:1; height:3px; background:#f0f0f0; border-radius:2px;"><div style="height:3px; background:var(--purple); border-radius:2px; width:25%;"></div></div>
+            <span style="font-size:8px; color:var(--text3);">1/4 章</span>
+          </div>
+          <div style="height:1px; background:#f0f0f0; margin:2px 0;"></div>
+          <div style="font-size:9px; color:var(--text3); letter-spacing:0.3px;">章节</div>
+          <div style="font-size:10px; padding:3px 10px; color:var(--text3); display:flex; align-items:center; gap:4px;"><span style="text-decoration:line-through;">第 1 章 · 行列式</span><span>&#x2713;</span></div>
+          <div style="font-size:10px; padding:3px 10px; color:var(--text3); display:flex; align-items:center; gap:4px;"><span style="text-decoration:line-through;">第 2 章 · 矩阵运算</span><span>&#x2713;</span></div>
+          <div style="font-size:11px; padding:5px 10px; background:var(--purple-bg); border-radius:6px; border-left:4px solid var(--purple); font-weight:500; color:#6d28d9;">第 3 章 · 线性方程组</div>
+          <div style="font-size:10px; color:var(--text2); padding:3px 10px;">第 4 章 · 特征值与特征向量</div>
+          <div style="font-size:10px; color:var(--text2); padding:3px 10px;">第 5 章 · 二次型</div>
+          <div style="height:1px; background:#f0f0f0; margin:4px 0;"></div>
+          <span style="font-size:9px; padding:1px 7px; border-radius:6px; background:var(--purple-bg); color:var(--purple); font-weight:500; align-self:flex-start;">学习型</span>
+          <div style="font-size:11px; color:var(--text);">14:00 - 15:00</div>
+          <div style="font-size:10px; color:var(--text2); margin-top:-3px;">预计 60 分钟</div>
+          <div style="height:1px; background:#f0f0f0; margin:2px 0;"></div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text2);"><span>本章 1/4 节</span><span style="color:var(--green); font-weight:500;">25%</span></div>
+          <div style="height:3px; background:#f0f0f0; border-radius:2px;"><div style="height:3px; background:var(--purple); border-radius:2px; width:25%;"></div></div>
+          <div style="font-size:9px; color:var(--text3);">总耗时 32 分钟</div>
+        </div>
+        <div style="flex:1.4; padding:16px; display:flex; flex-direction:column; gap:8px; min-width:0;">
+          <div style="font-size:17px; font-weight:600;">学线性代数 · 第 3 章</div>
+          <div style="background:var(--memo-bg); border-left:4px solid var(--memo-border); border-radius:6px; padding:10px 10px; flex:1; display:flex; flex-direction:column;">
+            <div style="font-size:9px; font-weight:600; color:var(--memo-text); margin-bottom:6px;">本章知识点 · 1/4</div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; background:#d4a853; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span style="font-size:11px; color:var(--memo-text); text-decoration:line-through;">3.1 矩阵乘法与转置</span></div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; border:1px solid #d4a853; background:rgba(124,58,237,0.08); flex-shrink:0;"></div><span style="font-size:11px; font-weight:500; color:var(--memo-text);">3.2 逆矩阵与伴随矩阵</span></div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; border:1px solid #d4a853; flex-shrink:0;"></div><span style="font-size:11px; color:var(--memo-text);">3.3 克拉默法则</span></div>
+            <div style="display:flex; align-items:center; gap:6px; padding:3px 0;"><div style="width:14px; height:14px; border-radius:3px; border:1px solid #d4a853; flex-shrink:0;"></div><span style="font-size:11px; color:var(--memo-text);">3.4 特征值与特征向量</span></div>
+          </div>
+          <div style="font-size:9px; color:var(--purple); cursor:pointer;">+ 追加知识点</div>
+          <div style="font-size:10px; padding:5px 8px; background:var(--purple-bg); color:var(--purple-text); border-radius:5px; display:flex; align-items:center; gap:4px;"><span style="font-weight:600; font-size:9px;">AI</span>逆矩阵是本章重点，建议多练几道题</div>
+          <div style="display:flex; gap:6px;"><div style="flex:1; text-align:center; font-size:10px; padding:7px; background:#f3f4f6; border-radius:7px; color:var(--text3); cursor:pointer;">暂停</div><div style="flex:1; text-align:center; font-size:10px; padding:7px; background:var(--purple); border-radius:7px; color:white; cursor:pointer; font-weight:500;">完成</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div></div>
+  <div class="carousel-dots" id="d2">
+    <button class="carousel-dot active" onclick="go2(0)"></button>
+    <button class="carousel-dot" onclick="go2(1)"></button>
+    <button class="carousel-dot" onclick="go2(2)"></button>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<script>
+  var cur2 = 0, dots2 = document.querySelectorAll('#d2 .carousel-dot'), track2 = document.getElementById('t2');
+  function upd2() { track2.style.transform = 'translateX(-'+(cur2*100)+'%)'; dots2.forEach(function(d,i){ d.classList.toggle('active', i===cur2); }); }
+  function next2() { if (cur2<2) { cur2++; upd2(); } }
+  function prev2() { if (cur2>0) { cur2--; upd2(); } }
+  function go2(i) { cur2=i; upd2(); }
+  upd2();
+</script>
+
+</body>
+</html>

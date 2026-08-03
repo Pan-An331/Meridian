@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task OS — Review 战报式复盘</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text2: #6b7280;
+    --text3: #9ca3af;
+    --brand: #6366f1;
+    --brand-bg: #eef2ff;
+    --brand-dark: #4338ca;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --amber-border: #fde68a;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --purple-border: #ddd6fe;
+    --blue: #2563eb;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+    --teal: #0d9488;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --gold: #d4a853;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius-sm: 7px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .subtitle { text-align: center; font-size: 13px; color: var(--text2); margin-bottom: 40px; }
+
+  .page { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── 页面头部 ── */
+  .hero { display: flex; align-items: center; justify-content: space-between; }
+  .hero-left { display: flex; align-items: center; gap: 10px; }
+  .hero-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: var(--purple-bg); color: var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .hero-title { font-size: 15px; font-weight: 600; }
+  .hero-desc { font-size: 12px; color: var(--text2); }
+  .seg {
+    display: flex; gap: 2px; background: #f1f2f4;
+    border-radius: 8px; padding: 3px;
+  }
+  .seg button {
+    font-size: 12px; padding: 4px 12px; border-radius: 6px;
+    border: none; background: transparent; color: var(--text2);
+    cursor: pointer; font-family: var(--font);
+  }
+  .seg button.on { background: white; color: var(--text); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+  /* ── 战报卡（网易云年报风格 · 修改版 A）── */
+  .war-report {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .wr-label { font-size: 11px; font-weight: 500; color: var(--text3); letter-spacing: 2px; }
+  .wr-title { font-size: 24px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; line-height: 1.4; }
+  .wr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wr-card { border-radius: 12px; padding: 14px; }
+  .wr-card.purple { background: var(--purple-bg); }
+  .wr-card.gray { background: #f4f4f6; }
+  .wr-card-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .wr-card.purple .wr-card-label { color: #7c7ad8; }
+  .wr-color { display: flex; align-items: center; gap: 8px; }
+  .wr-color-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; }
+  .wr-color-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .wr-color-sub { font-size: 10px; color: #7c7ad8; margin-top: 1px; }
+  .wr-big { font-size: 13px; font-weight: 600; color: var(--text); }
+  .wr-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .wr-keywords { background: #f4f4f6; border-radius: 12px; padding: 12px 14px; }
+  .wr-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .wr-tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; }
+  .wr-find {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 12px; color: #3c3489; line-height: 1.5;
+    background: var(--purple-bg); border-radius: 10px; padding: 10px 12px;
+  }
+  .wr-base {
+    border-top: 1px solid #f1f2f4; padding-top: 12px;
+    font-size: 11px; color: var(--text3);
+  }
+  .wr-base-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .wr-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .wr-stat {
+    border-radius: 10px; padding: 10px 6px; text-align: center;
+    background: #f8fafc; border: 1px solid #f1f2f4;
+  }
+  .wr-stat-num { font-size: 17px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+  .wr-stat-label { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  @media (max-width: 480px) { .wr-stat-num { font-size: 13px; } }
+  /* 洞察卡分区 */
+  .ins-sec { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.5px; }
+  .ins-divider { border-top: 1px dashed #e5e7eb; margin: 12px 0; }
+
+  /* ── 产出日记：按天任务 ── */
+  .day-block { border-bottom: 1px solid #f1f2f4; padding: 10px 0 8px; }
+  .day-block:last-child { border-bottom: none; }
+  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .day-name { font-size: 12px; font-weight: 600; }
+  .day-count {
+    font-size: 11px; color: var(--green); background: var(--green-bg);
+    border-radius: 5px; padding: 1px 7px;
+  }
+  .day-count.hot { color: var(--amber); background: var(--amber-bg); }
+  .day-rest { font-size: 11px; color: var(--text3); }
+  .day-note { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .task-row {
+    display: flex; align-items: center; gap: 8px; padding: 4px 0;
+    font-size: 13px;
+  }
+  .task-time {
+    width: 34px; font-size: 11px; color: var(--text3);
+    flex-shrink: 0; font-variant-numeric: tabular-nums;
+  }
+  .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  /* 任务名 + 胶囊 包在同一容器，胶囊跟随任务名文本 */
+  .task-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+  .task-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .task-dur {
+    font-size: 11px; color: var(--text3); width: 84px;
+    text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums;
+  }
+  /* 胶囊标签：贴任务名右侧，统一宽度居中，耗时永远贴最右缘 */
+  .task-tag {
+    flex-shrink: 0; font-size: 10px; font-weight: 500; line-height: 1;
+    border-radius: 999px; padding: 4px 0; width: 64px; text-align: center;
+    white-space: nowrap;
+  }
+  .task-tag.focus { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-border); }
+  .task-tag.split { color: var(--text2); background: #f4f4f6; border: 1px solid #e5e7eb; }
+
+  /* ── 双列：效率 + AI ── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .col-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .eff-row { margin-bottom: 8px; }
+  .eff-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 3px; }
+  .eff-label .fast { color: var(--green); }
+  .eff-label .slow { color: var(--red); }
+  .eff-track { height: 5px; background: #f1f2f4; border-radius: 4px; overflow: hidden; }
+  .eff-fill { height: 100%; border-radius: 4px; }
+  .ai-line { display: flex; gap: 8px; font-size: 12px; color: var(--text); margin-bottom: 8px; line-height: 1.5; }
+  .ai-line:last-child { margin-bottom: 0; }
+  .ai-tag { font-weight: 600; flex-shrink: 0; }
+  .ai-tag.purple { color: var(--purple); }
+  .ai-tag.amber { color: var(--amber); }
+  .ai-tag.green { color: var(--green); }
+
+  /* ── 洞察卡：分区标题 / 分隔线 / 任务类型分布 ── */
+  .ins-sec { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+  .ins-divider { border-top: 1px dashed #eceef0; margin: 14px 0; }
+  .dom-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .dom-row:last-child { margin-bottom: 0; }
+  .dom-label { width: 56px; font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .dom-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .dom-track { flex: 1; height: 6px; background: #f1f2f4; border-radius: 4px; overflow: hidden; }
+  .dom-fill { height: 100%; border-radius: 4px; }
+  /* 百分比：浅灰小字，贴近条尾；时长：加粗深色，行尾右对齐 */
+  .dom-pct { width: 36px; font-size: 9.5px; color: #9ca3af; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .dom-time { width: 84px; font-size: 12px; font-weight: 600; color: #374151; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+  /* ── 行动条 · 逐条应用 ── */
+  .action {
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .action-title { font-size: 12px; font-weight: 600; color: #14532d; }
+  .action-tip { font-size: 10px; color: #4d7c0f; margin: 2px 0 6px; }
+  .action-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 0;
+    border-top: 1px dashed #d7eecf;
+  }
+  .act-idx { font-size: 11px; font-weight: 600; color: #166534; flex-shrink: 0; }
+  .act-text { flex: 1; font-size: 12px; color: #166534; line-height: 1.5; }
+  .act-btn {
+    flex-shrink: 0; font-size: 11px; color: var(--green);
+    background: #ffffff; border: 1px solid var(--green-border);
+    border-radius: 7px; padding: 4px 10px; cursor: pointer;
+    font-family: var(--font); transition: all 0.15s ease;
+  }
+  .act-btn:hover { background: var(--green-bg); }
+  .act-btn.applied { color: #ffffff; background: var(--green); border-color: var(--green); }
+
+  /* ── 图例 ── */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    border-top: 1px solid #f1f2f4; padding-top: 12px;
+    font-size: 10px; color: var(--text3);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  @media (max-width: 560px) {
+    .cols { grid-template-columns: 1fr; }
+    .wr-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Task OS · Review 页面</h1>
+<p class="subtitle">战报式复盘 &#183; 看见自己做到了什么 &#183; 时间顺序不可动摇</p>
+
+<div class="page">
+
+  <!-- ═══════════════════ 页面头部 ═══════════════════ -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-icon">📈</div>
+      <div>
+        <div class="hero-title">回顾</div>
+        <div class="hero-desc">看见自己做到了什么，比上周更好</div>
+      </div>
+    </div>
+    <div class="seg">
+      <button class="on">本周</button>
+      <button>本月</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 战报卡 · 网易云年报风格 ═══════════════════ -->
+  <div class="war-report">
+    <span class="wr-label">WEEK 31 · 你的本周</span>
+    <p class="wr-title">这一周，你在为电赛冲刺</p>
+
+    <div class="wr-grid">
+      <div class="wr-card purple">
+        <p class="wr-card-label">本周主色</p>
+        <div class="wr-color">
+          <div class="wr-color-dot" style="background:#16a34a;"></div>
+          <div>
+            <p class="wr-color-name">实践绿</p>
+            <p class="wr-color-sub">画原理图 · PCB 的星期</p>
+          </div>
+        </div>
+      </div>
+      <div class="wr-card gray">
+        <p class="wr-card-label">本周之最 · 最投入</p>
+        <p class="wr-big">画原理图</p>
+        <p class="wr-sub">专注 179 分钟 · 全周最长</p>
+      </div>
+    </div>
+
+    <div class="wr-keywords">
+      <p class="wr-card-label">本周关键词</p>
+      <div class="wr-tags">
+        <span class="wr-tag" style="color:#3b6d11; background:#eaf3de;">原理图</span>
+        <span class="wr-tag" style="color:#534ab7; background:#eeedfe;">PCB</span>
+        <span class="wr-tag" style="color:#0f6e56; background:#e1f5ee;">英语</span>
+      </div>
+    </div>
+
+    <div class="wr-find">
+      <span>✨</span>
+      <span><b>发现：</b>这周 62% 的时间都投入在电赛实践上——画原理图、PCB 布线，看得出真的很专注</span>
+    </div>
+
+    <div class="wr-base">
+      <div class="wr-base-label">本周基础</div>
+      <div class="wr-cards">
+        <div class="wr-stat">
+          <div class="wr-stat-num" style="color:#7c3aed;">7 件</div>
+          <div class="wr-stat-label">完成任务</div>
+        </div>
+        <div class="wr-stat">
+          <div class="wr-stat-num" style="color:#0d9488;">6小时43分钟</div>
+          <div class="wr-stat-label">本周专注</div>
+        </div>
+        <div class="wr-stat">
+          <div class="wr-stat-num" style="color:#d97706;">4 天</div>
+          <div class="wr-stat-label">连续天数</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 本周成果 · 产出日记 ═══════════════════ -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
+      <div style="display:flex; align-items:baseline; gap:8px;">
+        <span style="font-size:14px; font-weight:600;">本周成果</span>
+        <span style="font-size:11px; color:var(--text3);">7/27 – 8/2 · 共 7 件</span>
+      </div>
+      <span style="font-size:11px; color:var(--text3);">按天 · 按时间</span>
+    </div>
+
+    <!-- 周一 -->
+    <div class="day-block">
+      <div class="day-head">
+        <span class="day-name" style="color:var(--text2);">周一 7/27</span>
+        <span class="day-rest">休息</span>
+      </div>
+      <div class="day-note">周末的两张原理图告一段落，周一休整</div>
+    </div>
+
+    <!-- 周二 -->
+    <div class="day-block">
+      <div class="day-head">
+        <span class="day-name">周二 7/28</span>
+        <span class="day-count">2 件</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time">10:00</span>
+        <span class="task-dot" style="background:#7C3AED;"></span>
+        <div class="task-main">
+          <span class="task-name">PCB 布线工作</span>
+        </div>
+        <span class="task-dur">1小时9分钟</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time">14:00</span>
+        <span class="task-dot" style="background:#7C3AED;"></span>
+        <div class="task-main">
+          <span class="task-name">做 PCB 设计</span>
+        </div>
+        <span class="task-dur">2分钟</span>
+      </div>
+    </div>
+
+    <!-- 周三 · 专注峰值 -->
+    <div class="day-block" style="background:var(--amber-bg); border-radius:10px; padding:10px 12px; margin:0 -4px; border:none;">
+      <div class="day-head">
+        <span class="day-name" style="color:#92400e;">周三 7/29</span>
+        <span class="day-count hot">2 件</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time" style="color:#b45309;">9:00</span>
+        <span class="task-dot" style="background:#7C3AED;"></span>
+        <div class="task-main">
+          <span class="task-name" style="color:#451a03;">画原理图</span>
+          <span class="task-tag focus">深度专注</span>
+        </div>
+        <span class="task-dur" style="color:#b45309;">2小时59分钟</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time" style="color:#b45309;">20:00</span>
+        <span class="task-dot" style="background:#2563EB;"></span>
+        <div class="task-main">
+          <span class="task-name" style="color:#451a03;">背英语单词</span>
+        </div>
+        <span class="task-dur" style="color:#b45309;">42分钟</span>
+      </div>
+    </div>
+
+    <!-- 周四 -->
+    <div class="day-block">
+      <div class="day-head">
+        <span class="day-name">周四 7/30</span>
+        <span class="day-count">2 件</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time">15:00</span>
+        <span class="task-dot" style="background:#475569;"></span>
+        <div class="task-main">
+          <span class="task-name">提交报告</span>
+          <span class="task-tag split">分2段</span>
+        </div>
+        <span class="task-dur">2小时20分钟</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time">21:00</span>
+        <span class="task-dot" style="background:#2563EB;"></span>
+        <div class="task-main">
+          <span class="task-name">背英语单词</span>
+        </div>
+        <span class="task-dur">2小时57分钟</span>
+      </div>
+    </div>
+
+    <!-- 周五 -->
+    <div class="day-block">
+      <div class="day-head">
+        <span class="day-name">周五 7/31</span>
+        <span class="day-count">1 件</span>
+      </div>
+      <div class="task-row">
+        <span class="task-time">8:30</span>
+        <span class="task-dot" style="background:#DB2777;"></span>
+        <div class="task-main">
+          <span class="task-name">电力电子</span>
+          <span class="task-tag focus">深度专注</span>
+        </div>
+        <span class="task-dur">1小时2分钟</span>
+      </div>
+    </div>
+
+    <!-- 周六 · 今天 -->
+    <div class="day-block" style="border:none;">
+      <div class="day-head">
+        <span class="day-name" style="color:var(--blue);">周六 8/1</span>
+        <span class="day-count" style="color:white; background:var(--blue);">今天</span>
+      </div>
+      <div class="day-note" style="color:var(--blue);">进行中 · 完成 1 件即可点亮今天</div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#7C3AED;"></span>实践</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#2563EB;"></span>学习</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#DB2777;"></span>竞赛</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#475569;"></span>课程</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#16A34A;"></span>健康</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#CA8A04;"></span>生活</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span>深度专注</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#d1d5db;"></span>分2段</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 本周洞察（时间分布 · 专注时段 · 时段偏好） ═══════════════════ -->
+  <div class="card">
+    <div class="col-title">本周洞察</div>
+
+    <div class="ins-sec">任务类型 · 时间花在哪</div>
+    <!-- 固定顺序：课程 → 学习 → 实践 → 竞赛（0% 的类型不展示） -->
+    <div class="dom-row">
+      <span class="dom-label"><span class="dom-dot" style="background:#475569;"></span>课程</span>
+      <div class="dom-track"><div class="dom-fill" style="width:56%; background:#475569;"></div></div>
+      <span class="dom-pct">35%</span>
+      <span class="dom-time">2小时20分钟</span>
+    </div>
+    <div class="dom-row">
+      <span class="dom-label"><span class="dom-dot" style="background:#2563EB;"></span>学习</span>
+      <div class="dom-track"><div class="dom-fill" style="width:88%; background:#2563EB;"></div></div>
+      <span class="dom-pct">54%</span>
+      <span class="dom-time">3小时39分钟</span>
+    </div>
+    <div class="dom-row">
+      <span class="dom-label"><span class="dom-dot" style="background:#7C3AED;"></span>实践</span>
+      <div class="dom-track"><div class="dom-fill" style="width:100%; background:#7C3AED;"></div></div>
+      <span class="dom-pct">62%</span>
+      <span class="dom-time">4小时10分钟</span>
+    </div>
+    <div class="dom-row">
+      <span class="dom-label"><span class="dom-dot" style="background:#DB2777;"></span>竞赛</span>
+      <div class="dom-track"><div class="dom-fill" style="width:25%; background:#DB2777;"></div></div>
+      <span class="dom-pct">15%</span>
+      <span class="dom-time">1小时2分钟</span>
+    </div>
+
+    <div class="ins-divider"></div>
+
+    <div class="ins-sec">最认真时段 · 精力高峰</div>
+    <div class="ai-line">
+      <span class="ai-tag purple">上午 6-9 点</span>
+      <span>全天 61% 的专注集中在这个时段，精力最旺盛</span>
+    </div>
+
+    <div class="ins-divider"></div>
+
+    <div class="ins-sec">任务时段偏好</div>
+    <div class="ai-line">
+      <span class="ai-tag green">实践类</span>
+      <span>更喜欢在上午完成——画原理图 9:00、PCB 布线 10:00</span>
+    </div>
+    <div class="ai-line">
+      <span class="ai-tag purple">学习类</span>
+      <span>更喜欢在晚上完成——背单词两次都在 20-21 点</span>
+    </div>
+    <div class="ai-line">
+      <span class="ai-tag amber">注意</span>
+      <span>12 次打断全在下午</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 行动条 · 逐条应用 ═══════════════════ -->
+  <div class="action">
+    <div class="action-title">🎯 下周可以试试</div>
+    <div class="action-tip">逐条应用 · 只采纳符合你情况的建议</div>
+    <div class="action-item">
+      <span class="act-idx">①</span>
+      <span class="act-text">执行率仅 35%，下周排期要更现实</span>
+      <button class="act-btn" onclick="toggleApply(this)">应用</button>
+    </div>
+    <div class="action-item">
+      <span class="act-idx">②</span>
+      <span class="act-text">深度工作排上午</span>
+      <button class="act-btn" onclick="toggleApply(this)">应用</button>
+    </div>
+    <div class="action-item">
+      <span class="act-idx">③</span>
+      <span class="act-text">找一段不被打扰的时间</span>
+      <button class="act-btn" onclick="toggleApply(this)">应用</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ 空状态 · 本周无数据时显示 ═══════════════════ -->
+  <div style="border: 1px dashed var(--border); border-radius: 14px; padding: 34px 20px; text-align: center; background: var(--card-bg);">
+    <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--purple-bg); color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px;">📈</div>
+    <p style="font-size: 14px; font-weight: 600; margin: 0 0 4px 0;">这一周还没留下足迹</p>
+    <p style="font-size: 12px; color: var(--text2); margin: 0 0 16px 0;">完成第一个任务，你的战报就会从这里开始</p>
+    <span style="font-size: 12px; color: white; background: var(--brand); border-radius: 8px; padding: 8px 16px; display: inline-block;">去 Today 开始专注 →</span>
+    <p style="font-size: 10px; color: var(--text3); margin-top: 10px;">（空状态示意 · 本周有数据时不显示）</p>
+  </div>
+
+</div>
+
+<script>
+  // 逐条应用建议：点击切换 应用 ↔ 已应用（演示交互，实现时对接 Plan 标注）
+  function toggleApply(btn) {
+    const applied = btn.classList.toggle('applied');
+    btn.textContent = applied ? '已应用 ✓' : '应用';
+  }
+</script>
+
+</body>
+</html>

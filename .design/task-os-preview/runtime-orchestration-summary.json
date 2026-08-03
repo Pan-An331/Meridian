@@ -1,0 +1,711 @@
+{
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8"
+  },
+  "pages": [
+    {
+      "nodeId": "page-preview",
+      "htmlSrc": "pages/preview.html",
+      "title": "UI 优化预览",
+      "pageType": "showcase"
+    },
+    {
+      "nodeId": "page-tech-doc",
+      "htmlSrc": "pages/tech-doc.html",
+      "title": "Task OS 技术文档",
+      "pageType": "information-dense",
+      "businessScenario": "technical-documentation",
+      "qualityRisks": [
+        "long-scroll",
+        "dense-content",
+        "code-blocks"
+      ]
+    }
+  ],
+  "project": {
+    "resolvedLane": "existing_edit_add_comparison",
+    "selectedIntentWorkflowRead": true,
+    "contextRequirementsLoaded": [
+      {
+        "path": "shared-runtime/runtime-boundaries/lane-runtime-contracts.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/page-rendering-quality-gate.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/design-artifact-validation.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/delivery-evidence-contract.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "visual-experience/visual-experience-guidelines.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      }
+    ],
+    "contextReadScope": {
+      "mainAgent": {
+        "forbiddenReads": [
+          "other intent-workflows/**",
+          "Sub-Agent implementation files before dispatch"
+        ]
+      },
+      "pageSubAgent": {
+        "allowedReads": [
+          "current lane page runtime guide",
+          "current lane dispatch contract excerpt",
+          "current Page Packet",
+          "supplementaryReads[] only"
+        ],
+        "forbiddenReads": [
+          "SKILL.md full re-read",
+          "other intent-workflows/**",
+          "full runtime-orchestration-summary.json unless explicitly sliced"
+        ]
+      }
+    },
+    "validationRunDiscipline": {
+      "maxFullValidationRuns": 2,
+      "softWarningsTriggerRepair": false,
+      "blockingRepairMode": "targeted-once",
+      "forbiddenRepairTriggers": [
+        "soft-warning-only",
+        "provenance-warning-only",
+        "style-warning-only"
+      ]
+    },
+    "lowValueCallWatchdog": {
+      "applies": true,
+      "noProgressSignals": [
+        "no_tool_call",
+        "no_artifact_diff",
+        "no_structured_decision"
+      ],
+      "noProgressNextAction": "enter_readiness_or_blocked_summary"
+    },
+    "deviceType": "desktop",
+    "intentProfile": {
+      "routingReason": "Existing .design project with 1 page — adding new technical documentation page"
+    },
+    "sharedProjectShellContract": {
+      "deviceType": "desktop",
+      "viewportMode": "document-scroll",
+      "mobileNavigation": {
+        "required": false,
+        "applies": false
+      }
+    },
+    "styleContinuityAnchors": {
+      "colorSystem": "Indigo brand palette (--brand-50 to --brand-900) with neutral gray scale and semantic state colors (success/warning/error/info). Light mode only.",
+      "shapeSystem": "Rounded corners at 4 tiers (sm/md/lg/xl via --brand-radius-*), clean card-based containers with subtle borders.",
+      "typographySystem": "Outfit sans-serif font family, weight range 300-700, mono font for code. Headings use semibold/bold weights.",
+      "spacingSystem": "Consistent space-y-6 page rhythm, generous padding on cards, section-based layout.",
+      "componentLanguage": "Card-based containers with subtle shadows, colored left-border accents for status, indigo primary buttons, sidebar with dark bg.",
+      "surfaceAndDepth": "White cards on light gray background (--brand-background: #f8fafc), subtle shadows (sm/md/lg/xl), elevated surface for important content.",
+      "imageryAndIconography": "Lucide icons via CDN, minimal decorative imagery, content-first approach.",
+      "interactionTone": "Smooth cubic-bezier transitions, hover states on interactive elements, professional and calm."
+    },
+    "pageCompletenessGate": {
+      "expectedPages": [
+        "preview",
+        "tech-doc"
+      ],
+      "requiredStates": [],
+      "requiredInteractions": [],
+      "requiredNavigation": [],
+      "missingAllowed": []
+    },
+    "cssPreflightEvidence": {
+      "applies": true,
+      "status": "passed",
+      "brandPrefix": "brand",
+      "checks": {
+        "themeVars": "present",
+        "semanticTokenFallback": "present",
+        "themeInline": "present",
+        "tailwindCdn": "present",
+        "htmlClass": "present",
+        "semanticMappings": "resolved"
+      }
+    },
+    "validationHistory": [
+      {
+        "reportPath": "validation-report.json",
+        "checkedAt": "2026-07-31T02:44:15.777Z",
+        "success": false,
+        "exitCode": 1,
+        "renderBlockingErrorCount": 1,
+        "repairPlanHints": []
+      },
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "3e7a52edb7043785fae934457377c20dbadf4881596c18d6a7969fa2f8ff46f8",
+        "checkedAt": "2026-07-31T06:37:27.998Z",
+        "success": false,
+        "exitCode": 1,
+        "renderBlockingErrorCount": 2,
+        "repairPlanHints": [],
+        "errorSignatures": [
+          {
+            "errorClass": "repair-ledger",
+            "normalized": "[repair-ledger] validationRepairLedger[] is required because validationHistory[] contains failed validation",
+            "signature": "8bcc8da0f1fe568cbaeffae535389b80f0a5031c3a4dfd625cc62f1becb0cfbc"
+          },
+          {
+            "errorClass": "dispatch-preflight-or-ownership",
+            "normalized": "[dispatch-changed-files] pages/preview.html: matching project.expectedDispatches[] completion row is required",
+            "signature": "9e2f2896e807a4b0c34e156768dfd6e2f1bbebda3c7f7bdbbe8150be72433c87"
+          }
+        ],
+        "terminalState": null
+      },
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "checkedAt": "2026-07-31T06:41:18.125Z",
+        "success": false,
+        "exitCode": 1,
+        "renderBlockingErrorCount": 1,
+        "repairPlanHints": [],
+        "errorSignatures": [
+          {
+            "errorClass": "repair-ledger",
+            "normalized": "[repair-ledger] validationHistory has 2 failed validation(s) but validationRepairLedger has 1 entry",
+            "signature": "3333f42e8489019214d29e9169a3809249d6d5b6e31c930564d89f17669be9a9"
+          }
+        ],
+        "terminalState": null
+      },
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "checkedAt": "2026-07-31T06:41:56.825Z",
+        "success": false,
+        "exitCode": 1,
+        "renderBlockingErrorCount": 1,
+        "repairPlanHints": [],
+        "errorSignatures": [
+          {
+            "errorClass": "repair-ledger",
+            "normalized": "[repair-ledger] validationHistory has 3 failed validation(s) but validationRepairLedger has 2 entries",
+            "signature": "83056ddec66775c77061757e3308101358be6a4d9ab350b7bfe56498430fa7fa"
+          }
+        ],
+        "terminalState": null
+      }
+    ],
+    "readScopeLedger": [
+      {
+        "actor": "page-sub-agent",
+        "lane": "free_exploration",
+        "path": "intent-workflows/intent-page-free-exploration/free-exploration-page-runtime.md",
+        "reason": "page runtime guide",
+        "scopeClass": "page-runtime",
+        "declaredBeforeRead": true,
+        "recordedAt": "2026-07-31T02:29:45.724Z",
+        "nodeId": "page-preview",
+        "htmlSrc": "pages/preview.html"
+      },
+      {
+        "actor": "page-sub-agent",
+        "lane": "free_exploration",
+        "path": "intent-workflows/intent-page-free-exploration/dispatch-contract.md",
+        "reason": "dispatch contract",
+        "scopeClass": "dispatch-contract",
+        "declaredBeforeRead": true,
+        "recordedAt": "2026-07-31T02:29:45.724Z",
+        "nodeId": "page-preview",
+        "htmlSrc": "pages/preview.html"
+      }
+    ],
+    "mainAgentPostDispatchMutations": [
+      {
+        "path": "task-os-preview.design",
+        "reason": "updated devMetadata after page dispatch",
+        "owner": "main-agent",
+        "recordedAt": "2026-07-31T02:46:29.309Z",
+        "source": "record-dispatch-completion.mjs"
+      }
+    ],
+    "validationRepairLedger": [
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "3e7a52edb7043785fae934457377c20dbadf4881596c18d6a7969fa2f8ff46f8",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:38:24.301Z",
+        "repairEntryStatus": "revalidated-failed-blocked",
+        "ownerTriage": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [],
+            "repairScope": "append_repair_entry_evidence_and_revalidation_report",
+            "strategy": "read validation report and repair workflow only"
+          },
+          {
+            "owner": "main-agent",
+            "errorClass": "dispatch-preflight-or-ownership",
+            "affectedFiles": [],
+            "repairScope": "return_to_dispatch_preflight_gate",
+            "strategy": "read summary and dispatch contract only"
+          }
+        ],
+        "repairPlanHints": [],
+        "repairActions": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [
+              "runtime-orchestration-summary.json"
+            ],
+            "action": "append_repair_entry_evidence",
+            "observedFileHashes": [
+              {
+                "path": "runtime-orchestration-summary.json",
+                "hash": "e309638895d9d221d813916cc0d26a8dd4c8b55779175b6ef19f7b62628c1d5d"
+              }
+            ],
+            "preEditFileHashes": [],
+            "postEditFileHashes": [],
+            "repairOwnedFields": [
+              "validationRepairLedger"
+            ],
+            "recordedAt": "2026-07-31T06:38:43.711Z",
+            "repairActionTableRequired": true
+          }
+        ],
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "3e7a52edb7043785fae934457377c20dbadf4881596c18d6a7969fa2f8ff46f8",
+        "revalidationSuccess": false,
+        "blockedReason": "repair-ledger-diagnostic",
+        "revalidationRecordedAt": "2026-07-31T06:40:51.110Z"
+      },
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:41:31.248Z",
+        "repairEntryStatus": "revalidated-failed-blocked",
+        "ownerTriage": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [],
+            "repairScope": "append_repair_entry_evidence_and_revalidation_report",
+            "strategy": "read validation report and repair workflow only"
+          }
+        ],
+        "repairPlanHints": [],
+        "repairActions": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [
+              "runtime-orchestration-summary.json"
+            ],
+            "action": "append_repair_entry_evidence",
+            "observedFileHashes": [
+              {
+                "path": "runtime-orchestration-summary.json",
+                "hash": "3cc152444a3b719eda381cb12f8a3fb3eededce4ee81ecc54d268c4fa79f4179"
+              }
+            ],
+            "preEditFileHashes": [],
+            "postEditFileHashes": [],
+            "repairOwnedFields": [
+              "validationRepairLedger"
+            ],
+            "recordedAt": "2026-07-31T06:41:40.505Z",
+            "repairActionTableRequired": true
+          }
+        ],
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "revalidationSuccess": false,
+        "blockedReason": "repair-ledger-diagnostic",
+        "revalidationRecordedAt": "2026-07-31T06:41:48.928Z"
+      },
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:42:14.128Z",
+        "repairEntryStatus": "revalidated-failed-blocked",
+        "ownerTriage": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [],
+            "repairScope": "append_repair_entry_evidence_and_revalidation_report",
+            "strategy": "read validation report and repair workflow only"
+          }
+        ],
+        "repairPlanHints": [],
+        "repairActions": [
+          {
+            "owner": "main-agent",
+            "errorClass": "repair-ledger",
+            "affectedFiles": [
+              "runtime-orchestration-summary.json"
+            ],
+            "action": "append_repair_entry_evidence",
+            "observedFileHashes": [
+              {
+                "path": "runtime-orchestration-summary.json",
+                "hash": "c34113430b29c4635771351524b01f01ee25895f561fd4dce4d191816163dca5"
+              }
+            ],
+            "preEditFileHashes": [],
+            "postEditFileHashes": [],
+            "repairOwnedFields": [
+              "validationRepairLedger"
+            ],
+            "recordedAt": "2026-07-31T06:42:22.692Z",
+            "repairActionTableRequired": true
+          }
+        ],
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "revalidationSuccess": false,
+        "blockedReason": "repair-ledger-diagnostic",
+        "revalidationRecordedAt": "2026-07-31T06:42:31.772Z"
+      }
+    ],
+    "repairEntryEvidence": [
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "3e7a52edb7043785fae934457377c20dbadf4881596c18d6a7969fa2f8ff46f8",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:38:24.301Z",
+        "ledgerIndex": 0,
+        "ownerTriageCount": 2,
+        "repairActionCount": 1,
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "3e7a52edb7043785fae934457377c20dbadf4881596c18d6a7969fa2f8ff46f8",
+        "revalidationSuccess": false
+      },
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:41:31.248Z",
+        "ledgerIndex": 1,
+        "ownerTriageCount": 1,
+        "repairActionCount": 1,
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "revalidationSuccess": false
+      },
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-31T06:42:14.128Z",
+        "ledgerIndex": 2,
+        "ownerTriageCount": 1,
+        "repairActionCount": 1,
+        "revalidationReportPath": "validation-report.json",
+        "revalidationReportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "revalidationSuccess": false
+      }
+    ],
+    "dispatchPreflightManifest": [
+      {
+        "recorded_at": "2026-07-31T06:29:03.304Z",
+        "generatedBy": "build-page-dispatch-manifest.mjs",
+        "packetType": "FreePagePacket",
+        "laneContract": {
+          "resolvedLane": "free_exploration",
+          "packetType": "FreePagePacket",
+          "pageRuntimeGuide": "intent-workflows/intent-page-free-exploration/free-exploration-page-runtime.md",
+          "dispatchContract": "intent-workflows/intent-page-free-exploration/dispatch-contract.md"
+        },
+        "taskLinePresent": true,
+        "outputPathPresent": true,
+        "sharedTemplate": "intent-workflows/intent-page-free-exploration/free-exploration-page-runtime.md",
+        "nodeId": "page-preview",
+        "htmlSrc": "pages/preview.html",
+        "supplementaryReads": [],
+        "allowedWritePaths": [
+          "pages/preview.html",
+          "assets/"
+        ],
+        "forbiddenWriteRoots": [
+          "*.design",
+          "runtime-orchestration-summary.json",
+          "validation-report.json",
+          "finish-readiness-report.json",
+          "restore-contract-report.json",
+          "page-generation-summary.json"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/preview.html",
+            "assets/"
+          ]
+        },
+        "skillRuntime": {
+          "skillDir": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design",
+          "deterministicToolDir": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling",
+          "toolPaths": {
+            "applyHtmlHeadContract": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\apply-html-head-contract.mjs",
+            "recordDispatchCompletion": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\record-dispatch-completion.mjs",
+            "buildPageDispatchManifest": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\build-page-dispatch-manifest.mjs",
+            "validateDesignWorkspace": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-design-workspace.mjs",
+            "validateFinishReadiness": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-finish-readiness.mjs",
+            "validateRestoreContract": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-restore-contract.mjs"
+          },
+          "requiredForPageSubAgent": [
+            "applyHtmlHeadContract",
+            "recordDispatchCompletion"
+          ],
+          "pathInjection": "absolute",
+          "pathContract": "Do not use {SKILL_DIR} placeholders inside Page Sub-Agent packets; use toolPaths.* absolute paths.",
+          "commandTemplates": {
+            "recordDispatchCompletion": "node \"c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\record-dispatch-completion.mjs\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\" --node-id=\"page-preview\" --html-src=\"pages/preview.html\" --status=completed --changed-files=<comma-separated-project-relative-files> --trace-digest=<main-agent-runtime-trace-digest> --tool-ledger-json=<tool-ledger-json-or-file>"
+          }
+        },
+        "cssFilePath": "g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\colors_and_type.css",
+        "htmlFilePath": "g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\pages\\preview.html",
+        "brandPrefix": "brand",
+        "aestheticsMode": "free-explore",
+        "toolDisciplineBlockPresent": true,
+        "fillHtmlHeadCommand": "node \"c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\apply-html-head-contract.mjs\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\colors_and_type.css\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\pages\\preview.html\" --title=\"UI 优化预览\" --lang=\"zh-CN\" --prefix=\"brand\" --replace-head",
+        "headFillMode": "replace-head-after-body",
+        "viewportMode": null,
+        "completionSchemaExpected": "compact",
+        "restoreFields": null,
+        "restoreContractStatus": null,
+        "restoreCompactPacket": null,
+        "deterministicCommands": null,
+        "sourceAuthorityLock": null,
+        "preDispatchFileHashes": {
+          "task-os-preview.design": "cf8c4e717a1e6ff2dbe9e17fab26de66440ec0ed569930c31bfe64eb17bb7eb5"
+        },
+        "contextPreflight": {
+          "workflowPath": "intent-workflows/intent-page-free-exploration/INTENT_WORKFLOW.md",
+          "requiredContextFiles": [
+            "shared-runtime/runtime-boundaries/lane-runtime-contracts.md",
+            "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md",
+            "delivery-quality/page-rendering-quality-gate.md",
+            "delivery-quality/design-artifact-validation.md",
+            "delivery-quality/delivery-evidence-contract.md",
+            "visual-experience/visual-experience-guidelines.md"
+          ],
+          "optionalContextFiles": [],
+          "passed": true
+        },
+        "pageSliceOnly": true,
+        "requiredFieldsPresent": true,
+        "missingFields": [],
+        "fillHtmlHeadCommandValid": true,
+        "mobileNavigation": {
+          "required": false,
+          "appliesToThisPage": false,
+          "canonicalHtmlIncluded": false,
+          "missingFields": []
+        },
+        "persistedToSummary": true,
+        "taskQueryAudited": false,
+        "proofSource": "summary-only",
+        "largeWorkflowFilesInTaskQuery": null
+      },
+      {
+        "recorded_at": "2026-07-31T06:29:03.304Z",
+        "generatedBy": "build-page-dispatch-manifest.mjs",
+        "packetType": "FreePagePacket",
+        "laneContract": {
+          "resolvedLane": "free_exploration",
+          "packetType": "FreePagePacket",
+          "pageRuntimeGuide": "intent-workflows/intent-page-free-exploration/free-exploration-page-runtime.md",
+          "dispatchContract": "intent-workflows/intent-page-free-exploration/dispatch-contract.md"
+        },
+        "taskLinePresent": true,
+        "outputPathPresent": true,
+        "sharedTemplate": "intent-workflows/intent-page-free-exploration/free-exploration-page-runtime.md",
+        "nodeId": "page-tech-doc",
+        "htmlSrc": "pages/tech-doc.html",
+        "supplementaryReads": [],
+        "allowedWritePaths": [
+          "pages/tech-doc.html",
+          "assets/"
+        ],
+        "forbiddenWriteRoots": [
+          "*.design",
+          "runtime-orchestration-summary.json",
+          "validation-report.json",
+          "finish-readiness-report.json",
+          "restore-contract-report.json",
+          "page-generation-summary.json"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/tech-doc.html",
+            "assets/"
+          ]
+        },
+        "skillRuntime": {
+          "skillDir": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design",
+          "deterministicToolDir": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling",
+          "toolPaths": {
+            "applyHtmlHeadContract": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\apply-html-head-contract.mjs",
+            "recordDispatchCompletion": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\record-dispatch-completion.mjs",
+            "buildPageDispatchManifest": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\build-page-dispatch-manifest.mjs",
+            "validateDesignWorkspace": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-design-workspace.mjs",
+            "validateFinishReadiness": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-finish-readiness.mjs",
+            "validateRestoreContract": "c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-restore-contract.mjs"
+          },
+          "requiredForPageSubAgent": [
+            "applyHtmlHeadContract",
+            "recordDispatchCompletion"
+          ],
+          "pathInjection": "absolute",
+          "pathContract": "Do not use {SKILL_DIR} placeholders inside Page Sub-Agent packets; use toolPaths.* absolute paths.",
+          "commandTemplates": {
+            "recordDispatchCompletion": "node \"c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\record-dispatch-completion.mjs\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\" --node-id=\"page-tech-doc\" --html-src=\"pages/tech-doc.html\" --status=completed --changed-files=<comma-separated-project-relative-files> --trace-digest=<main-agent-runtime-trace-digest> --tool-ledger-json=<tool-ledger-json-or-file>"
+          }
+        },
+        "cssFilePath": "g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\colors_and_type.css",
+        "htmlFilePath": "g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\pages\\tech-doc.html",
+        "brandPrefix": "brand",
+        "aestheticsMode": "free-explore",
+        "toolDisciplineBlockPresent": true,
+        "fillHtmlHeadCommand": "node \"c:\\Users\\33458\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\apply-html-head-contract.mjs\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\colors_and_type.css\" \"g:\\Agent_Project\\task-manage-sys\\.design\\task-os-preview\\pages\\tech-doc.html\" --title=\"Task OS 技术文档\" --lang=\"zh-CN\" --prefix=\"brand\"",
+        "headFillMode": "skeleton-first",
+        "viewportMode": null,
+        "completionSchemaExpected": "compact",
+        "restoreFields": null,
+        "restoreContractStatus": null,
+        "restoreCompactPacket": null,
+        "deterministicCommands": null,
+        "sourceAuthorityLock": null,
+        "preDispatchFileHashes": {
+          "task-os-preview.design": "cf8c4e717a1e6ff2dbe9e17fab26de66440ec0ed569930c31bfe64eb17bb7eb5"
+        },
+        "contextPreflight": {
+          "workflowPath": "intent-workflows/intent-page-free-exploration/INTENT_WORKFLOW.md",
+          "requiredContextFiles": [
+            "shared-runtime/runtime-boundaries/lane-runtime-contracts.md",
+            "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md",
+            "delivery-quality/page-rendering-quality-gate.md",
+            "delivery-quality/design-artifact-validation.md",
+            "delivery-quality/delivery-evidence-contract.md",
+            "visual-experience/visual-experience-guidelines.md"
+          ],
+          "optionalContextFiles": [],
+          "passed": true
+        },
+        "pageSliceOnly": true,
+        "requiredFieldsPresent": true,
+        "missingFields": [],
+        "fillHtmlHeadCommandValid": true,
+        "mobileNavigation": {
+          "required": false,
+          "appliesToThisPage": false,
+          "canonicalHtmlIncluded": false,
+          "missingFields": []
+        },
+        "persistedToSummary": true,
+        "taskQueryAudited": false,
+        "proofSource": "summary-only",
+        "largeWorkflowFilesInTaskQuery": null
+      }
+    ],
+    "expectedDispatches": [
+      {
+        "nodeId": "page-preview",
+        "pageId": "page-preview",
+        "targetPageId": "page-preview",
+        "htmlSrc": "pages/preview.html",
+        "packetType": "FreePagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/preview.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "d316b125833c5415aeb12db85164b8763f610a27d8f75b3da74a29533c593c4d",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        },
+        "recordedAt": "2026-07-31T02:46:29.309Z",
+        "source": "record-dispatch-completion.mjs"
+      },
+      {
+        "nodeId": "page-tech-doc",
+        "pageId": "page-tech-doc",
+        "targetPageId": "page-tech-doc",
+        "htmlSrc": "pages/tech-doc.html",
+        "packetType": "FreePagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/tech-doc.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "main-agent-trace",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        },
+        "recordedAt": "2026-07-31T06:36:56.176Z",
+        "source": "record-dispatch-completion.mjs"
+      }
+    ],
+    "repairStopConditionMet": true,
+    "repairStopReason": "repair-ledger-diagnostic",
+    "remainingBlockingIssues": [
+      "[repair-ledger] validationHistory has 3 failed validation(s) but validationRepairLedger has 2 entries"
+    ],
+    "ledgerDiagnosticReports": [
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "c3d299013bf46078c622b75bec2fe1d641f556552382fe4276a3d121caa11aba",
+        "checkedAt": "2026-07-31T06:41:18.125Z",
+        "success": false,
+        "exitCode": 1,
+        "diagnosticOnly": true,
+        "diagnosticClass": "repair-ledger",
+        "blockedReason": "repair-ledger-diagnostic"
+      },
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "7678f651bd33723ca60050180c751422d165d781cf6b86ea9a46078870f06503",
+        "checkedAt": "2026-07-31T06:41:56.825Z",
+        "success": false,
+        "exitCode": 1,
+        "diagnosticOnly": true,
+        "diagnosticClass": "repair-ledger",
+        "blockedReason": "repair-ledger-diagnostic"
+      }
+    ]
+  }
+}
