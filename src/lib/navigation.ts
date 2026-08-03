@@ -8,23 +8,26 @@ import {
    Inbox(理解) → Plan(规划) → Today(执行) → Review(复盘) → Project(整理)
    所有页面路径、宽度规则、快捷键顺序都从这里取，
    新增页面只改这一处（REVIEW P1-3）
+   中英双语：labelZh/labelEn（默认中文：收纳/蓝图/此刻/复盘/项目）+ subZh/subEn
    ═══════════════════════════════════════════ */
 
 export interface NavItem {
   href: string;
-  label: string;
-  sub: string;
+  labelZh: string;  // 中文显示名（默认）
+  labelEn: string;  // English display name
+  subZh: string;    // 中文副标题（sidebar 小字）
+  subEn: string;    // English subtitle
   num: string;      // ① ② ③ ④
   Icon: ComponentType<{ size?: number; className?: string }>;
   isDefault?: boolean; // Today 默认落地
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/inbox",    label: "Inbox",   sub: "理解",        num: "①", Icon: InboxIcon },
-  { href: "/plan",     label: "Plan",    sub: "规划",        num: "②", Icon: PlanIcon },
-  { href: "/today",    label: "Today",   sub: "执行 · 驾驶舱", num: "③", Icon: TodayIcon, isDefault: true },
-  { href: "/review",   label: "Review",  sub: "复盘",        num: "④", Icon: ReviewIcon },
-  { href: "/projects", label: "Project", sub: "整理",        num: "⑤", Icon: ProjectIcon },
+  { href: "/inbox",    labelZh: "收纳", labelEn: "Inbox",    subZh: "理解",     subEn: "Capture", num: "①", Icon: InboxIcon },
+  { href: "/plan",     labelZh: "蓝图", labelEn: "Plan",     subZh: "规划",     subEn: "Plan",    num: "②", Icon: PlanIcon },
+  { href: "/today",    labelZh: "此刻", labelEn: "Today",    subZh: "执行 · 驾驶舱", subEn: "Focus", num: "③", Icon: TodayIcon, isDefault: true },
+  { href: "/review",   labelZh: "复盘", labelEn: "Review",   subZh: "复盘",     subEn: "Review",  num: "④", Icon: ReviewIcon },
+  { href: "/projects", labelZh: "项目", labelEn: "Projects", subZh: "整理",     subEn: "Organize", num: "⑤", Icon: ProjectIcon },
 ];
 
 /** 快捷键循环顺序：工作流 5 页 + 设置 */

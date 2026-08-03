@@ -139,6 +139,11 @@ export async function PUT(
       data.level = body.level;
     }
     if (body.accumulate !== undefined) data.accumulate = !!body.accumulate;
+    // Project 页优化 · 阶段 D：★ 执行清单开关持久化（布尔白名单）
+    if (body.star !== undefined) {
+      if (typeof body.star !== "boolean") return badRequest("star 需为布尔值");
+      data.star = body.star;
+    }
     // 修复 P0-2：不允许直接写 category 之外的任意字段；category 走归一化
     if (body.category !== undefined) {
       const { normalizeCategory } = await import("@/lib/plan/colors");

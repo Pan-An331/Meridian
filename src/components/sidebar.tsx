@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { SettingsIcon, LogOutIcon } from "@/components/ui/icons";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NAV_ITEMS, isActiveNav } from "@/lib/navigation";
+import { getNavLang, listenNavLang, type NavLang } from "@/lib/ui-preferences";
+import MeridianLogo from "@/components/auth/MeridianLogo";
 
 /* ═══════════════════════════════════════════
    Sidebar V2 — 工作流顺序（默认导航形态）
@@ -40,20 +43,22 @@ function ToggleIcon({ collapsed }: { collapsed: boolean }) {
 export function Sidebar({ userName, collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const w = collapsed ? "w-16" : "w-64";
+  const [lang, setLang] = useState<NavLang>("zh");
+
+  useEffect(() => {
+    setLang(getNavLang());
+    return listenNavLang(setLang);
+  }, []);
 
   return (
     <aside className={`${w} bg-[var(--page-sidebar)] text-[var(--page-sidebar-text)] flex flex-col h-full shrink-0 transition-all duration-200 hidden lg:flex`}>
-      {/* Brand row — 64px 与顶栏统一 */}
+      {/* Brand row — 64px 与顶栏统一（Meridian 品牌 · C 方案 Logo） */}
       <div className="flex items-center justify-between p-5 border-b border-white/10 h-16 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--color-grad-brand)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-              <rect x="9" y="3" width="6" height="4" rx="1" />
-              <path d="M9 14l2 2 4-4" />
-            </svg>
+            <MeridianLogo size={18} />
           </div>
-          {!collapsed && <h1 className="text-lg font-bold tracking-tight">Task OS</h1>}
+          {!collapsed && <h1 className="text-lg font-bold tracking-tight">Meridian</h1>}
         </div>
         <button
           onClick={onToggle}
@@ -71,8 +76,10 @@ export function Sidebar({ userName, collapsed, onToggle }: SidebarProps) {
 
       {/* 工作流导航（Today 默认徽章） */}
       <nav className={`flex-1 overflow-y-auto ${collapsed ? "px-2 py-3 space-y-1" : "p-4 space-y-1"}`}>
-        {NAV_ITEMS.map(({ href, label, sub, Icon, isDefault }) => {
+        {NAV_ITEMS.map(({ href, labelZh, labelEn, subZh, subEn, Icon, isDefault }) => {
           const active = isActiveNav(pathname, href);
+          const label = lang === "zh" ? labelZh : labelEn;
+          const sub = lang === "zh" ? subZh : subEn;
           return (
             <Link key={href} href={href} title={collapsed ? label : undefined}
               className={`flex items-center rounded-lg text-sm transition-all duration-150 ${
@@ -89,7 +96,7 @@ export function Sidebar({ userName, collapsed, onToggle }: SidebarProps) {
                 <div className="flex flex-col min-w-0">
                   <span className="leading-tight truncate flex items-center gap-1.5">
                     {label}
-                    {isDefault && <span className="text-xs px-1.5 py-px rounded bg-white/12 text-brand-200 font-normal">默认</span>}
+                    {isDefault && <span className="text-xs px-1.5 py-px rounded bg-white/12 text-brand-200 font-normal">{lang === "zh" ? "默认" : "Default"}</span>}
                   </span>
                   <span className={`text-xs leading-tight ${active ? "text-brand-200" : "text-[var(--page-sidebar-text)]/35"}`}>{sub}</span>
                 </div>

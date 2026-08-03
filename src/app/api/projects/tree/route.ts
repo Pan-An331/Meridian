@@ -1,10 +1,14 @@
 // V5 项目整理页：读取任务树
-// GET /api/projects/tree → { roots: TreeNode[], orphans: TreeNode[] }
+// GET /api/projects/tree → { trees: TreeNode[], orphans: TreeNode[] }
 // 一次全查 + 内存组装（深度不限），orphans = 未挂树的任务级任务（可拖进任意树）
+// Project 页优化（2026-08-04）：+themeColor（project 派生色）/ +suggestion（orphans 建议归属）/ +doneCount/totalCount（完成度）/ +star
 
 import { NextResponse } from "next/server";
 import { getServerSession, unauthorized } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
+import { deriveProjectThemeColor } from "@/lib/project/theme-color";
+import { suggestTarget, type Suggestion } from "@/lib/project/suggestion";
+import { getStreak } from "@/lib/task/streak";
 
 interface TreeNode {
   id: string;
@@ -14,11 +18,28 @@ interface TreeNode {
   accumulate: boolean;
   completedAt: string | null;
   category: string | null;
+  theme: string | null;
+  themeColor: { pcolor: string; pbg: string; theme: string | null } | null;
   estimatedMinutes: number | null;
   deadline: string | null;
   importance: number;
   parentId: string | null;
+  star: boolean;
+  doneCount: number;
+  totalCount: number;
+  streak?: { current: number; longest: number; lastDate: string | null; todayChecked: boolean; last30: string[] } | null;
+  weekTarget?: number | null;
+  weekCount?: number | null;
   children: TreeNode[];
+  suggestion?: Suggestion | null; // 仅 orphans 顶层使用
+}
+
+// 树内原始节点（轻量）
+interface RawNode {
+  id: string; title: string; level: string | null; status: string; accumulate: boolean;
+  completedAt: Date | null; category: string | null; theme: string | null;
+  estimatedMinutes: number | null; deadline: Date | null; importance: number;
+  parentId: string | null; star: boolean; sortOrder: number;
 }
 
 export async function GET() {
@@ -29,20 +50,24 @@ export async function GET() {
     where: { userId: session.user.id },
     select: {
       id: true, title: true, level: true, status: true, accumulate: true,
-      completedAt: true, category: true, estimatedMinutes: true,
-      deadline: true, importance: true, parentId: true, sortOrder: true,
+      completedAt: true, category: true, theme: true, estimatedMinutes: true,
+      deadline: true, importance: true, parentId: true, sortOrder: true, star: true,
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
+  }) as RawNode[];
 
   const nodes = new Map<string, TreeNode>();
   for (const t of tasks) {
     nodes.set(t.id, {
       id: t.id, title: t.title, level: t.level || "task", status: t.status,
       accumulate: t.accumulate, completedAt: t.completedAt?.toISOString() ?? null,
-      category: t.category, estimatedMinutes: t.estimatedMinutes,
+      category: t.category, theme: t.theme ?? null,
+      themeColor: null, // 阶段 A：project 级派生色（子树聚合后填）
+      estimatedMinutes: t.estimatedMinutes,
       deadline: t.deadline?.toISOString() ?? null, importance: t.importance,
-      parentId: t.parentId, children: [],
+      parentId: t.parentId, star: t.star,
+      doneCount: 0, totalCount: 0, // 阶段 C：完成度（聚合后填）
+      children: [],
     });
   }
 
@@ -56,9 +81,71 @@ export async function GET() {
     }
   }
 
-  // trees = 全部根节点（前端按树渲染，展开/折叠）
-  // orphans = 便捷列表：未挂树的 task 级任务（前端"待整理池"，可拖进任意树）
+  // ── 阶段 C：完成度聚合（自底向上，直接子级统计；cancelled 不计入）──
+  function aggregateCompletion(node: TreeNode): { done: number; total: number } {
+    let done = node.status === "completed" ? 1 : 0;
+    let total = node.status !== "cancelled" ? 1 : 0;
+    for (const c of node.children) {
+      const sub = aggregateCompletion(c);
+      done += sub.done;
+      total += sub.total;
+    }
+    node.doneCount = done;
+    node.totalCount = total;
+    return { done, total };
+  }
+  for (const r of roots) aggregateCompletion(r);
+
+  // ── 阶段 A：project 级派生色（子树任务 theme/category 主频聚合）──
+  function collectDescendants(node: TreeNode): { theme: string | null; category: string | null }[] {
+    const acc: { theme: string | null; category: string | null }[] = [];
+    const walk = (n: TreeNode) => {
+      for (const c of n.children) {
+        acc.push({ theme: c.theme, category: c.category });
+        walk(c);
+      }
+    };
+    walk(node);
+    return acc;
+  }
+  function applyThemeColor(node: TreeNode) {
+    if (node.level === "project") {
+      const descendants = collectDescendants(node);
+      node.themeColor = deriveProjectThemeColor(descendants);
+    }
+    for (const c of node.children) applyThemeColor(c);
+  }
+  for (const r of roots) applyThemeColor(r);
+
+  // ── 阶段 B：orphans 建议归属（标题/主题匹配，零 AI，不强猜）──
   const orphans = roots.filter(r => r.level === "task" && r.status !== "cancelled");
+  // 候选挂入目标 = project/phase 级节点（含其下各级的 project/phase 节点）
+  const candidateTargets: { id: string; title: string; theme: string | null }[] = [];
+  const collectTargets = (node: TreeNode) => {
+    if (node.level === "project" || node.level === "phase") {
+      candidateTargets.push({ id: node.id, title: node.title, theme: node.theme });
+    }
+    for (const c of node.children) collectTargets(c);
+  };
+  for (const r of roots) collectTargets(r);
+
+  for (const o of orphans) {
+    o.suggestion = suggestTarget({ title: o.title, theme: o.theme }, candidateTargets);
+  }
+
+  // ── 积累型：streak 透传（树接口复用，阶段 C 需求：积累型返回连续天数）──
+  const accumNodes: TreeNode[] = [];
+  const walkAccum = (node: TreeNode) => {
+    if (node.accumulate) accumNodes.push(node);
+    for (const c of node.children) walkAccum(c);
+  };
+  for (const r of roots) walkAccum(r);
+  if (accumNodes.length > 0) {
+    const streaks = await Promise.all(
+      accumNodes.map(n => getStreak(session.user.id, n.id).catch(() => null))
+    );
+    accumNodes.forEach((n, i) => { n.streak = streaks[i]; });
+  }
 
   return NextResponse.json({ trees: roots, orphans });
 }

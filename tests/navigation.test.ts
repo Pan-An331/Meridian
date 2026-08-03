@@ -13,6 +13,18 @@ describe("navigation · 工作流顺序", () => {
   it("快捷键顺序 = 工作流 5 页 + 设置", () => {
     expect(NAV_ORDER).toEqual(["/inbox", "/plan", "/today", "/review", "/projects", "/settings"]);
   });
+
+  it("中英双语导航名（默认中文：收纳/蓝图/此刻/复盘/项目）", () => {
+    expect(NAV_ITEMS.map((i) => i.labelZh)).toEqual(["收纳", "蓝图", "此刻", "复盘", "项目"]);
+    expect(NAV_ITEMS.map((i) => i.labelEn)).toEqual(["Inbox", "Plan", "Today", "Review", "Projects"]);
+  });
+
+  it("副标题双语齐全", () => {
+    for (const i of NAV_ITEMS) {
+      expect(i.subZh.length).toBeGreaterThan(0);
+      expect(i.subEn.length).toBeGreaterThan(0);
+    }
+  });
 });
 
 describe("isActiveNav · 激活判断", () => {

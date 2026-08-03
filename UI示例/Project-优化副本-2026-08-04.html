@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 页优化副本 v3 · 大纲式层级树</title>
+<style>
+:root{
+  --bg:#eef0f4; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
+  --brand:#1e3a8a; --brand-deep:#172554; --brand-bg:#e0e7ff; --brand-border:#c7d2fe;
+  --gold:#f59e0b; --gold-bg:#fffbeb; --gold-border:#fcd34d;
+  --green:#059669; --green-bg:#ecfdf5;
+  --amber:#d97706; --amber-bg:#fffbeb;
+  --group-bg:#f4f6fb; --line:#e3e8ef;
+  --memo-bg:#fff9e6; --memo-bar:#f5a623; --memo-tx:#8b6914; --memo-ck:#d4a853;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+.page{max-width:1080px;margin:0 auto;padding:28px 20px 0}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.page-head h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.page-head .sub{font-size:12px;color:var(--text2);margin-top:3px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{font-size:10.5px;font-weight:600;padding:3.5px 11px;border-radius:14px;background:#fff;color:var(--text2);border:1px solid #dfe3ea;letter-spacing:.2px}
+.chip.key{background:var(--brand-bg);color:var(--brand-deep);border-color:var(--brand-border)}
+.main{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+@media(max-width:860px){.main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.card-head{display:flex;align-items:center;gap:8px;padding:11px 16px;font-size:13px;font-weight:700;border-bottom:1px solid #f1f2f5}
+.card-head .dot{width:7px;height:7px;border-radius:50%;background:var(--brand)}
+.card-head .cnt{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--text3)}
+.card-head .btn-mini{margin-left:10px;font-size:10.5px;font-weight:600;color:var(--brand-deep);background:var(--brand-bg);border:none;border-radius:7px;padding:4px 10px;cursor:pointer}
+.card-head .btn-mini:hover{background:var(--brand-border)}
+
+/* ═══ 大纲式树 ═══ */
+.tree{padding:8px 6px 10px}
+.trow{position:relative;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .12s;user-select:none;border-left:3px solid transparent}
+.trow:hover{background:#f5f7fa}
+.trow.sel{background:var(--brand-bg);border-left-color:var(--brand)}
+/* 项目根 = 分组头（自动派生色：主题 > 主领域） */
+.trow.lvl0{background:var(--group-bg);border-left:3px solid var(--pcolor,var(--brand));margin-top:6px;font-weight:700;font-size:13.5px}
+.trow.lvl0:first-of-type{margin-top:0}
+.trow.lvl0:hover{background:#eef1f8}
+.trow.lvl0.sel{background:var(--brand-bg);border-left-color:var(--pcolor,var(--brand))}
+.trow.lvl0 .prog b{color:var(--pcolor,var(--brand-deep))}
+/* 拖拽反馈 */
+.trow.drag-over-child{outline:2px dashed var(--brand);outline-offset:-2px;background:var(--brand-bg)}
+.trow.drag-over-before{box-shadow:inset 0 2px 0 0 var(--gold)}
+.trow.drag-over-after{box-shadow:inset 0 -2px 0 0 var(--gold)}
+.trow.dragging{opacity:.45}
+/* 连接线（缩进区） */
+.trow{--ind:6px}
+.trow.lvl1{--ind:26px}
+.trow.lvl2{--ind:46px}
+.trow.lvl3{--ind:66px}
+.trow .indent{position:absolute;left:var(--ind);top:0;bottom:0;width:16px;pointer-events:none}
+.trow .indent::before{content:"";position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--line)}
+.trow .indent::after{content:"";position:absolute;left:5px;top:50%;width:11px;height:1px;background:var(--line)}
+.trow.lvl0 .indent{display:none}
+.trow.no-prev .indent::before{display:none}
+.trow.last-group .indent::before{top:0;bottom:50%}
+/* 层级圆点 */
+.hdot{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.hdot i{display:block;border-radius:50%}
+.lvl0 .hdot i{width:9px;height:9px;background:var(--pcolor,var(--brand));box-shadow:0 0 0 3px var(--pbg,var(--brand-bg))}
+.lvl1 .hdot i{width:8px;height:8px;border:2px solid var(--brand);background:#fff}
+.lvl2 .hdot i{width:6px;height:6px;background:#c3cad4}
+.lvl3 .hdot i{width:5px;height:5px;background:#d6dae1}
+.trow.is-accum .hdot i{border-color:var(--gold);background:var(--gold-bg)}
+/* 主题角标（项目根：自动派生色） */
+.t-theme{font-size:8.5px;font-weight:600;padding:1.5px 6px;border-radius:7px;flex-shrink:0;background:var(--pbg,var(--brand-bg));color:var(--pcolor,var(--brand-deep))}
+/* 展开箭头 */
+.tw{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:var(--text3);border-radius:4px;flex-shrink:0;font-size:8px;margin-left:-4px}
+.tw:hover{background:#e8eaee}
+.tw.empty{visibility:hidden}
+/* 勾选 */
+.tck{width:15px;height:15px;border-radius:4.5px;border:1.5px solid #cbd5e1;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff}
+.tck.on{background:var(--green);border-color:var(--green)}
+.tck.part{background:var(--brand-bg);border-color:var(--brand);position:relative}
+.tck.part::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:1.5px;background:var(--brand)}
+/* 名称 */
+.t-name{font-size:12.5px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvl0 .t-name{font-size:13.5px}
+.lvl1 .t-name{font-weight:500}
+/* 徽章 */
+.t-badge{font-size:8.5px;font-weight:600;padding:1.5px 6px;border-radius:7px;flex-shrink:0}
+.b-proj{background:var(--brand-bg);color:var(--brand-deep)}
+.b-stage{background:#eef2f7;color:#475569}
+.b-list{background:#fff0e6;color:#c2410c}
+.b-accum{background:var(--gold-bg);color:#b45309}
+.t-checklist{font-size:8.5px;font-weight:600;color:var(--brand-deep);background:var(--brand-bg);border-radius:6px;padding:1.5px 6px;flex-shrink:0;display:none}
+.trow.is-list .t-checklist{display:inline-block}
+/* 星标/完成度 */
+.star{color:#d1d5db;font-size:12px;flex-shrink:0;cursor:pointer;padding:1px 2px}
+.star:hover{color:var(--gold)}
+.star.on{color:var(--gold)}
+.prog{font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums;flex-shrink:0;min-width:24px;text-align:right}
+.prog b{color:var(--text2);font-weight:600}
+.lvl0 .prog b{color:var(--brand-deep)}
+.gold-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;box-shadow:0 0 0 2px var(--gold-bg)}
+.gold-dot.off{background:#d6dae1;box-shadow:0 0 0 2px #f4f5f7}
+.opts{display:none;gap:2px;flex-shrink:0}
+.trow:hover .opts{display:flex}
+.opts button{width:19px;height:19px;border:none;background:transparent;border-radius:5px;color:var(--text3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.opts button:hover{background:#e8eaee;color:var(--brand)}
+/* 新建输入 */
+.new-input{display:none;margin:6px 12px;padding:7px 11px;border:1.5px solid var(--brand);border-radius:9px;font-size:12.5px;outline:none;width:calc(100% - 24px)}
+.new-input.show{display:block}
+.tree-tip{margin:10px 10px 2px;padding-top:10px;border-top:1px dashed var(--border);font-size:9.5px;color:var(--text3);text-align:center;line-height:1.7}
+.tree-tip b{color:var(--amber);font-weight:600}
+
+/* ═══ 右栏 ═══ */
+.pool{padding:8px}
+.pool-item{border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:7px;background:#fafbfc;transition:all .12s;border-left:3px solid transparent}
+.pool-item:hover{border-left-color:var(--gold);border-color:var(--gold-border)}
+.pi-top{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500}
+.pi-top .src{font-size:9px;color:var(--text3);background:#f1f5f9;border-radius:6px;padding:1.5px 6px;flex-shrink:0}
+.pi-ai{margin-top:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ai-sug{font-size:10px;color:var(--amber);background:var(--amber-bg);border:1px dashed var(--gold-border);border-radius:7px;padding:3px 8px;flex:1;min-width:0}
+.ai-sug b{font-weight:600}
+.ai-btn{font-size:10px;font-weight:600;color:#fff;background:var(--brand);border:none;border-radius:7px;padding:3.5px 9px;cursor:pointer;flex-shrink:0}
+.ai-btn:hover{background:var(--brand-deep)}
+.habits{padding:8px}
+.habit{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;margin-bottom:6px;background:#fafbfc;border:1px solid var(--border)}
+.habit .h-name{font-size:12.5px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.habit .h-streak{font-size:10px;color:var(--text3);white-space:nowrap}
+.habit .h-streak b{color:var(--amber);font-weight:700}
+.h-check{border:none;border-radius:8px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;flex-shrink:0}
+.h-check.idle{background:#fff;color:var(--amber);border:1px solid var(--gold-border)}
+.h-check.idle:hover{background:var(--gold-bg)}
+.h-check.done{background:var(--gold);color:#fff;border:1px solid var(--gold)}
+.h-week{display:flex;gap:3px;flex-shrink:0}
+.hw-dot{width:9px;height:9px;border-radius:50%;background:#e8eaee}
+.hw-dot.fill{background:var(--gold)}
+.ar-head{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text2)}
+.ar-head .arr{font-size:9px;color:var(--text3);transition:transform .15s}
+.ar-head.open .arr{transform:rotate(90deg)}
+.ar-head .cnt{margin-left:auto;font-size:10px;color:var(--text3);font-weight:500}
+.ar-body{display:none;padding:4px 16px 12px}
+.ar-body.open{display:block}
+.ar-item{font-size:11.5px;color:var(--text3);padding:4px 0;border-bottom:1px dashed #f0f1f4}
+.ar-item:last-child{border-bottom:none}
+
+/* 档案面板 */
+.panel-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:50}
+.panel-overlay.show{display:block}
+.panel{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;background:#fff;z-index:51;box-shadow:-8px 0 30px rgba(15,23,42,.15);transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
+.panel.show{transform:translateX(0)}
+.p-head{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--border)}
+.p-head .p-title{font-size:16px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-close{border:none;background:#f1f5f9;color:var(--text2);width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:13px}
+.p-body{flex:1;overflow-y:auto;padding:16px 18px}
+.p-sec{margin-bottom:18px}
+.p-lbl{font-size:9.5px;color:var(--text3);letter-spacing:.4px;margin-bottom:6px}
+.p-chain{font-size:12.5px;color:var(--text2)}
+.p-chain b{color:var(--text)}
+.p-meta{display:flex;gap:14px;font-size:11px;color:var(--text3);flex-wrap:wrap}
+.p-meta b{color:var(--text2);font-weight:600}
+.p-list{list-style:none;background:var(--memo-bg);border-left:3px solid var(--memo-bar);border-radius:9px;padding:7px 6px}
+.p-list::before{content:attr(data-title);display:block;font-size:10px;font-weight:600;color:var(--memo-tx);padding:2px 6px 5px;letter-spacing:.3px;border-bottom:1px dashed rgba(139,105,20,.3);margin-bottom:4px}
+.p-list li{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;font-size:12.5px;background:rgba(255,255,255,.6);margin-bottom:2px}
+.p-list li.done{color:var(--text3);opacity:.65;text-decoration:line-through}
+.p-list li.next{background:#fff;border-left:4px solid var(--brand);font-weight:600;box-shadow:0 1px 3px rgba(16,24,40,.07)}
+.p-list .ck{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--memo-ck);flex-shrink:0;background:#fff}
+.p-list .ck.on{background:var(--green);border-color:var(--green)}
+.p-list .ck.next{border-color:var(--brand)}
+.p-ai{background:var(--brand-bg);border:1px solid var(--brand-border);border-radius:9px;padding:9px 12px;font-size:11.5px;color:var(--brand-deep);line-height:1.6}
+.p-ai .lbl{font-size:8.5px;font-weight:700;letter-spacing:.4px;color:var(--brand);margin-bottom:3px}
+.p-foot{display:flex;gap:8px;padding:13px 18px;border-top:1px solid var(--border)}
+.p-foot .btn{flex:1;border:none;border-radius:9px;font-size:12px;font-weight:600;padding:8px 0;cursor:pointer}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-ghost{background:#f1f5f9;color:var(--text2)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#1f2937;color:#fff;font-size:12.5px;padding:9px 18px;border-radius:10px;opacity:0;transition:all .25s;z-index:99;pointer-events:none;box-shadow:0 6px 20px rgba(15,23,42,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.note-box{margin-top:20px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 20px}
+.note-box h3{font-size:13.5px;font-weight:700;margin-bottom:10px}
+.note-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:760px){.note-grid{grid-template-columns:1fr}}
+.n-item{font-size:11px;color:var(--text2);background:#f8fafc;border-radius:9px;padding:9px 11px;line-height:1.55}
+.n-item b{color:var(--text)}
+.foot{text-align:center;color:var(--text3);font-size:11px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="page-head">
+  <div>
+    <h1>Project · 项目整理 <span style="font-size:13px;color:var(--text3);font-weight:500">优化副本 v3 · 大纲式层级</span></h1>
+    <div class="sub">项目根 = 分组头（浅底）· 层级圆点 + 连接线 · 无图标，层次感靠结构</div>
+  </div>
+  <div class="chips">
+    <span class="chip key">项目根 = 分组头</span>
+    <span class="chip key">圆点分级</span>
+    <span class="chip key">拖拽 / 新建 / ★</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ═══ 左：大纲式树 ═══ -->
+  <div class="card">
+    <div class="card-head">
+      <span class="dot"></span>项目树
+      <span class="cnt">2 项目 · 8 节点</span>
+      <button class="btn-mini" onclick="newNode(null,'项目')">＋ 新建项目</button>
+    </div>
+    <input class="new-input" id="newInput" placeholder="输入名称，回车创建（Esc 取消）" onkeydown="newKeydown(event)"/>
+    <div class="tree" id="tree">
+
+      <!-- 分组头：四轴飞行器（L0） -->
+      <div class="trow lvl0 is-proj" style="--pcolor:#DB2777;--pbg:#FDF2F8" data-lvl="0" data-id="proj1" draggable="true" onclick="openPanel('四轴飞行器','项目')">
+        <span class="indent"></span>
+        <span class="tw" onclick="event.stopPropagation();toggle(this)">▾</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">四轴飞行器</span>
+        <span class="t-badge b-proj">项目</span>
+        <span class="t-theme">竞赛</span>
+        <span class="star on" onclick="event.stopPropagation();toggleStar(this)">★</span>
+        <span class="prog"><b>3/6</b></span>
+        <span class="opts">
+          <button title="新建子项" onclick="event.stopPropagation();newNode('proj1','阶段')">＋</button>
+          <button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button>
+        </span>
+      </div>
+
+      <!-- L1 阶段：画原理图（★=清单） -->
+      <div class="trow lvl1 is-list" data-lvl="1" data-id="stage1" draggable="true" onclick="openPanel('画原理图','清单')">
+        <span class="indent"></span>
+        <span class="tw" onclick="event.stopPropagation();toggle(this)">▾</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">画原理图</span>
+        <span class="t-badge b-stage">阶段</span>
+        <span class="t-checklist">执行清单</span>
+        <span class="star on" onclick="event.stopPropagation();toggleStar(this)">★</span>
+        <span class="prog"><b>2/5</b></span>
+        <span class="opts">
+          <button title="新建子项" onclick="event.stopPropagation();newNode('stage1','任务')">＋</button>
+          <button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button>
+          <button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button>
+        </span>
+      </div>
+      <!-- L2 任务 -->
+      <div class="trow lvl2" data-lvl="2" data-id="t1" draggable="true" onclick="openPanel('电源模块','任务')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">电源模块</span>
+        <span class="prog"><b>✓</b></span>
+        <span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button><button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button></span>
+      </div>
+      <div class="trow lvl2" data-lvl="2" data-id="t2" draggable="true" onclick="openPanel('主控 MCU','任务')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">主控 MCU</span>
+        <span class="star" onclick="event.stopPropagation();toggleStar(this)">★</span>
+        <span class="prog"><b>…</b></span>
+        <span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button><button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button></span>
+      </div>
+      <div class="trow lvl2" data-lvl="2" data-id="t3" draggable="true" onclick="openPanel('电机驱动','任务')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">电机驱动</span>
+        <span class="prog"><b>…</b></span>
+        <span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button></span>
+      </div>
+
+      <!-- L1 阶段：PCB 布局（非★） -->
+      <div class="trow lvl1" data-lvl="1" data-id="stage2" draggable="true" onclick="openPanel('PCB 布局','阶段')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">PCB 布局</span>
+        <span class="t-badge b-stage">阶段</span>
+        <span class="star" onclick="event.stopPropagation();toggleStar(this)">★</span>
+        <span class="prog"><b>0/3</b></span>
+        <span class="opts"><button title="新建子项" onclick="event.stopPropagation();newNode('stage2','任务')">＋</button><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button><button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button></span>
+      </div>
+
+      <!-- 分组头：考研（L0） -->
+      <div class="trow lvl0 is-proj" style="--pcolor:#F97316;--pbg:#FFF7ED" data-lvl="0" data-id="proj2" draggable="true" onclick="openPanel('考研','项目')">
+        <span class="indent"></span>
+        <span class="tw" onclick="event.stopPropagation();toggle(this)">▾</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">考研</span>
+        <span class="t-badge b-proj">项目</span>
+        <span class="t-theme">考研</span>
+        <span class="star on" onclick="event.stopPropagation();toggleStar(this)">★</span>
+        <span class="prog"><b>2/4</b></span>
+        <span class="opts">
+          <button title="新建子项" onclick="event.stopPropagation();newNode('proj2','阶段')">＋</button>
+          <button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button>
+        </span>
+      </div>
+      <!-- L1 积累 -->
+      <div class="trow lvl1 is-accum" data-lvl="1" data-id="acc1" draggable="true" onclick="openPanel('背单词','积累')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">背单词</span>
+        <span class="t-badge b-accum">积累</span>
+        <span class="gold-dot" title="今日已打卡"></span>
+        <span class="prog"><b>12天</b></span>
+        <span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button><button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button></span>
+      </div>
+      <div class="trow lvl1 is-accum" data-lvl="1" data-id="acc2" draggable="true" onclick="openPanel('力量训练','积累')">
+        <span class="indent"></span>
+        <span class="tw empty">·</span>
+        <span class="hdot"><i></i></span>
+        <span class="t-name">力量训练</span>
+        <span class="t-badge b-accum">积累</span>
+        <span class="gold-dot off" title="今日未打卡"></span>
+        <span class="prog"><b>1/3周</b></span>
+        <span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button></span>
+      </div>
+
+      <div class="tree-tip">
+        <b>拖拽</b> 行到节点上 = 成为子级 · <b>拖到两行间</b> = 换序 · 行尾 <b>＋</b> = 新建子项 · <b>★</b> = 设为执行清单
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 右栏 ═══ -->
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card" style="border-color:var(--gold-border)">
+      <div class="card-head"><span class="dot" style="background:var(--gold)"></span>待整理 · 今天要归位的<span class="cnt">3 项</span></div>
+      <div class="pool">
+        <div class="pool-item">
+          <div class="pi-top">复习数电第三章<span class="src">Inbox</span></div>
+          <div class="pi-ai"><span class="ai-sug">AI 建议 → 挂入 <b>考研</b></span><button class="ai-btn" onclick="aiAttach(this)">挂入</button></div>
+          <div class="pi-hint" style="font-size:9px;color:var(--text3);margin-top:5px">或拖拽到左侧任意项目</div>
+        </div>
+        <div class="pool-item">
+          <div class="pi-top">四六级报名<span class="src">Inbox</span></div>
+          <div class="pi-ai"><span class="ai-sug">AI 建议 → 新建项目 <b>英语</b></span><button class="ai-btn" onclick="aiAttach(this)">挂入</button></div>
+          <div class="pi-hint" style="font-size:9px;color:var(--text3);margin-top:5px">或拖拽到左侧任意项目</div>
+        </div>
+        <div class="pool-item">
+          <div class="pi-top">整理实验报告模板<span class="src">Inbox</span></div>
+          <div class="pi-ai"><span class="ai-sug">AI 建议 → 挂入 <b>四轴飞行器</b></span><button class="ai-btn" onclick="aiAttach(this)">挂入</button></div>
+          <div class="pi-hint" style="font-size:9px;color:var(--text3);margin-top:5px">或拖拽到左侧任意项目</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot" style="background:var(--gold)"></span>习惯 · 打卡<span class="cnt">唯一入口</span></div>
+      <div class="habits">
+        <div class="habit">
+          <span class="h-name">背单词</span>
+          <span class="h-week"><span class="hw-dot fill"></span><span class="hw-dot fill"></span><span class="hw-dot fill"></span><span class="hw-dot fill"></span><span class="hw-dot"></span><span class="hw-dot"></span><span class="hw-dot"></span></span>
+          <span class="h-streak">连续 <b>12</b> 天</span>
+          <button class="h-check done" onclick="toggleCheck(this)">已打卡 ✓</button>
+        </div>
+        <div class="habit">
+          <span class="h-name">力量训练</span>
+          <span class="h-week"><span class="hw-dot fill"></span><span class="hw-dot"></span><span class="hw-dot"></span><span class="hw-dot"></span><span class="hw-dot"></span><span class="hw-dot"></span><span class="hw-dot"></span></span>
+          <span class="h-streak">本周 <b>1/3</b></span>
+          <button class="h-check idle" onclick="toggleCheck(this)">今日打卡</button>
+        </div>
+      </div>
+      <div style="padding:0 12px 10px;font-size:9.5px;color:var(--text3);text-align:center">打卡统一在此 · 树行不再重复</div>
+    </div>
+
+    <div class="card">
+      <div class="ar-head" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+        <span class="arr">▸</span>归档<span class="cnt">6 项 · 点开查看</span>
+      </div>
+      <div class="ar-body">
+        <div class="ar-item">2026-07 电赛方案设计（完成）</div>
+        <div class="ar-item">2026-07 数据结构作业（完成）</div>
+        <div class="ar-item">2026-06 体测训练（完成）</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 档案面板 -->
+<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="p-head">
+    <span id="p-title" class="p-title">画原理图</span>
+    <span id="p-badge" class="t-badge b-list" style="font-size:10px;padding:2.5px 9px">清单型</span>
+    <button class="p-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="p-body">
+    <div class="p-sec">
+      <div class="p-lbl">归属链</div>
+      <div class="p-chain">四轴飞行器 <b>›</b> 画原理图 <b>›</b> 电源模块</div>
+    </div>
+    <div class="p-sec">
+      <div class="p-lbl">元信息</div>
+      <div class="p-meta"><span>类型 <b>清单型</b></span><span>预计 <b>90分</b></span><span>已用 <b>45分</b></span><span>完成 <b>2/5</b></span></div>
+    </div>
+    <div class="p-sec">
+      <div class="p-lbl">执行清单</div>
+      <ul class="p-list" data-title="执行清单">
+        <li class="done"><span class="ck on"></span>STM32 最小系统 <span style="margin-left:auto;font-size:10px;color:var(--text3)">18分</span></li>
+        <li class="done"><span class="ck on"></span>MPU6050 传感器 <span style="margin-left:auto;font-size:10px;color:var(--text3)">22分</span></li>
+        <li class="next"><span class="ck next"></span>电源模块 <span style="margin-left:auto;font-size:10px;color:var(--brand)">进行中</span></li>
+        <li><span class="ck"></span>蜂鸣器与 LED 指示</li>
+        <li><span class="ck"></span>USB 转串口</li>
+      </ul>
+    </div>
+    <div class="p-sec">
+      <div class="p-lbl">执行类型开关</div>
+      <div style="display:flex;align-items:center;gap:9px;background:#f8fafc;border-radius:9px;padding:9px 12px">
+        <span style="font-size:12px;color:var(--text2)">★ 可排期执行清单（Today 可出发/勾选）</span>
+        <span style="margin-left:auto;width:30px;height:17px;border-radius:9px;background:var(--brand);position:relative;cursor:pointer"><span style="position:absolute;right:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff"></span></span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px">开 = 该节点作为执行清单（画原理图）· 关 = 纯结构容器（PCB 布局）</div>
+    </div>
+    <div class="p-sec">
+      <div class="p-lbl">AI 增强</div>
+      <div class="p-ai"><div class="lbl">执行建议</div>按当前节奏可能超时 20 分 · 建议电源模块优先，卡口最少</div>
+    </div>
+  </div>
+  <div class="p-foot">
+    <button class="btn btn-primary" onclick="closePanel()">去 Today 执行 →</button>
+    <button class="btn btn-ghost" onclick="closePanel()">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="note-box">
+  <h3>v3 怎么解决"层次感"（无图标版）</h3>
+  <div class="note-grid">
+    <div class="n-item"><b>① 项目根 = 分组头 + 自动派生色</b><br>浅底分组头 + 左侧色条/圆点/完成度跟随项目派生色（主题>主领域）——四轴飞行器=竞赛红、考研=考研橙；色值取自现有 THEMES/领域表，零手动选色</div>
+    <div class="n-item"><b>② 层级圆点分级</b><br>L0 实心品牌点（大）· L1 空心点 · L2 灰点 —— 不靠图标，靠点的大小/实虚表达层级</div>
+    <div class="n-item"><b>③ 树状连接线</b><br>缩进 + 竖线 + 横折线 —— 归属关系的骨架</div>
+    <div class="n-item"><b>④ 星标 = 执行清单</b><br>★开 = 「执行清单」徽章（Today 可执行）；关 = 纯结构</div>
+    <div class="n-item"><b>⑤ 拖拽 / 新建</b><br>拖到节点=子级（虚线高亮）· 拖两行间=换序（金线）· ＋新建自动层级</div>
+    <div class="n-item"><b>⑥ 右栏三区</b><br>待整理池（AI 建议挂入）> 习惯区（打卡唯一入口）> 归档折叠</div>
+  </div>
+</div>
+
+<div class="foot">Meridian · Project 优化副本 v3 · 2026-08-04 · 纯 UI 示例（可交互），未动真实代码</div>
+
+</div>
+
+<script>
+let toastTimer;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800); }
+function toggle(arrow){ arrow.textContent = arrow.textContent==='▾'?'▸':'▾'; }
+function toggleStar(star){
+  const row = star.closest('.trow');
+  const on = star.classList.toggle('on');
+  row.classList.toggle('is-list', on);
+  toast(on ? '已设为「执行清单」· Today 可出发勾选' : '已取消清单 · 变为纯结构节点');
+}
+let newParent=null, newLvl=0, newType='任务';
+function newNode(parentId, type){ newParent=parentId; newType=type; const inp=document.getElementById('newInput'); inp.classList.add('show'); inp.focus(); }
+function newKeydown(e){
+  if(e.key==='Enter'){
+    const inp=document.getElementById('newInput'); const name=inp.value.trim(); if(!name) return;
+    const parent = newParent ? document.querySelector(`[data-id="${newParent}"]`) : null;
+    const lvl = parent ? Math.min(Number(parent.dataset.lvl)+1,3) : 0;
+    const id='n'+Date.now();
+    const row=document.createElement('div');
+    row.className='trow lvl'+lvl + (lvl===0?' is-proj':'');
+    row.dataset.lvl=lvl; row.dataset.id=id; row.draggable=true;
+    const badge = lvl===0?'<span class="t-badge b-proj">项目</span>' : newType==='阶段'?'<span class="t-badge b-stage">阶段</span>':'';
+    row.innerHTML=`<span class="indent"></span><span class="tw empty">·</span><span class="hdot"><i></i></span><span class="t-name"></span>${badge}<span class="star${lvl===0?' on':''}" onclick="event.stopPropagation();toggleStar(this)">★</span><span class="prog"><b>0/1</b></span><span class="opts"><button title="上移" onclick="event.stopPropagation();moveRow(this,-1)">↑</button><button title="下移" onclick="event.stopPropagation();moveRow(this,1)">↓</button></span>`;
+    row.querySelector('.t-name').textContent=name;
+    row.onclick=()=>openPanel(name, lvl===0?'项目':newType);
+    const tree=document.getElementById('tree');
+    if(parent){
+      const lvl1=[...tree.querySelectorAll(`[data-lvl="${lvl}"]`)];
+      const firstKid=lvl1.find(k=>k.previousElementSibling===parent);
+      if(firstKid) tree.insertBefore(row,firstKid); else tree.insertBefore(row, parent.nextElementSibling||null);
+      const tw=parent.querySelector('.tw'); if(tw){ tw.textContent='▾'; tw.classList.remove('empty'); }
+    } else { tree.insertBefore(row, tree.querySelector('.tree-tip')); }
+    inp.value=''; inp.classList.remove('show');
+    toast(`已创建「${name}」`+(parent?` → 挂入 ${parent.querySelector('.t-name').textContent}`:''));
+    fixLines();
+  } else if(e.key==='Escape'){ e.target.value=''; e.target.classList.remove('show'); }
+}
+function moveRow(btn, dir){
+  const row=btn.closest('.trow'); const sib=dir<0?row.previousElementSibling:row.nextElementSibling;
+  if(!sib || !sib.classList.contains('trow')) return;
+  const tree=document.getElementById('tree');
+  if(dir<0) tree.insertBefore(row,sib); else tree.insertBefore(sib,row);
+  toast('已调整顺序'); fixLines();
+}
+function fixLines(){
+  const tree=document.getElementById('tree');
+  const rows=[...tree.querySelectorAll('.trow')];
+  rows.forEach((r,i)=>{
+    const prev=rows[i-1], next=rows[i+1];
+    r.classList.toggle('no-prev', !prev || prev.dataset.lvl >= r.dataset.lvl);
+    r.classList.toggle('last-group', !next || next.dataset.lvl < r.dataset.lvl);
+  });
+}
+let dragId=null;
+document.querySelectorAll('.trow').forEach(r=>{
+  r.addEventListener('dragstart', e=>{ dragId=r.dataset.id; r.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain',r.dataset.id);}catch(_){} });
+  r.addEventListener('dragend', ()=>{ r.classList.remove('dragging'); document.querySelectorAll('.trow').forEach(x=>x.classList.remove('drag-over-child','drag-over-before','drag-over-after')); dragId=null; });
+  r.addEventListener('dragover', e=>{
+    e.preventDefault(); e.dataTransfer.dropEffect='move';
+    document.querySelectorAll('.trow').forEach(x=>x.classList.remove('drag-over-child','drag-over-before','drag-over-after'));
+    const rect=r.getBoundingClientRect(); const y=e.clientY-rect.top;
+    const zone = y<rect.height/3?'before' : y>rect.height*2/3?'after' : 'child';
+    r.classList.add('drag-over-'+zone); r._zone=zone;
+  });
+  r.addEventListener('dragleave', ()=>{ r.classList.remove('drag-over-child','drag-over-before','drag-over-after'); });
+  r.addEventListener('drop', e=>{
+    e.preventDefault();
+    const zone=r._zone||'child';
+    const dragged=document.getElementById('tree').querySelector(`[data-id="${dragId}"]`);
+    if(!dragged || dragged===r) return;
+    const tree=document.getElementById('tree');
+    const name=dragged.querySelector('.t-name').textContent;
+    const tname=r.querySelector('.t-name').textContent;
+    if(zone==='child'){
+      const nlvl=Math.min(Number(r.dataset.lvl)+1,3);
+      dragged.dataset.lvl=nlvl; dragged.className='trow lvl'+nlvl + (dragged.classList.contains('is-proj')?' is-proj':'') + (dragged.classList.contains('is-accum')?' is-accum':'') + (dragged.classList.contains('is-list')?' is-list':'');
+      tree.insertBefore(dragged, r.nextElementSibling||null);
+      const tw=r.querySelector('.tw'); if(tw){ tw.textContent='▾'; tw.classList.remove('empty'); }
+      toast(`「${name}」已挂入「${tname}」`);
+    } else {
+      dragged.dataset.lvl=r.dataset.lvl; dragged.className='trow lvl'+r.dataset.lvl;
+      if(zone==='before') tree.insertBefore(dragged,r); else tree.insertBefore(dragged,r.nextElementSibling);
+      toast(`「${name}」已调整顺序`);
+    }
+    document.querySelectorAll('.trow').forEach(x=>x.classList.remove('drag-over-child','drag-over-before','drag-over-after'));
+    fixLines();
+  });
+});
+function toggleCheck(btn){
+  if(btn.classList.contains('done')){ btn.classList.remove('done'); btn.classList.add('idle'); btn.textContent='今日打卡'; }
+  else { btn.classList.remove('idle'); btn.classList.add('done'); btn.textContent='已打卡 ✓'; toast('打卡成功 · 连续 +1 天'); }
+}
+function aiAttach(btn){ btn.textContent='已挂入 ✓'; btn.disabled=true; btn.style.opacity=.6; toast('已挂入项目 · 待整理池 -1'); }
+function openPanel(title, type){ document.getElementById('p-title').textContent=title; document.getElementById('p-badge').textContent=type+(type==='清单'?'型':''); document.getElementById('overlay').classList.add('show'); document.getElementById('panel').classList.add('show'); }
+function closePanel(){ document.getElementById('overlay').classList.remove('show'); document.getElementById('panel').classList.remove('show'); }
+fixLines();
+</script>
+</body>
+</html>

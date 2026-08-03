@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meridian · 子午 登录页视觉稿 v3</title>
+<title>Meridian · 子午 视觉稿 v4 · Logo 定稿（断口双点）</title>
 <style>
 :root{
   --bg:#e9edf3; --card:#fff; --border:#e5e7eb; --text:#111827; --text2:#5b6472; --text3:#98a2b3;
@@ -27,28 +27,29 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
 .sec-title small{font-size:11px;color:var(--text3);font-weight:400}
 .sec-desc{font-size:12px;color:var(--text2);background:#fff;border:1px dashed var(--border);border-radius:9px;padding:8px 14px;margin:10px 0 16px}
 
-/* Logo 精修卡 */
-.logo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.alt-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-.alt-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 10px 10px;text-align:center}
-.alt-card .ac-ico{width:52px;height:52px;margin:0 auto;display:flex;align-items:center;justify-content:center}
-.alt-card .ac-name{font-size:11px;font-weight:700;color:var(--text);margin-top:7px}
-.alt-card .ac-d{font-size:9px;color:var(--text3);margin-top:2px;line-height:1.4}
-.logo-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+/* ═══ Logo 定稿展示 ═══ */
+.logo-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.05);margin-bottom:14px}
 .lc-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f1f2f5;background:#fafbfc}
 .lc-name{font-size:12.5px;font-weight:700;color:var(--text)}
 .lc-tag{font-size:9px;font-weight:600;color:var(--text3);background:#fff;border:1px solid #e5e8ee;border-radius:9px;padding:2px 8px;letter-spacing:.3px}
-.lc-body{padding:18px 16px 14px}
-.logo-96{width:120px;height:108px;margin:0 auto;display:flex;align-items:center;justify-content:center}
-.logo-horiz{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:10px;padding:9px;background:#fafbfc;border-radius:10px;border:1px solid #f1f2f5}
+.lc-tag.gold{background:#FFFBEB;color:#B45309;border-color:#FDE68A}
+.lc-body{padding:20px 18px 16px}
+.logo-main{display:flex;gap:26px;align-items:center;justify-content:center;flex-wrap:wrap}
+.logo-96{width:130px;height:118px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f8f9fb,#f1f3f7);border-radius:14px;border:1px solid #eef0f4}
+.logo-horiz{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 16px;background:#fafbfc;border-radius:10px;border:1px solid #f1f2f5}
 .lh-word{font-size:16px;font-weight:700;letter-spacing:.3px;color:var(--text)}
 .lh-cn{font-size:10px;color:var(--text3);letter-spacing:1px;border-left:1px solid #dde1e8;padding-left:8px}
-.lc-meta{font-size:10.5px;color:var(--text3);text-align:center;margin-top:9px;line-height:1.6}
-.lc-meta b{color:var(--text2)}
-.fav-row{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px dashed #e5e8ee}
+.fav-row{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin-top:16px;padding-top:14px;border-top:1px dashed #e5e8ee}
 .fav-box{text-align:center}
 .fav-frame{background:#F8FAFC;border:1px solid #eef0f4;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
 .fav-lbl{font-size:8.5px;color:var(--text3);letter-spacing:.4px}
+.spec-box{margin-top:14px;background:#F7F8FA;border-radius:10px;padding:11px 14px;font-size:11px;color:var(--text2);line-height:1.75;font-family:ui-monospace,Consolas,monospace}
+.spec-box b{color:var(--navy)}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.why{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 13px}
+.why .w-n{width:22px;height:22px;border-radius:7px;background:#EEF2FF;color:var(--navy);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.why .w-t{font-size:12px;font-weight:700;color:var(--text)}
+.why .w-d{font-size:10.5px;color:var(--text3);margin-top:3px;line-height:1.55}
 
 /* ═══ 登录页 · 全宽横版 ═══ */
 .login-card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 10px 34px rgba(16,24,40,.10);margin-bottom:26px}
@@ -152,348 +153,133 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
 .compat li .ci{width:16px;height:16px;border-radius:5px;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
 .compat li .cw{width:16px;height:16px;border-radius:5px;background:#fffbeb;color:#d97706;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
 .foot{text-align:center;color:var(--text3);font-size:11px;margin-top:26px}
-@media(max-width:960px){.logo-grid{grid-template-columns:repeat(2,1fr)}.alt-grid{grid-template-columns:repeat(3,1fr)}.tokens{grid-template-columns:1fr}.app-row{grid-template-columns:1fr}.lp-wide{grid-template-columns:1fr}}
+@media(max-width:960px){.why-grid{grid-template-columns:repeat(2,1fr)}.tokens{grid-template-columns:1fr}.app-row{grid-template-columns:1fr}.lp-wide{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="page">
 
+<!-- ═══ 页头 ═══ -->
 <div class="head">
-  <h1>Meridian · 子午 登录页视觉稿 v3</h1>
-  <div class="sub">UI Designer 出稿 · 2026-08-03 · v3.2：Logo 精修区扩为 6 个主方案 + 17 个备选方案库（收录全部探索候选）· 登录页 / 移动端 / 色板区保持 V1 中轴不变</div>
+  <h1>Meridian · 子午 视觉稿 v4 · Logo 定稿</h1>
+  <div class="sub">UI Designer 出稿 · 2026-08-04 · 依据《Meridian-Logo锚点v6-中轴升级》C 方案「断口双点」定稿 · 其余探索方案已删除 · 登录页 / 移动端 / 色板全部同步更新</div>
   <div class="chips">
-    <span class="ch key">横版 7fr/5fr 分栏 · 整页宽渲染</span>
-    <span class="ch key">Slogan 34px 单行不换行</span>
-    <span class="ch key">品牌区：价值点 + 流程示意 + 信任条</span>
-    <span class="ch key">表单区：记住我 + 第三方登录 + 注册</span>
-    <span class="ch">移动端顶部横幅</span>
+    <span class="ch key">C 方案 · 断口双点 = 最终 Logo</span>
+    <span class="ch">圆环 + 8 刻度 + 原点（基础规格不变）</span>
+    <span class="ch">中轴 = 断口穿出 + 锚点（不画直线）</span>
   </div>
 </div>
 
 <div class="anchors">
-  <a class="anchor" href="#logos">① Logo 精修 4 变体</a>
-  <a class="anchor" href="#login">② 登录页 4 版（全宽横版）</a>
-  <a class="anchor" href="#mobi">③ 移动端竖版</a>
+  <a class="anchor" href="#logos">① Logo 定稿</a>
+  <a class="anchor" href="#login">② 登录页（全宽横版）</a>
+  <a class="anchor" href="#mobile">③ 移动端</a>
   <a class="anchor" href="#pals">④ 色板 3 套应用</a>
 </div>
 
-<!-- ═══════════════ Logo 精修 ═══════════════ -->
+<!-- ═══════════════ ① Logo 定稿 · C 方案 断口双点 ═══════════════ -->
 <div class="sec" id="logos">
-  <div class="sec-title">① Logo 图标精修 <small>6 个主方案（V1 已定）· 统一「断口 + 金色光轴 + 原点」语言</small></div>
-  <div class="sec-desc">V1 中轴为保留方案（登录页现行）；V2-V4 为结构变体；V5 弧旋金点（万千归一）/ V6 中轴弧旋（方向×时间×归一 三合一）为探索精选。全部附 favicon 48/32/16。</div>
-  <div class="logo-grid">
+  <div class="sec-title">① Logo 定稿 · C 方案「断口双点」 <small>锚点 v6 · Axis Anchored · 产品选定</small></div>
+  <div class="sec-desc">基础规格不变：圆环 + 8 刻度（12/3/6/9 主 + 四象限中间各一，刻度在圆内）+ 金色原点。中轴升级：<b>环在 12 点为中轴裂开</b>（负空间），金色中轴穿出断口、末端一颗金色锚点（环外）——有头（原点）有尾（锚点），像罗盘针被钉住。禁止直线中轴、禁止箭头。</div>
 
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V1 · 中轴</span><span class="lc-tag">最本质</span></div>
-      <div class="lc-body">
+  <div class="logo-card">
+    <div class="lc-head"><span class="lc-name">C · 断口双点 <span style="font-weight:400;color:var(--text3);font-size:10px">Axis Anchored · 定稿</span></span><span class="lc-tag gold">✓ 已选定</span></div>
+    <div class="lc-body">
+      <div class="logo-main">
+        <!-- 主图标 -->
         <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#1E3A8A" stroke-width="6" stroke-linecap="round"/>
-            <line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="9" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="6" fill="#F59E0B"/>
+          <svg width="112" height="112" viewBox="0 0 100 100" fill="none">
+            <path d="M 56.3 14.5 A 36 36 0 1 1 43.7 14.5" fill="none" stroke="#1E3A8A" stroke-width="3.5"/>
+            <line x1="50" y1="24" x2="50" y2="14" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+            <line x1="86" y1="50" x2="76" y2="50" stroke="#1E3A8A" stroke-width="4" stroke-linecap="round"/>
+            <line x1="50" y1="86" x2="50" y2="76" stroke="#1E3A8A" stroke-width="4" stroke-linecap="round"/>
+            <line x1="14" y1="50" x2="24" y2="50" stroke="#1E3A8A" stroke-width="4" stroke-linecap="round"/>
+            <line x1="75.5" y1="24.5" x2="71.2" y2="28.8" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/>
+            <line x1="75.5" y1="75.5" x2="71.2" y2="71.2" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24.5" y1="75.5" x2="28.8" y2="71.2" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24.5" y1="24.5" x2="28.8" y2="28.8" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/>
+            <line x1="50" y1="26" x2="50" y2="9" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="50" cy="7" r="3" fill="#F59E0B"/>
+            <circle cx="50" cy="50" r="3.5" fill="#F59E0B"/>
           </svg>
         </div>
+        <!-- 横向带字版 -->
         <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#1E3A8A" stroke-width="18" stroke-linecap="round"/><line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="27" stroke-linecap="round"/><circle cx="50" cy="50" r="18" fill="#F59E0B"/></svg>
-          <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
-        </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><path d="M6.4 2.6 A5.3 5.3 0 1 1 9.6 2.6" stroke="#1E3A8A" stroke-width="1.05" stroke-linecap="round"/><line x1="8" y1="8" x2="8" y2="1.2" stroke="#F59E0B" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M6.4 2.6 A5.3 5.3 0 1 1 9.6 2.6" stroke="#1E3A8A" stroke-width="1.05" stroke-linecap="round"/><line x1="8" y1="8" x2="8" y2="1.2" stroke="#F59E0B" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.4 2.6 A5.3 5.3 0 1 1 9.6 2.6" stroke="#1E3A8A" stroke-width="1.05" stroke-linecap="round"/><line x1="8" y1="8" x2="8" y2="1.2" stroke="#F59E0B" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
-        </div>
-        <div class="lc-meta"><b>断口日环 + 光轴穿出 + 原点</b><br>时间穿过边界 · 最简</div>
-      </div>
-    </div>
-
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V2 · 日晷 v2</span><span class="lc-tag">时间语义 · 收敛版</span></div>
-      <div class="lc-body">
-        <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="5"/>
-            <line x1="50" y1="9.5" x2="50" y2="17.5" stroke="#F59E0B" stroke-width="3.6" stroke-linecap="round"/>
-            <line x1="50" y1="50" x2="50" y2="20" stroke="#F59E0B" stroke-width="8" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="5" fill="#F59E0B"/>
+          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+            <path d="M 56.3 14.5 A 36 36 0 1 1 43.7 14.5" fill="none" stroke="#1E3A8A" stroke-width="10"/>
+            <line x1="50" y1="24" x2="50" y2="14" stroke="#F59E0B" stroke-width="12"/>
+            <line x1="86" y1="50" x2="76" y2="50" stroke="#1E3A8A" stroke-width="12"/>
+            <line x1="50" y1="86" x2="50" y2="76" stroke="#1E3A8A" stroke-width="12"/>
+            <line x1="14" y1="50" x2="24" y2="50" stroke="#1E3A8A" stroke-width="12"/>
+            <line x1="75.5" y1="24.5" x2="71.2" y2="28.8" stroke="#1E3A8A" stroke-width="9"/>
+            <line x1="75.5" y1="75.5" x2="71.2" y2="71.2" stroke="#1E3A8A" stroke-width="9"/>
+            <line x1="24.5" y1="75.5" x2="28.8" y2="71.2" stroke="#1E3A8A" stroke-width="9"/>
+            <line x1="24.5" y1="24.5" x2="28.8" y2="28.8" stroke="#1E3A8A" stroke-width="9"/>
+            <line x1="50" y1="26" x2="50" y2="9" stroke="#F59E0B" stroke-width="10"/>
+            <circle cx="50" cy="7" r="8" fill="#F59E0B"/>
+            <circle cx="50" cy="50" r="10" fill="#F59E0B"/>
           </svg>
-        </div>
-        <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="15"/><line x1="50" y1="9.5" x2="50" y2="17.5" stroke="#F59E0B" stroke-width="11"/><line x1="50" y1="50" x2="50" y2="20" stroke="#F59E0B" stroke-width="24" stroke-linecap="round"/><circle cx="50" cy="50" r="15" fill="#F59E0B"/></svg>
           <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
         </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><line x1="8" y1="8" x2="8" y2="3.3" stroke="#F59E0B" stroke-width="1.55" stroke-linecap="round"/><circle cx="8" cy="8" r="1" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><line x1="8" y1="8" x2="8" y2="3.3" stroke="#F59E0B" stroke-width="1.55" stroke-linecap="round"/><circle cx="8" cy="8" r="1" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><line x1="8" y1="8" x2="8" y2="3.3" stroke="#F59E0B" stroke-width="1.55" stroke-linecap="round"/><circle cx="8" cy="8" r="1" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
+        <!-- favicon 三档 -->
+        <div class="fav-row" style="border-top:none;margin-top:0;padding-top:0">
+          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1E3A8A"/><line x1="50" y1="24" x2="50" y2="10" stroke="#FCD34D" stroke-width="6"/><circle cx="50" cy="8" r="4.5" fill="#FCD34D"/><circle cx="50" cy="50" r="5" fill="#FCD34D"/><line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="5"/><line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="5"/><line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="5"/></svg></div><div class="fav-lbl">48</div></div>
+          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1E3A8A"/><line x1="50" y1="24" x2="50" y2="10" stroke="#FCD34D" stroke-width="6"/><circle cx="50" cy="8" r="4.5" fill="#FCD34D"/><circle cx="50" cy="50" r="5" fill="#FCD34D"/><line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="5"/><line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="5"/><line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="5"/></svg></div><div class="fav-lbl">32</div></div>
+          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#1E3A8A"/><line x1="50" y1="24" x2="50" y2="10" stroke="#FCD34D" stroke-width="6"/><circle cx="50" cy="8" r="4.5" fill="#FCD34D"/><circle cx="50" cy="50" r="5" fill="#FCD34D"/><line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="5"/><line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="5"/><line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="5"/></svg></div><div class="fav-lbl">16</div></div>
         </div>
-        <div class="lc-meta"><b>完整日环 + 金色指针与 12 点刻度</b><br>收敛无断口 · 指向正午</div>
       </div>
+      <div class="spec-box">spec · 环 <b>3.5</b>（12 点断口）/ 8 刻度（12 金 · 3/6/9 深蓝 · 四象限 3 深蓝）/ 金轴 <b>3.5</b> 穿出断口 / 锚点 <b>r3</b>（环外 · 顶）/ 原点 <b>r3.5</b>（金 · 环心）· 金色 #F59E0B · 深蓝 #1E3A8A · 锚点 v6 C 原稿</div>
     </div>
+  </div>
 
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V3 · 同心双环</span><span class="lc-tag">层次 · 新</span></div>
-      <div class="lc-body">
-        <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="6"/>
-            <circle cx="50" cy="50" r="23" stroke="#1E3A8A" stroke-width="3"/>
-            <line x1="50" y1="12" x2="50" y2="88" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="4.5" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="18"/><circle cx="50" cy="50" r="23" stroke="#1E3A8A" stroke-width="9"/><line x1="50" y1="12" x2="50" y2="88" stroke="#F59E0B" stroke-width="18" stroke-linecap="round"/><circle cx="50" cy="50" r="14" fill="#F59E0B"/></svg>
-          <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
-        </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><circle cx="8" cy="8" r="3.4" stroke="#1E3A8A" stroke-width="0.85"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="0.95" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><circle cx="8" cy="8" r="3.4" stroke="#1E3A8A" stroke-width="0.85"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="0.95" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.15"/><circle cx="8" cy="8" r="3.4" stroke="#1E3A8A" stroke-width="0.85"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="0.95" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
-        </div>
-        <div class="lc-meta"><b>同心双环 + 金色中轴 + 金心</b><br>年轮层次 · 环环相扣</div>
-      </div>
-    </div>
-
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V4 · 罗盘</span><span class="lc-tag">方向 · 新</span></div>
-      <div class="lc-body">
-        <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="5"/>
-            <line x1="50" y1="10" x2="50" y2="17" stroke="#1E3A8A" stroke-width="3.4" stroke-linecap="round"/>
-            <line x1="83" y1="50" x2="90" y2="50" stroke="#1E3A8A" stroke-width="3.4" stroke-linecap="round"/>
-            <line x1="50" y1="83" x2="50" y2="90" stroke="#1E3A8A" stroke-width="3.4" stroke-linecap="round"/>
-            <line x1="10" y1="50" x2="17" y2="50" stroke="#1E3A8A" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M50 16 L58 50 L50 84 L42 50 Z" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#1E3A8A" stroke-width="15"/><line x1="50" y1="10" x2="50" y2="17" stroke="#1E3A8A" stroke-width="10" stroke-linecap="round"/><line x1="83" y1="50" x2="90" y2="50" stroke="#1E3A8A" stroke-width="10" stroke-linecap="round"/><line x1="50" y1="83" x2="50" y2="90" stroke="#1E3A8A" stroke-width="10" stroke-linecap="round"/><line x1="10" y1="50" x2="17" y2="50" stroke="#1E3A8A" stroke-width="10" stroke-linecap="round"/><path d="M50 16 L58 50 L50 84 L42 50 Z" fill="#F59E0B"/></svg>
-          <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
-        </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.1"/><path d="M8 3.8 L9.6 8 L8 12.2 L6.4 8 Z" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.1"/><path d="M8 3.8 L9.6 8 L8 12.2 L6.4 8 Z" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.3" stroke="#1E3A8A" stroke-width="1.1"/><path d="M8 3.8 L9.6 8 L8 12.2 L6.4 8 Z" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
-        </div>
-        <div class="lc-meta"><b>罗盘环 + 四向刻度 + 金色菱形指针</b><br>方向感最强 · 菱形有辨识度</div>
-      </div>
-    </div>
-
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V5 · 弧旋金点</span><span class="lc-tag">万千归一</span></div>
-      <div class="lc-body">
-        <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <path d="M42.3 19 A32 32 0 1 1 57.7 19" stroke="#1E3A8A" stroke-width="8.5" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="7" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><path d="M42.3 19 A32 32 0 1 1 57.7 19" stroke="#1E3A8A" stroke-width="24" stroke-linecap="round"/><circle cx="50" cy="50" r="21" fill="#F59E0B"/></svg>
-          <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
-        </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><circle cx="8" cy="8" r="1.15" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
-        </div>
-        <div class="lc-meta"><b>缺口环绕 + 金色中心点</b><br>万千事物绕此刻运转 · 归一</div>
-      </div>
-    </div>
-
-    <div class="logo-card">
-      <div class="lc-head"><span class="lc-name">V6 · 中轴弧旋</span><span class="lc-tag">三合一</span></div>
-      <div class="lc-body">
-        <div class="logo-96">
-          <svg width="118" height="106" viewBox="0 0 100 100" fill="none">
-            <path d="M42.3 19 A32 32 0 1 1 57.7 19" stroke="#1E3A8A" stroke-width="8.5" stroke-linecap="round"/>
-            <line x1="50" y1="13" x2="50" y2="87" stroke="#F59E0B" stroke-width="5.5" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="6.5" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="logo-horiz">
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><path d="M42.3 19 A32 32 0 1 1 57.7 19" stroke="#1E3A8A" stroke-width="24" stroke-linecap="round"/><line x1="50" y1="13" x2="50" y2="87" stroke="#F59E0B" stroke-width="17" stroke-linecap="round"/><circle cx="50" cy="50" r="20" fill="#F59E0B"/></svg>
-          <span class="lh-word">Meridian</span><span class="lh-cn">子午</span>
-        </div>
-        <div class="fav-row">
-          <div class="fav-box"><div class="fav-frame" style="width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="1.05" fill="#F59E0B"/></svg></div><div class="fav-lbl">48</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:32px;height:32px"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="1.05" fill="#F59E0B"/></svg></div><div class="fav-lbl">32</div></div>
-          <div class="fav-box"><div class="fav-frame" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.77 2.85 A5.3 5.3 0 1 1 9.23 2.85" stroke="#1E3A8A" stroke-width="1.15" stroke-linecap="round"/><line x1="8" y1="2.2" x2="8" y2="13.8" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="1.05" fill="#F59E0B"/></svg></div><div class="fav-lbl">16</div></div>
-        </div>
-        <div class="lc-meta"><b>环绕 + 金色中轴贯穿</b><br>方向 × 时间 × 归一 三合一</div>
-      </div>
-    </div>
+  <!-- 为什么是它 -->
+  <div class="why-grid">
+    <div class="why"><div class="w-n">1</div><div class="w-t">时间 = 环</div><div class="w-d">圆环 + 8 刻度 + 原点，钟面语言完整——基础规格保留，识别框架不变</div></div>
+    <div class="why"><div class="w-n">2</div><div class="w-t">中轴 = 断口</div><div class="w-d">环在 12 点为中轴"裂开"，负空间表达方向——不画直线，甩开"圆+竖杠"</div></div>
+    <div class="why"><div class="w-n">3</div><div class="w-t">方向 = 双点</div><div class="w-d">金轴穿出断口，末端锚点钉在环外（有头有尾）——像罗盘针，方向感最强</div></div>
+    <div class="why"><div class="w-n">4</div><div class="w-t">归一 = 双环心</div><div class="w-d">原点（此刻）+ 锚点（正午）两点一线，万千事物围绕这条轴运转</div></div>
   </div>
 </div>
 
-<!-- ═══════════════ 备选方案库 ═══════════════ -->
-<div class="sec" id="alts">
-  <div class="sec-title">①b · 备选方案库 <small>全部探索候选收录 · 共 17 款 · 供日后参考</small></div>
-  <div class="sec-desc">历轮探索产生的候选（含被否方向与一体化解法），图标 52px 简版展示，仅存档不参与主推。</div>
-  <div class="alt-grid">
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#1E3A8A" stroke-width="6" stroke-linecap="round"/><line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="8" stroke-linecap="round"/></svg></div><div class="ac-name">指针穿出</div><div class="ac-d">断口环 + 金针穿出</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" fill="none" stroke="#1E3A8A" stroke-width="5.5"/><path d="M50 14 A36 36 0 0 1 50 86 Z" fill="#1E3A8A"/><line x1="50" y1="10" x2="50" y2="90" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/></svg></div><div class="ac-name">昼夜分界</div><div class="ac-d">右半实心 + 金轴</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" fill="none" stroke="#1E3A8A" stroke-width="4.5"/><line x1="50" y1="8" x2="50" y2="92" stroke="#1E3A8A" stroke-width="8"/><circle cx="50" cy="50" r="12" fill="#F59E0B"/></svg></div><div class="ac-name">金心中轴</div><div class="ac-d">细环粗轴大金心</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="14" cy="66" r="4" fill="#1E3A8A" opacity=".45"/><circle cx="25" cy="40" r="3" fill="#1E3A8A" opacity=".65"/><circle cx="34" cy="58" r="4.5" fill="#1E3A8A" opacity=".8"/><circle cx="44" cy="32" r="3.2" fill="#1E3A8A"/><line x1="48" y1="50" x2="90" y2="50" stroke="#F59E0B" stroke-width="6.5" stroke-linecap="round"/><circle cx="90" cy="50" r="4" fill="#F59E0B"/></svg></div><div class="ac-name">万千归一</div><div class="ac-d">散点汇聚金线</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M20 50 A30 30 0 1 1 80 50 A24 24 0 1 0 20 50 Z" fill="#1E3A8A"/><circle cx="66" cy="26" r="5.5" fill="#F59E0B"/></svg></div><div class="ac-name">子午月相</div><div class="ac-d">月牙 + 正午金点</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><line x1="12" y1="80" x2="88" y2="80" stroke="#1E3A8A" stroke-width="4" stroke-linecap="round"/><line x1="50" y1="80" x2="50" y2="28" stroke="#F59E0B" stroke-width="6.5" stroke-linecap="round"/><path d="M50 10 L57 28 L43 28 Z" fill="#F59E0B"/></svg></div><div class="ac-name">晨轴</div><div class="ac-d">地平线 + 金轴箭头</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M8 50 A42 42 0 0 1 92 50" fill="none" stroke="#1E3A8A" stroke-width="7" stroke-linecap="round"/><circle cx="50" cy="50" r="27" fill="#F59E0B"/></svg></div><div class="ac-name">金日蓝轨</div><div class="ac-d">金日 + 轨道弧</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M20 82 L36 24 L50 50 L64 24 L80 82" fill="none" stroke="#1E3A8A" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><line x1="50" y1="50" x2="50" y2="82" stroke="#F59E0B" stroke-width="8" stroke-linecap="round"/></svg></div><div class="ac-name">M 中轴</div><div class="ac-d">M 字标 + 金柱</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="35" fill="#1E3A8A"/><line x1="50" y1="10" x2="50" y2="90" stroke="#F59E0B" stroke-width="10" stroke-linecap="round"/></svg></div><div class="ac-name">金轴圆盘</div><div class="ac-d">实心盘 + 金轴</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M16 26 A26 26 0 0 0 16 74" fill="none" stroke="#1E3A8A" stroke-width="6.5" stroke-linecap="round"/><path d="M84 26 A26 26 0 0 1 84 74" fill="none" stroke="#1E3A8A" stroke-width="6.5" stroke-linecap="round"/><line x1="50" y1="13" x2="50" y2="87" stroke="#F59E0B" stroke-width="5.5" stroke-linecap="round"/></svg></div><div class="ac-name">镜像中轴</div><div class="ac-d">双弧 + 金轴</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="34" fill="none" stroke="#1E3A8A" stroke-width="5"/><line x1="50" y1="13" x2="50" y2="19" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="81" y1="50" x2="87" y2="50" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="50" y1="81" x2="50" y2="87" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="13" y1="50" x2="19" y2="50" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><circle cx="50" cy="50" r="7" fill="#F59E0B"/></svg></div><div class="ac-name">时刻盘</div><div class="ac-d">12 刻度 + 金点</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="34" fill="none" stroke="#1E3A8A" stroke-width="5"/><line x1="50" y1="13" x2="50" y2="19" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="81" y1="50" x2="87" y2="50" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="50" y1="81" x2="50" y2="87" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="13" y1="50" x2="19" y2="50" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round"/><line x1="50" y1="8" x2="50" y2="92" stroke="#F59E0B" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="50" r="5" fill="#F59E0B"/></svg></div><div class="ac-name">刻度中轴</div><div class="ac-d">刻度环 + 金轴金心</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M42.3 19 A32 32 0 1 1 57.7 19" fill="none" stroke="#1E3A8A" stroke-width="7.5" stroke-linecap="round"/><path d="M50 28 L56 50 L50 72 L44 50 Z" fill="#1E3A8A"/><circle cx="50" cy="50" r="5.5" fill="#F59E0B"/></svg></div><div class="ac-name">罗盘弧旋</div><div class="ac-d">环绕 + 菱形方向</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M42.3 19 A32 32 0 1 1 57.7 19" fill="none" stroke="#1E3A8A" stroke-width="7.5" stroke-linecap="round"/><line x1="50" y1="30" x2="50" y2="24" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round" transform="rotate(-45 50 50)"/><line x1="50" y1="30" x2="50" y2="24" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round" transform="rotate(-90 50 50)"/><line x1="50" y1="30" x2="50" y2="24" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round" transform="rotate(45 50 50)"/><line x1="50" y1="30" x2="50" y2="24" stroke="#1E3A8A" stroke-width="2.6" stroke-linecap="round" transform="rotate(90 50 50)"/><line x1="50" y1="50" x2="50" y2="26" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="5.5" fill="#F59E0B"/></svg></div><div class="ac-name">刻度弧旋</div><div class="ac-d">环绕 + 刻度指针</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M40.8 17.8 A33.5 33.5 0 1 1 59.2 17.8 L50 2 Z" fill="#1E3A8A"/><circle cx="50" cy="50" r="8" fill="#F59E0B"/></svg></div><div class="ac-name">楔缺金心</div><div class="ac-d">实心盘 + V 缺口金点</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M42.3 19 A32 32 0 1 1 57.7 19" fill="none" stroke="#1E3A8A" stroke-width="8.5" stroke-linecap="round"/><circle cx="50" cy="50" r="14" fill="#F59E0B"/></svg></div><div class="ac-name">嵌心环</div><div class="ac-d">粗环 + 大金点重叠</div></div>
-    <div class="alt-card"><div class="ac-ico"><svg width="52" height="52" viewBox="0 0 100 100" fill="none"><path d="M40.8 17.8 A33.5 33.5 0 1 1 59.2 17.8 L50 2 Z" fill="#1E3A8A"/><line x1="50" y1="6" x2="50" y2="94" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="50" r="5" fill="#F59E0B"/></svg></div><div class="ac-name">金轴贯盘</div><div class="ac-d">实心盘 + 金轴穿出</div></div>
-  </div>
-</div>
-
-
-
-<!-- ═══════════════ 登录页 4 版 · 全宽横版 ═══════════════ -->
+<!-- ═══════════════ ② 登录页 · 全宽横版（C 方案渲染） ═══════════════ -->
 <div class="sec" id="login">
-  <div class="sec-title">② 登录页 4 版 · 全宽横版 <small>整页宽渲染（≈1150px）· 左品牌区 7fr + 右表单区 5fr · Slogan 34px 单行</small></div>
-  <div class="sec-desc">品牌区（自上而下）：Logo（44px 图标 + Meridian + 子午）→ 主 Slogan「你的时间，自有中轴。」34px/800 单行 → 解释句「一天有万千事物，总有一条中轴。」16px 紧贴下方 → 品牌故事段 → 价值点三卡 → 成长闭环流程示意 → 底部信任条 + 中轴水印。表单区：欢迎回来 / 邮箱 / 密码 / 记住我·忘记密码 / 进入子午 → / 第三方登录 / 注册引导 / 页脚。</div>
+  <div class="sec-title">② 登录页 · 全宽横版 <small>整页宽渲染（≈1150px）· 左品牌区 7fr + 右表单区 5fr · Slogan 34px 单行</small></div>
+  <div class="sec-desc">品牌区（自上而下）：Logo（C 方案 · 44px + Meridian + 子午）→ 主 Slogan「你的时间，自有中轴。」34px/800 单行 → 解释句「一天有万千事物，总有一条中轴。」紧贴下方（不可拆分）→ 品牌故事段 → 价值点三卡 → 成长闭环流程示意 → 底部信任条 + C 方案水印。表单区：欢迎回来 / 邮箱 / 密码 / 记住我·忘记密码 / 进入子午 → / 第三方登录 / 注册引导 / 页脚。套 A 子午蓝金渲染。</div>
 
-  <!-- ─── 登录页 V1 · 中轴 ─── -->
   <div class="login-card">
-    <div class="lp-top"><span><b>V1 · 中轴</b> · 登录页（套 A 子午蓝金 · 全宽横版）</span><span>品牌区 7fr | 表单区 5fr · min-height 560</span></div>
+    <div class="lp-top"><span><b>C · 断口双点</b> · 登录页（套 A 子午蓝金 · 全宽横版）</span><span>品牌区 7fr | 表单区 5fr · min-height 560</span></div>
     <div class="lp-wide">
       <div class="brand-side">
         <div class="ring"></div><div class="ring r2"></div>
-        <div class="wm"><svg width="140" height="140" viewBox="0 0 100 100" fill="none"><path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#fff" stroke-width="10"/><line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="16"/><circle cx="50" cy="50" r="11" fill="#F59E0B"/></svg></div>
+        <div class="wm"><svg width="140" height="140" viewBox="0 0 100 100" fill="none">
+          <path d="M 56.3 14.5 A 36 36 0 1 1 43.7 14.5" stroke="#fff" stroke-width="9"/>
+          <line x1="50" y1="24" x2="50" y2="14" stroke="#F59E0B" stroke-width="10"/>
+          <line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="10"/>
+          <line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="10"/>
+          <line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="10"/>
+          <line x1="75.5" y1="24.5" x2="71.2" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+          <line x1="75.5" y1="75.5" x2="71.2" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+          <line x1="24.5" y1="75.5" x2="28.8" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+          <line x1="24.5" y1="24.5" x2="28.8" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+          <line x1="50" y1="26" x2="50" y2="9" stroke="#F59E0B" stroke-width="9"/>
+          <circle cx="50" cy="7" r="7.5" fill="#F59E0B"/>
+          <circle cx="50" cy="50" r="9" fill="#F59E0B"/>
+        </svg></div>
         <div class="b-logo">
-          <svg width="44" height="44" viewBox="0 0 100 100" fill="none"><path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#fff" stroke-width="10"/><line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="16"/><circle cx="50" cy="50" r="11" fill="#F59E0B"/></svg>
-          <span class="b-word">Meridian</span><span class="b-cn">子午</span><span class="b-ver">BETA</span>
-        </div>
-        <div class="b-slogan">你的时间，自有中轴。</div>
-        <div class="b-explain">一天有万千事物，总有一条中轴。</div>
-        <div class="b-story">子午为向，正午为时——把脑海里的纷繁交给 Meridian，每一天围绕真正重要的事物运转。</div>
-        <div class="b-values">
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="2.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">子午为向</div><div class="bv-d">AI 从纷繁里帮你挑出主线，过滤未来</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="3.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">正午为时</div><div class="bv-d">专注当下，今天只围绕一条中轴运转</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 13 L13 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/><path d="M13 8 L13 3 L8 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="bv-t">万千归一</div><div class="bv-d">复盘成长闭环，看见自己的中轴</div></div>
-        </div>
-        <div class="b-flow">
-          <div class="bf-step"><span class="bf-n">1</span><span class="bf-t">输入</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">2</span><span class="bf-t">规划</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">3</span><span class="bf-t">执行</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">4</span><span class="bf-t">复盘</span></div>
-        </div>
-        <div class="b-trust"><span class="td"></span>已帮你记录 <b>1,284</b> 小时专注 · 沉淀 <b>12</b> 条个人中轴</div>
-      </div>
-      <div class="form-side">
-        <div class="f-title">欢迎回来</div>
-        <div class="f-sub">登录后继续你的成长闭环</div>
-        <div class="f-field"><label>邮箱</label><input class="f-input" placeholder="you@example.com"></div>
-        <div class="f-field"><label>密码</label><input class="f-input" type="password" placeholder="请输入密码"></div>
-        <div class="f-row"><label><span class="f-check"></span>记住我</label><span class="lnk">忘记密码？</span></div>
-        <button class="f-btn">进入子午 →</button>
-        <div class="f-div"><span class="sep"></span><span>或使用以下方式</span><span class="sep"></span></div>
-        <div class="f-social"><div class="fs-btn">微信登录</div><div class="fs-btn">Google</div></div>
-        <div class="f-reg">还没有账号？<b>立即注册 →</b></div>
-        <div class="f-foot">AI 驱动的个人时间操作系统 · © 2026 Meridian</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ─── 登录页 V2 · 日晷 ─── -->
-  <div class="login-card">
-    <div class="lp-top"><span><b>V2 · 日晷 v2</b> · 登录页（套 A 子午蓝金 · 全宽横版）</span><span>品牌区 7fr | 表单区 5fr · min-height 560</span></div>
-    <div class="lp-wide">
-      <div class="brand-side">
-        <div class="ring"></div><div class="ring r2"></div>
-        <div class="wm"><svg width="140" height="140" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="9"/><line x1="50" y1="9.5" x2="50" y2="17.5" stroke="#F59E0B" stroke-width="7"/><line x1="50" y1="50" x2="50" y2="20" stroke="#F59E0B" stroke-width="15"/><circle cx="50" cy="50" r="10" fill="#F59E0B"/></svg></div>
-        <div class="b-logo">
-          <svg width="44" height="44" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="9"/><line x1="50" y1="9.5" x2="50" y2="17.5" stroke="#F59E0B" stroke-width="7"/><line x1="50" y1="50" x2="50" y2="20" stroke="#F59E0B" stroke-width="15"/><circle cx="50" cy="50" r="10" fill="#F59E0B"/></svg>
-          <span class="b-word">Meridian</span><span class="b-cn">子午</span><span class="b-ver">BETA</span>
-        </div>
-        <div class="b-slogan">你的时间，自有中轴。</div>
-        <div class="b-explain">一天有万千事物，总有一条中轴。</div>
-        <div class="b-story">子午为向，正午为时——把脑海里的纷繁交给 Meridian，每一天围绕真正重要的事物运转。</div>
-        <div class="b-values">
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="2.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">子午为向</div><div class="bv-d">AI 从纷繁里帮你挑出主线，过滤未来</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="3.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">正午为时</div><div class="bv-d">专注当下，今天只围绕一条中轴运转</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 13 L13 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/><path d="M13 8 L13 3 L8 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="bv-t">万千归一</div><div class="bv-d">复盘成长闭环，看见自己的中轴</div></div>
-        </div>
-        <div class="b-flow">
-          <div class="bf-step"><span class="bf-n">1</span><span class="bf-t">输入</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">2</span><span class="bf-t">规划</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">3</span><span class="bf-t">执行</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">4</span><span class="bf-t">复盘</span></div>
-        </div>
-        <div class="b-trust"><span class="td"></span>已帮你记录 <b>1,284</b> 小时专注 · 沉淀 <b>12</b> 条个人中轴</div>
-      </div>
-      <div class="form-side">
-        <div class="f-title">欢迎回来</div>
-        <div class="f-sub">登录后继续你的成长闭环</div>
-        <div class="f-field"><label>邮箱</label><input class="f-input" placeholder="you@example.com"></div>
-        <div class="f-field"><label>密码</label><input class="f-input" type="password" placeholder="请输入密码"></div>
-        <div class="f-row"><label><span class="f-check"></span>记住我</label><span class="lnk">忘记密码？</span></div>
-        <button class="f-btn">进入子午 →</button>
-        <div class="f-div"><span class="sep"></span><span>或使用以下方式</span><span class="sep"></span></div>
-        <div class="f-social"><div class="fs-btn">微信登录</div><div class="fs-btn">Google</div></div>
-        <div class="f-reg">还没有账号？<b>立即注册 →</b></div>
-        <div class="f-foot">AI 驱动的个人时间操作系统 · © 2026 Meridian</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ─── 登录页 V3 · 准星中轴 ─── -->
-  <div class="login-card">
-    <div class="lp-top"><span><b>V3 · 同心双环</b> · 登录页（套 A 子午蓝金 · 全宽横版）</span><span>品牌区 7fr | 表单区 5fr · min-height 560</span></div>
-    <div class="lp-wide">
-      <div class="brand-side">
-        <div class="ring"></div><div class="ring r2"></div>
-        <div class="wm"><svg width="140" height="140" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="11"/><circle cx="50" cy="50" r="23" stroke="#fff" stroke-width="5.5"/><line x1="50" y1="12" x2="50" y2="88" stroke="#F59E0B" stroke-width="11"/><circle cx="50" cy="50" r="8.5" fill="#F59E0B"/></svg></div>
-        <div class="b-logo">
-          <svg width="44" height="44" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="11"/><circle cx="50" cy="50" r="23" stroke="#fff" stroke-width="5.5"/><line x1="50" y1="12" x2="50" y2="88" stroke="#F59E0B" stroke-width="11"/><circle cx="50" cy="50" r="8.5" fill="#F59E0B"/></svg>
-          <span class="b-word">Meridian</span><span class="b-cn">子午</span><span class="b-ver">BETA</span>
-        </div>
-        <div class="b-slogan">你的时间，自有中轴。</div>
-        <div class="b-explain">一天有万千事物，总有一条中轴。</div>
-        <div class="b-story">子午为向，正午为时——把脑海里的纷繁交给 Meridian，每一天围绕真正重要的事物运转。</div>
-        <div class="b-values">
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="2.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">子午为向</div><div class="bv-d">AI 从纷繁里帮你挑出主线，过滤未来</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#F59E0B" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="3.5" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div class="bv-t">正午为时</div><div class="bv-d">专注当下，今天只围绕一条中轴运转</div></div>
-          <div class="bv"><div class="bv-ico"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 13 L13 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/><path d="M13 8 L13 3 L8 3" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="bv-t">万千归一</div><div class="bv-d">复盘成长闭环，看见自己的中轴</div></div>
-        </div>
-        <div class="b-flow">
-          <div class="bf-step"><span class="bf-n">1</span><span class="bf-t">输入</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">2</span><span class="bf-t">规划</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">3</span><span class="bf-t">执行</span></div><span class="bf-a">→</span>
-          <div class="bf-step"><span class="bf-n">4</span><span class="bf-t">复盘</span></div>
-        </div>
-        <div class="b-trust"><span class="td"></span>已帮你记录 <b>1,284</b> 小时专注 · 沉淀 <b>12</b> 条个人中轴</div>
-      </div>
-      <div class="form-side">
-        <div class="f-title">欢迎回来</div>
-        <div class="f-sub">登录后继续你的成长闭环</div>
-        <div class="f-field"><label>邮箱</label><input class="f-input" placeholder="you@example.com"></div>
-        <div class="f-field"><label>密码</label><input class="f-input" type="password" placeholder="请输入密码"></div>
-        <div class="f-row"><label><span class="f-check"></span>记住我</label><span class="lnk">忘记密码？</span></div>
-        <button class="f-btn">进入子午 →</button>
-        <div class="f-div"><span class="sep"></span><span>或使用以下方式</span><span class="sep"></span></div>
-        <div class="f-social"><div class="fs-btn">微信登录</div><div class="fs-btn">Google</div></div>
-        <div class="f-reg">还没有账号？<b>立即注册 →</b></div>
-        <div class="f-foot">AI 驱动的个人时间操作系统 · © 2026 Meridian</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ─── 登录页 V4 · 经线球 ─── -->
-  <div class="login-card">
-    <div class="lp-top"><span><b>V4 · 罗盘</b> · 登录页（套 A 子午蓝金 · 全宽横版）</span><span>品牌区 7fr | 表单区 5fr · min-height 560</span></div>
-    <div class="lp-wide">
-      <div class="brand-side">
-        <div class="ring"></div><div class="ring r2"></div>
-        <div class="wm"><svg width="140" height="140" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="9"/><line x1="50" y1="10" x2="50" y2="17" stroke="#fff" stroke-width="6.5"/><line x1="83" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="6.5"/><line x1="50" y1="83" x2="50" y2="90" stroke="#fff" stroke-width="6.5"/><line x1="10" y1="50" x2="17" y2="50" stroke="#fff" stroke-width="6.5"/><path d="M50 16 L58 50 L50 84 L42 50 Z" fill="#F59E0B"/></svg></div>
-        <div class="b-logo">
-          <svg width="44" height="44" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" stroke="#fff" stroke-width="9"/><line x1="50" y1="10" x2="50" y2="17" stroke="#fff" stroke-width="6.5"/><line x1="83" y1="50" x2="90" y2="50" stroke="#fff" stroke-width="6.5"/><line x1="50" y1="83" x2="50" y2="90" stroke="#fff" stroke-width="6.5"/><line x1="10" y1="50" x2="17" y2="50" stroke="#fff" stroke-width="6.5"/><path d="M50 16 L58 50 L50 84 L42 50 Z" fill="#F59E0B"/></svg>
+          <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+            <path d="M 56.3 14.5 A 36 36 0 1 1 43.7 14.5" stroke="#fff" stroke-width="9"/>
+            <line x1="50" y1="24" x2="50" y2="14" stroke="#F59E0B" stroke-width="10"/>
+            <line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="10"/>
+            <line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="10"/>
+            <line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="10"/>
+            <line x1="75.5" y1="24.5" x2="71.2" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+            <line x1="75.5" y1="75.5" x2="71.2" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+            <line x1="24.5" y1="75.5" x2="28.8" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+            <line x1="24.5" y1="24.5" x2="28.8" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+            <line x1="50" y1="26" x2="50" y2="9" stroke="#F59E0B" stroke-width="9"/>
+            <circle cx="50" cy="7" r="7.5" fill="#F59E0B"/>
+            <circle cx="50" cy="50" r="9" fill="#F59E0B"/>
+          </svg>
           <span class="b-word">Meridian</span><span class="b-cn">子午</span><span class="b-ver">BETA</span>
         </div>
         <div class="b-slogan">你的时间，自有中轴。</div>
@@ -528,15 +314,28 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
   </div>
 </div>
 
-<!-- ═══════════════ 移动端竖版 ═══════════════ -->
-<div class="sec" id="mobi">
+<!-- ═══════════════ ③ 移动端竖版（C 方案） ═══════════════ -->
+<div class="sec" id="mobile">
   <div class="sec-title">③ 移动端竖版 <small>品牌区收窄为顶部横幅（主 Slogan + 解释句保留）· 表单区下方</small></div>
-  <div class="sec-desc">规格 §4.5：<860px 时品牌区变顶部横幅，主 Slogan 与解释句的"不可拆分"关系保留；表单区自然下移。</div>
+  <div class="sec-desc">规格 §4.5：<860px 时品牌区变顶部横幅，主 Slogan 与解释句的"不可拆分"关系保留；表单区自然下移。Logo 用 C 方案白色版。</div>
   <div class="mobile-card">
     <div class="m-banner">
       <div class="ring"></div>
       <div class="m-logo">
-        <svg width="30" height="30" viewBox="0 0 100 100" fill="none"><path d="M41.9 14.6 A36 36 0 1 1 58.1 14.6" stroke="#fff" stroke-width="10"/><line x1="50" y1="50" x2="50" y2="8" stroke="#F59E0B" stroke-width="16"/><circle cx="50" cy="50" r="11" fill="#F59E0B"/></svg>
+        <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+          <path d="M 56.3 14.5 A 36 36 0 1 1 43.7 14.5" stroke="#fff" stroke-width="9"/>
+          <line x1="50" y1="24" x2="50" y2="14" stroke="#F59E0B" stroke-width="10"/>
+          <line x1="86" y1="50" x2="76" y2="50" stroke="#fff" stroke-width="10"/>
+          <line x1="50" y1="86" x2="50" y2="76" stroke="#fff" stroke-width="10"/>
+          <line x1="14" y1="50" x2="24" y2="50" stroke="#fff" stroke-width="10"/>
+          <line x1="75.5" y1="24.5" x2="71.2" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+          <line x1="75.5" y1="75.5" x2="71.2" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+          <line x1="24.5" y1="75.5" x2="28.8" y2="71.2" stroke="#fff" stroke-width="7.5"/>
+          <line x1="24.5" y1="24.5" x2="28.8" y2="28.8" stroke="#fff" stroke-width="7.5"/>
+          <line x1="50" y1="26" x2="50" y2="9" stroke="#F59E0B" stroke-width="9"/>
+          <circle cx="50" cy="7" r="7.5" fill="#F59E0B"/>
+          <circle cx="50" cy="50" r="9" fill="#F59E0B"/>
+        </svg>
         <span style="font-size:16px;font-weight:800;letter-spacing:1px">Meridian</span><span style="font-size:10px;opacity:.85;letter-spacing:2px;border-left:1px solid rgba(255,255,255,.3);padding-left:8px">子午</span>
       </div>
       <div class="m-slogan">你的时间，自有中轴。</div>
@@ -554,10 +353,10 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
   </div>
 </div>
 
-<!-- ═══════════════ 色板 3 套应用 ═══════════════ -->
+<!-- ═══════════════ ④ 色板 3 套应用 ═══════════════ -->
 <div class="sec" id="pals">
   <div class="sec-title">④ 品牌色 3 套应用预览 <small>token 级色板 + 按钮/链接/导航高亮 + 兼容性检查</small></div>
-  <div class="sec-desc">中性色沿用现有 v2；三套只动 brand token 系与强调色。登录页 4 版均以套 A 渲染；切换下方 tab 看三套在按钮/链接/导航上的效果。</div>
+  <div class="sec-desc">中性色沿用现有 v2；三套只动 brand token 系与强调色。登录页以套 A 渲染；切换下方 tab 看三套在按钮/链接/导航上的效果。Logo 断口双点的金色 = accent 正午金（套 A）/ Indigo 深（套 B）/ 夜青（套 C）。</div>
 
   <div class="pal-tabs">
     <button class="ptab on" data-p="pa">套 A · 子午<span>子夜蓝 + 正午金（推荐）</span></button>
@@ -573,7 +372,7 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
           <div class="sw"><div class="sw-chip" style="background:#1E3A8A"></div><span class="sw-name">brand 主色</span><span class="sw-usage">主按钮 / 主链接 / 选中态 / 导航高亮</span><span class="sw-hex">#1E3A8A</span></div>
           <div class="sw"><div class="sw-chip" style="background:#172554"></div><span class="sw-name">brand-deep</span><span class="sw-usage">hover / 按压态 / 渐变深端</span><span class="sw-hex">#172554</span></div>
           <div class="sw"><div class="sw-chip" style="background:#E0E7FF"></div><span class="sw-name">brand-bg</span><span class="sw-usage">选中背景 / 徽章底 / 标签底</span><span class="sw-hex">#E0E7FF</span></div>
-          <div class="sw"><div class="sw-chip" style="background:#F59E0B"></div><span class="sw-name">accent 正午金 ★</span><span class="sw-usage">Logo 光轴 / slogan 点缀 / 打卡完成瞬间</span><span class="sw-hex">#F59E0B</span></div>
+          <div class="sw"><div class="sw-chip" style="background:#F59E0B"></div><span class="sw-name">accent 正午金 ★</span><span class="sw-usage">Logo 断口 / 光轴 / 锚点 / 打卡完成瞬间</span><span class="sw-hex">#F59E0B</span></div>
         </div>
       </div>
       <div class="tok-card">
@@ -619,7 +418,7 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
           <div class="sw"><div class="sw-chip" style="background:#6366F1"></div><span class="sw-name">brand 主色</span><span class="sw-usage">主按钮 / 主链接 / 选中态（= 现有品牌色）</span><span class="sw-hex">#6366F1</span></div>
           <div class="sw"><div class="sw-chip" style="background:#4338CA"></div><span class="sw-name">brand-deep</span><span class="sw-usage">hover / 按压态（强调色兼用）</span><span class="sw-hex">#4338CA</span></div>
           <div class="sw"><div class="sw-chip" style="background:#EEF2FF"></div><span class="sw-name">brand-bg</span><span class="sw-usage">选中背景 / 徽章底</span><span class="sw-hex">#EEF2FF</span></div>
-          <div class="sw"><div class="sw-chip" style="background:#4338CA"></div><span class="sw-name">accent 强调</span><span class="sw-usage">Logo / slogan 点缀（无金色）</span><span class="sw-hex">#4338CA</span></div>
+          <div class="sw"><div class="sw-chip" style="background:#4338CA"></div><span class="sw-name">accent 强调</span><span class="sw-usage">Logo 断口 / 光轴 / 锚点（无金色）</span><span class="sw-hex">#4338CA</span></div>
         </div>
       </div>
       <div class="tok-card">
@@ -664,7 +463,7 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
           <div class="sw"><div class="sw-chip" style="background:#0F2A43"></div><span class="sw-name">brand 主色</span><span class="sw-usage">主按钮 / 主链接 / 选中态</span><span class="sw-hex">#0F2A43</span></div>
           <div class="sw"><div class="sw-chip" style="background:#082032"></div><span class="sw-name">brand-deep</span><span class="sw-usage">hover / 按压态</span><span class="sw-hex">#082032</span></div>
           <div class="sw"><div class="sw-chip" style="background:#F0F9FF"></div><span class="sw-name">brand-bg</span><span class="sw-usage">选中背景 / 徽章底（微调避开学习蓝）</span><span class="sw-hex">#F0F9FF</span></div>
-          <div class="sw"><div class="sw-chip" style="background:#06B6D4"></div><span class="sw-name">accent 夜青</span><span class="sw-usage">Logo 光轴 / 完成瞬间（冷色发光）</span><span class="sw-hex">#06B6D4</span></div>
+          <div class="sw"><div class="sw-chip" style="background:#06B6D4"></div><span class="sw-name">accent 夜青</span><span class="sw-usage">Logo 断口 / 光轴 / 锚点（冷色发光）</span><span class="sw-hex">#06B6D4</span></div>
         </div>
       </div>
       <div class="tok-card">
@@ -703,16 +502,17 @@ body{font-family:var(--font);background:#e9edf3;color:var(--text);font-size:14px
   </div>
 </div>
 
-<div class="foot">Meridian · 子午 登录页视觉稿 v3 · 2026-08-03 · 全宽横版分栏 · 文案按规格逐字落位 · 产品选定 Logo 变体 + 色板 → 前端实施</div>
+<div class="foot">Meridian · 子午 视觉稿 v4 · 2026-08-04 · Logo 定稿 = C 方案「断口双点」（锚点 v6）· 登录页 / 移动端 / 色板全部同步 · 产品选定色板 → 前端实施（token 替换 + favicon 导出 + 横向带字版 SVG）</div>
 
 </div>
 <script>
+/* 色板 tab 切换 */
 document.querySelectorAll('.ptab').forEach(function(b){
   b.addEventListener('click', function(){
     document.querySelectorAll('.ptab').forEach(function(x){x.classList.remove('on')});
-    document.querySelectorAll('.pal-wrap').forEach(function(w){w.classList.remove('on')});
-    this.classList.add('on');
-    document.getElementById(this.dataset.p).classList.add('on');
+    document.querySelectorAll('.pal-wrap').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');
+    document.getElementById(b.dataset.p).classList.add('on');
   });
 });
 </script>

@@ -1,22 +1,26 @@
 "use client";
 
 /* ═══════════════════════════════════════════
-   UI Preferences — 导航方案 + Focus Card 版式
+   UI Preferences — 导航方案 + Focus Card 版式 + 导航语言
    存取 localStorage，首版即可用，后续可迁移 UserProfile
    · 事件名常量 + 订阅函数（接收方做类型守卫）
    ═══════════════════════════════════════════ */
 
 export type NavMode = "side" | "top";
 export type FcLayout = 1 | 2; // 1 = 一栏（放大） 2 = 两栏（左信息/右内容）
+export type NavLang = "zh" | "en";
 
 const NAV_KEY = "taskos.nav";
 const LAYOUT_KEY = "taskos.fcLayout";
+const LANG_KEY = "taskos.lang";
 
 export const NAV_DEFAULT: NavMode = "side";
 export const LAYOUT_DEFAULT: FcLayout = 1;
+export const LANG_DEFAULT: NavLang = "zh";
 
 export const NAV_CHANGE_EVENT = "taskos:nav-change";
 export const FCLAYOUT_CHANGE_EVENT = "taskos:fclayout-change";
+export const LANG_CHANGE_EVENT = "taskos:lang-change";
 
 function safeGet(key: string): string | null {
   if (typeof window === "undefined") return null;
@@ -46,6 +50,15 @@ export function setFcLayout(layout: FcLayout) {
   safeSet(LAYOUT_KEY, String(layout));
 }
 
+export function getNavLang(): NavLang {
+  const v = safeGet(LANG_KEY);
+  return v === "en" ? "en" : LANG_DEFAULT;
+}
+
+export function setNavLang(lang: NavLang) {
+  safeSet(LANG_KEY, lang);
+}
+
 /* ── 跨组件广播：设置页改动 → 壳 / Today 立即响应 ── */
 
 function isNavMode(v: unknown): v is NavMode {
@@ -54,6 +67,10 @@ function isNavMode(v: unknown): v is NavMode {
 
 function isFcLayout(v: unknown): v is FcLayout {
   return v === 1 || v === 2;
+}
+
+function isNavLang(v: unknown): v is NavLang {
+  return v === "zh" || v === "en";
 }
 
 export function listenNavMode(cb: (mode: NavMode) => void): () => void {
@@ -74,4 +91,14 @@ export function listenFcLayout(cb: (layout: FcLayout) => void): () => void {
   };
   window.addEventListener(FCLAYOUT_CHANGE_EVENT, handler);
   return () => window.removeEventListener(FCLAYOUT_CHANGE_EVENT, handler);
+}
+
+export function listenNavLang(cb: (lang: NavLang) => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    if (isNavLang(detail)) cb(detail);
+  };
+  window.addEventListener(LANG_CHANGE_EVENT, handler);
+  return () => window.removeEventListener(LANG_CHANGE_EVENT, handler);
 }

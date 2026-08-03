@@ -4,13 +4,16 @@ import { AuthProvider } from "@/components/auth-provider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export const metadata: Metadata = {
-  title: "Personal Task OS",
-  description: "Not a task storage, but a task filter. 帮助用户过滤未来，不是堆积未来。",
+  title: "Meridian · 子午",
+  description: "AI 驱动的个人时间操作系统——把脑海里的纷繁整理成可执行的时间系统，每一天围绕真正重要的事物运转。",
   manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/meridian-icon.svg", type: "image/svg+xml" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Task OS",
+    title: "Meridian",
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -18,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "var(--color-brand-600)",
+  themeColor: "#1e3a8a",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

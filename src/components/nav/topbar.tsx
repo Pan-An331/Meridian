@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { SettingsIcon, LogOutIcon } from "@/components/ui/icons";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NAV_ITEMS, isActiveNav } from "@/lib/navigation";
+import { getNavLang, listenNavLang, type NavLang } from "@/lib/ui-preferences";
+import MeridianLogo from "@/components/auth/MeridianLogo";
 
 /* ═══════════════════════════════════════════
    Topbar — 顶栏导航（可选形态 B）
@@ -19,29 +22,32 @@ interface TopbarProps {
 
 export function Topbar({ userName }: TopbarProps) {
   const pathname = usePathname();
+  const [lang, setLang] = useState<NavLang>("zh");
+
+  useEffect(() => {
+    setLang(getNavLang());
+    return listenNavLang(setLang);
+  }, []);
 
   return (
     <header className="h-14 shrink-0 bg-[var(--page-sidebar)] text-[var(--page-sidebar-text)] grid grid-cols-[1fr_auto_1fr] items-center px-5 gap-4">
-      {/* Brand（左） */}
+      {/* Brand（左）· Meridian · C 方案 Logo */}
       <div className="flex items-center gap-3">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--color-grad-brand)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="1" />
-            <path d="M9 14l2 2 4-4" />
-          </svg>
+          <MeridianLogo size={15} />
         </div>
-        <h1 className="text-base font-bold tracking-tight hidden md:inline">Task OS</h1>
+        <h1 className="text-base font-bold tracking-tight hidden md:inline">Meridian</h1>
         {/* V3：全局搜索 */}
         <div className="w-[220px] lg:w-[260px]">
           <GlobalSearch />
         </div>
       </div>
 
-      {/* 四页面 Tab（严格居中） */}
+      {/* 五页面 Tab（严格居中 · 中英切换） */}
       <nav className="flex items-center gap-1">
-        {NAV_ITEMS.map(({ href, label, Icon, isDefault }) => {
+        {NAV_ITEMS.map(({ href, labelZh, labelEn, Icon, isDefault }) => {
           const active = isActiveNav(pathname, href);
+          const label = lang === "zh" ? labelZh : labelEn;
           return (
             <Link key={href} href={href}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
@@ -53,7 +59,7 @@ export function Topbar({ userName }: TopbarProps) {
                 <Icon size={18} className={active ? "text-brand-200" : "text-[var(--page-sidebar-text)]/45"} />
               </span>
               <span className="leading-none">{label}</span>
-              {isDefault && !active && <span className="text-xs px-1.5 py-px rounded bg-white/12 text-[var(--page-sidebar-text)]/60">默认</span>}
+              {isDefault && !active && <span className="text-xs px-1.5 py-px rounded bg-white/12 text-[var(--page-sidebar-text)]/60">{lang === "zh" ? "默认" : "Default"}</span>}
             </Link>
           );
         })}

@@ -93,6 +93,8 @@ model Task {
   level            String?   @default("task")
   // V5 层级重构：积累型任务（背单词/健身：打卡制，无"完成"）
   accumulate       Boolean   @default(false)
+  // Project 页优化 · 阶段 D：★ 执行清单开关（★点亮 = 可排期执行清单，Today 可出发勾选子项）
+  star             Boolean   @default(false)
 
   user       User      @relation(fields: [userId], references: [id])
   parent     Task?     @relation("SubTasks", fields: [parentId], references: [id])

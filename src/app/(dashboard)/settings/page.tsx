@@ -583,11 +583,11 @@ function DataCard() {
 
 function AboutCard() {
   return (
-    <Card title="关于" desc="Task OS V1.0" icon="ℹ️" iconBg="bg-[var(--color-gray-100)] text-[var(--v2-text2)]">
+    <Card title="关于" desc="Meridian · 子午" icon="ℹ️" iconBg="bg-[var(--color-gray-100)] text-[var(--v2-text2)]">
       <div className="text-center py-2">
-        <div className="text-sm font-semibold text-[var(--v2-text)]">Task OS · AI 驱动的个人时间操作系统</div>
+        <div className="text-sm font-semibold text-[var(--v2-text)]">Meridian · 子午 · AI 驱动的个人时间操作系统</div>
         <div className="text-sm text-[var(--v2-text2)] mt-1.5 leading-[1.7]">
-          帮用户过滤未来，而不是堆积未来。<br />AI 管理过程 · 用户管理方向。
+          一天有万千事物，总有一条中轴。<br />帮用户过滤未来，而不是堆积未来。
         </div>
         <div className="text-sm text-[var(--v2-text3)] mt-2.5">版本 V1.0.0 · 2026-08</div>
       </div>

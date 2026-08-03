@@ -1,16 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, isActiveNav } from "@/lib/navigation";
+import { getNavLang, listenNavLang, type NavLang } from "@/lib/ui-preferences";
 
 /**
  * iOS 26–style floating bottom navigation — V2
  * 只放 4 个主 Tab（设置移入页头齿轮，不再占 tab 位）
  * 激活 tab 胶囊指示 + glassmorphism，安全区适配 iPhone。
+ * 导航名中英切换（默认中文）。
  */
 export function MobileNav() {
   const pathname = usePathname();
+  const [lang, setLang] = useState<NavLang>("zh");
+
+  useEffect(() => {
+    setLang(getNavLang());
+    return listenNavLang(setLang);
+  }, []);
 
   return (
     <nav
@@ -28,8 +37,9 @@ export function MobileNav() {
           boxShadow: "var(--shadow-mobile-nav)",
         }}
       >
-        {NAV_ITEMS.map(({ href, label, Icon }) => {
+        {NAV_ITEMS.map(({ href, labelZh, labelEn, Icon }) => {
           const isActive = isActiveNav(pathname, href);
+          const label = lang === "zh" ? labelZh : labelEn;
 
           return (
             <Link

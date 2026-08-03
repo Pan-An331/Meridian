@@ -11,17 +11,17 @@
 
 :root,
 [data-theme-brand="indigo"] {
-  --brand-50: #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-300: #a5b4fc;
-  --brand-400: #818cf8;
-  --brand-500: #6366f1;
-  --brand-600: #4f46e5;
-  --brand-700: #4338ca;
-  --brand-800: #3730a3;
-  --brand-900: #312e81;
-  --brand-name: "靛蓝";
+  --brand-50: #eef4ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #3b82f6;
+  --brand-500: #2563eb;
+  --brand-600: #1e3a8a;  /* 品牌主色 · 子夜蓝（Meridian 定稿） */
+  --brand-700: #172554;
+  --brand-800: #0f1f4d;
+  --brand-900: #0a1638;
+  --brand-name: "子夜";
 }
 
 [data-theme-brand="sunset"] {

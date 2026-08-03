@@ -21,7 +21,7 @@ export interface ThemeMeta {
 }
 
 export const BRAND_LIST: ThemeMeta[] = [
-  { id: "indigo", name: "靛蓝", color: "var(--color-brand-600)" },
+  { id: "indigo", name: "子夜", color: "var(--color-brand-600)" },
   { id: "sunset", name: "日落", color: "#ea580c" },
   { id: "ocean", name: "深海", color: "#0d9488" },
   { id: "forest", name: "森林", color: "#10b981" },
