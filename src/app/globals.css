@@ -527,3 +527,23 @@
 @media (max-width: 860px) {
   .plan-tsk-title{font-size:13px}
 }
+
+/* ═══════════════════════════════════════════
+   PWA / iOS 安全区适配（2026-08-05 平板端优化）
+   刘海屏顶部 notch / 底部 Home 条 不被内容遮挡
+   ═══════════════════════════════════════════ */
+@supports (padding: env(safe-area-inset-top)) {
+  /* 固定头部/侧栏留出安全区 */
+  .page-sidebar, .pt-topbar, .pwa-safe-top { padding-top: env(safe-area-inset-top); }
+  /* 底部固定元素留出 Home 条空间 */
+  .pwa-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 8px); }
+  /* 全局主内容底部兜底（滚动到最底时不被 Home 条挡） */
+  main { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* iOS 独立模式（standalone）下：全屏沉浸 */
+@media (display-mode: standalone) {
+  body { -webkit-tap-highlight-color: transparent; }
+  /* 禁用双击缩放（PWA 中误触更明显） */
+  * { touch-action: manipulation; }
+}

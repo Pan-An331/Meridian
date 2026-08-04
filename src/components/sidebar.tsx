@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { SettingsIcon, LogOutIcon } from "@/components/ui/icons";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NAV_ITEMS, isActiveNav } from "@/lib/navigation";
 import { getNavLang, listenNavLang, type NavLang } from "@/lib/ui-preferences";
@@ -106,9 +105,8 @@ export function Sidebar({ userName, collapsed, onToggle }: SidebarProps) {
         })}
       </nav>
 
-      {/* 底部工具区：主题 + 设置（降级为图标，与主页不再平级） */}
+      {/* 底部工具区：设置（主题切换已移除——品牌定稿 D19 决定不做用户自定义配色） */}
       <div className={`${collapsed ? "px-2" : "px-4"} pb-1 space-y-1`}>
-        <ThemeSwitcher collapsed={collapsed} />
         <Link href="/settings" title="设置"
           className={`flex items-center rounded-lg text-sm transition-all duration-150 ${
             collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5"
