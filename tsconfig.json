@@ -44,6 +44,8 @@
     "node_modules",
     "UI示例",
     "scripts/archive",
-    "docs/archive"
+    "docs/archive",
+    "vitest.config.ts",
+    "tests"
   ]
 }
