@@ -512,7 +512,7 @@ export default function ProjectsPage() {
             <span className="w-[7px] h-[7px] rounded-full bg-[var(--v2-brand)] flex-none" />
             <span className="text-[13px] font-bold text-[var(--v2-text)]">项目树</span>
             <span className="text-[10.5px] text-[var(--v2-text3)] ml-auto">{treeCount} 项目 · {nodeCount} 节点</span>
-            <button className="ml-2 text-[10.5px] font-semibold text-[var(--v2-brand-deep)] bg-[var(--v2-brand-bg)] border-none rounded-md px-2.5 py-1 cursor-pointer hover:bg-[#c7d2fe] transition-colors" onClick={() => newNode(null)}>＋ 新建项目</button>
+            <button className="pt-new-btn ml-2 text-[10.5px] font-semibold text-[var(--v2-brand-deep)] bg-[var(--v2-brand-bg)] border-none rounded-md px-2.5 py-1 cursor-pointer hover:bg-[#c7d2fe] transition-colors" onClick={() => newNode(null)}>＋ 新建项目</button>
           </div>
           <input
             ref={newInputRef}
@@ -531,7 +531,7 @@ export default function ProjectsPage() {
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-[var(--v2-brand-bg)] flex items-center justify-center mb-3">🗂</div>
                 <div className="text-[15px] font-medium text-[var(--v2-text)] mb-1.5">还没有项目</div>
                 <div className="text-sm text-[var(--v2-text3)] mb-4">点上方「＋新建项目」创建第一个项目</div>
-                <button className="text-sm font-medium rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition-all px-4 py-1.5" onClick={() => newNode(null)}>＋ 新建项目</button>
+                <button className="text-sm font-medium rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition-all px-4 py-2.5 min-h-[44px]" onClick={() => newNode(null)}>＋ 新建项目</button>
               </div>
             ) : (
               <div className="flex flex-col">

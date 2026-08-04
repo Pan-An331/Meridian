@@ -595,7 +595,7 @@ export default function ReviewPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="mb-4 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-[24px] font-semibold tracking-[-0.3px] text-[var(--v2-text)]">回顾</h2>
           <p className="text-xs text-[var(--v2-text3)]/70 mt-1">看见自己做到了什么，比上周更好</p>
@@ -604,7 +604,7 @@ export default function ReviewPage() {
         <div className="flex gap-0.5 p-0.5 rounded-lg bg-[var(--color-gray-100)] shrink-0 mt-1">
           {(["week", "month"] as const).map((p) => (
             <button key={p} onClick={() => { setPeriod(p); load(p); }}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+              className={`px-3.5 py-2.5 min-h-[44px] rounded-md text-sm font-medium transition-all ${
                 period === p ? "bg-white text-[var(--v2-text)] shadow-[var(--shadow-card)]" : "text-[var(--v2-text2)] hover:text-[var(--v2-text)]"
               }`}>
               {p === "week" ? "本周" : "本月"}

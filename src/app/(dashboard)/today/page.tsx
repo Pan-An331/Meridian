@@ -17,6 +17,7 @@ import { FocusCardV2, type FocusCardV2Data, type FcV2Phase, type FcV2Type } from
 interface CurrentTask {
   id: string; title: string; description: string | null;
   taskType: string | null; category: string | null; parentTitle: string | null;
+  parentId?: string | null; // 收尾批次 C：树匹配优先用 id（后端返回后生效）
   // FCV2：动机（继承后最终值）+ 出发时刻
   purpose?: string | null;
   departureAt?: string | null;
@@ -128,7 +129,62 @@ interface FocusCard {
 }
 
 /* ── 真实任务 → V2 卡片映射（FCV2：直读后端 Task.purpose / Task.departureAt） ── */
-function toCardV2(t: CurrentTask): FocusCardV2Data {
+
+/* 收尾批次 C：项目树节点（/api/projects/tree · doneCount/totalCount 后端就绪后消费，前端递归兜底） */
+interface ProjTreeNode {
+  id: string; title: string; level: string; status: string;
+  doneCount?: number | null; totalCount?: number | null;
+  children: ProjTreeNode[];
+}
+const countDone = (n: ProjTreeNode): number => (n.status === "completed" ? 1 : 0) + (n.children || []).reduce((s, c) => s + countDone(c), 0);
+const countTotal = (n: ProjTreeNode): number => 1 + (n.children || []).reduce((s, c) => s + countTotal(c), 0);
+/** 收尾批次 D：monthDates mock 占位（确定性：本月隔天 + 今天，后端未返回该字段时用） */
+function mockMonthDates(): string[] {
+  const out: string[] = [];
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const today = now.getDate();
+  for (let d = 1; d <= today; d++) {
+    if (d % 2 === 1 || d === today) out.push(`${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+  }
+  return out;
+}
+/** 按 parentTitle 名称链在树中匹配祖先节点（找不到 = 孤儿 → 空链） */
+function matchChain(trees: ProjTreeNode[], names: string[]): ProjTreeNode[] {
+  let level = trees;
+  const chain: ProjTreeNode[] = [];
+  for (const name of names) {
+    const hit = level.find((n) => n.title === name);
+    if (!hit) return [];
+    chain.push(hit);
+    level = hit.children || [];
+  }
+  return chain;
+}
+function buildAncestry(t: CurrentTask, trees: ProjTreeNode[]): { stages: { name: string; done?: boolean; current?: boolean }[] | undefined; projectProgress: { done: number; total: number } | undefined } {  const names = (t.parentTitle || "").split(" / ").map((s) => s.trim()).filter(Boolean);
+  if (!names.length) return { stages: undefined, projectProgress: undefined };
+  const chain = matchChain(trees, names);
+  if (!chain.length) return { stages: undefined, projectProgress: undefined };
+  // stages：project/phase 级入链；最后一级 = 直接父级（current）
+  const stages = chain.filter((n) => n.level === "project" || n.level === "phase").map((n, i, arr) => ({
+    name: n.title,
+    done: n.status === "completed",
+    current: i === arr.length - 1,
+  }));
+  // projectProgress：最近一个有子级的祖先（doneCount/totalCount 优先，前端递归兜底）
+  let progressNode: ProjTreeNode | null = null;
+  for (let i = chain.length - 1; i >= 0; i--) {
+    if ((chain[i].children || []).length > 0) { progressNode = chain[i]; break; }
+  }
+  const projectProgress = progressNode ? {
+    done: progressNode.doneCount ?? countDone(progressNode),
+    total: progressNode.totalCount ?? countTotal(progressNode),
+  } : undefined;
+  return { stages: stages.length ? stages : undefined, projectProgress };
+}
+
+function toCardV2(t: CurrentTask, trees: ProjTreeNode[] = []): FocusCardV2Data {
   const children = t.children ?? [];
   const hasChildren = children.length > 0;
   const hasSchedule = !!t.scheduledStart;
@@ -136,6 +192,8 @@ function toCardV2(t: CurrentTask): FocusCardV2Data {
   const freq = t.accumStats?.freqType;
   const purposeHint = type === "timer" ? "固定时间 · 到点自动完成" : type === "checklist" ? "做产品/项目" : type === "learning" ? "学书本知识" : freq === "weekly" ? "隔天练 · 中断不算断" : "每天坚持一点点";
   const parent = t.parentTitle || "无归属项目";
+  // 收尾批次 C：左栏项目阶段（树接口直读）
+  const ancestry = buildAncestry(t, trees);
   // FCV2 phase：出发时刻 + 状态推导（in_progress=going，completed=done，有 departureAt 未完成=confirm）
   const departureAt = t.departureAt ?? null;
   const phase: FcV2Phase = t.taskType === "completed" ? "done" : departureAt ? "going" : "unstarted";
@@ -161,8 +219,13 @@ function toCardV2(t: CurrentTask): FocusCardV2Data {
     monthTotalDays: t.accumStats?.monthTotalDays,
     totalMinutes: t.accumStats?.totalMinutes,
     weekDates: t.accumStats?.weekDates,
+    // 收尾批次 D：mini-cal 当月打卡日期（后端 accumStats.monthDates 已就绪；undefined 时 mock 占位保证验收）
+    monthDates: t.accumStats?.monthDates ?? mockMonthDates(),
     aiHint: undefined,
     description: t.description,
+    // 收尾批次 C：左栏项目阶段直读树接口（去 mock）
+    stages: ancestry.stages,
+    projectProgress: ancestry.projectProgress,
   };
 }
 
@@ -297,7 +360,7 @@ function AiPanel({ text, recommendations, onAdopt, busy }: { text: string; recom
           className="flex-1 text-sm px-3 py-1.5 rounded-md border border-[#DDD6FE] bg-white focus:outline-none focus:border-[var(--v2-purple)] min-w-0"
         />
         <button onClick={send} disabled={sending || !input.trim()}
-          className="text-sm px-4 py-1.5 rounded-md bg-[var(--v2-purple)] text-white font-medium disabled:opacity-50 shrink-0">
+          className="text-sm px-4 py-2.5 min-h-[44px] rounded-md bg-[var(--v2-purple)] text-white font-medium disabled:opacity-50 shrink-0">
           {sending ? "…" : "发送"}
         </button>
       </div>
@@ -331,6 +394,15 @@ export default function TodayPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  // 收尾批次 C：项目树缓存（页面级 fetch 一次，不随卡片刷新重复请求）
+  const [treeCache, setTreeCache] = useState<ProjTreeNode[]>([]);
+  useEffect(() => {
+    fetch("/api/projects/tree")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && Array.isArray(d.trees)) setTreeCache(d.trees as ProjTreeNode[]); })
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -509,8 +581,8 @@ export default function TodayPage() {
       <div className={`today-flex ${complex ? "max-w-[960px]" : "max-w-[880px]"}`}>
       {/* 测量区：问候语 + 主卡 实际高度（≤600 简单 / >600 复杂，滞回 540） */}
       <div ref={measureRef} className="space-y-4">
-      {/* 页头：问候独立行 + 统计徽章（布局提示移入设置页，不再占位） */}
-      <div className="flex items-center justify-between mb-1">
+      {/* 页头：问候独立行 + 统计徽章（布局提示移入设置页，不再占位 · 窄屏换行） */}
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
         <div>
           <h2 className="text-[24px] font-semibold tracking-[-0.3px] text-[var(--v2-text)]">{getGreeting(userName)}</h2>
           <div className="text-[13px] text-[var(--v2-text3)] mt-1">
@@ -541,7 +613,7 @@ export default function TodayPage() {
             </>
           )}
           <FocusCardV2
-            card={toCardV2(data?.currentTask ?? { id: cur.card.id, title: cur.card.title, description: null, taskType: null, category: null, parentTitle: null, children: [], scheduledStart: null, scheduledEnd: null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: 0, completionPercent: 0 } as CurrentTask)}
+            card={toCardV2(data?.currentTask ?? { id: cur.card.id, title: cur.card.title, description: null, taskType: null, category: null, parentTitle: null, children: [], scheduledStart: null, scheduledEnd: null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: 0, completionPercent: 0 } as CurrentTask, treeCache)}
             onStart={() => doAction(cur.card.id, "start")}
             onComplete={(min) => doAction(cur.card.id, "complete", min && min > 0 ? { durationMinutes: min } : {})}
             onSkip={() => doAction(cur.card.id, "reschedule", { reason: "user_skip_today" })}

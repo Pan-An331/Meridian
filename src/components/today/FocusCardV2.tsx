@@ -36,6 +36,7 @@ export interface FocusCardV2Data {
   streak?: { current: number; longest: number };
   weekTarget?: number; weekCount?: number; monthCount?: number; monthTotalDays?: number; totalMinutes?: number;
   weekDates?: string[];             // 频次型本周打卡日期
+  monthDates?: string[];            // 积累·每日 当月打卡日期 YYYY-MM-DD（收尾批次 D：后端 accumStats 透传）
   aiHint?: string;                  // AI 提醒/执行条
   description?: string | null;
 }
@@ -72,6 +73,46 @@ const TYPE_COLOR: Record<FcV2Type, string> = {
   timer: "#4338ca", checklist: "#c2410c", learning: "#7c3aed", "accum-daily": "#059669", "accum-weekly": "#0891b2",
 };
 const LIST_TITLE: Record<FcV2Type, string> = { checklist: "执行清单", learning: "知识点", "accum-weekly": "今日动作", timer: "", "accum-daily": "" };
+
+/* 收尾批次 D：当月小日历（accum-daily · 周一开头 7 列） */
+function MonthCal({ monthDates }: { monthDates?: string[] }) {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const firstDow = (new Date(y, m, 1).getDay() + 6) % 7; // 周一=0
+  const today = now.getDate();
+  const set = new Set(monthDates ?? []);
+  const cells: React.ReactNode[] = [];
+  for (let i = 0; i < firstDow; i++) cells.push(<span key={`p${i}`} className="w-[22px] h-[22px]" />);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const checked = set.has(ds);
+    const isToday = d === today;
+    cells.push(
+      <span
+        key={d}
+        className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[9.5px] tabular-nums ${
+          checked
+            ? "bg-[var(--v2-brand-gold)] text-white font-semibold"
+            : isToday
+              ? "border border-[var(--v2-brand)] text-[var(--v2-brand-deep)] font-medium"
+              : "text-[var(--v2-text3)]"
+        }`}
+        title={checked ? `${ds} 已打卡` : ds}
+      >{d}</span>
+    );
+  }
+  return (
+    <div>
+      <div className="flex items-center justify-between mt-2 mb-1">
+        <span className="text-[9.5px] text-[var(--v2-text3)]">本月 {y} 年 {m + 1} 月</span>
+        <span className="text-[9px] text-[var(--v2-text3)]">打卡 {monthDates?.length ?? 0} 天</span>
+      </div>
+      <div className="grid grid-cols-7 gap-[3px] justify-items-center">{cells}</div>
+    </div>
+  );
+}
 const PAUSE_REASONS = ["太难了", "注意力下降", "临时有事", "估时错误", "其他"];
 
 /* ── 补记时长弹窗 ── */
@@ -201,6 +242,8 @@ function MemoList({ card, onItemToggle, going }: { card: FocusCardV2Data; onItem
 /* ── 主组件 ── */
 export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin, onSkip, onPause, onContinueTomorrow, busy, demo }: Props) {
   // 内部状态机：demo 模式或真实卡（出发/暂停为本地模拟）
+  // 收尾批次 B：忘记确认提示条（session 级关闭，不持久化）
+  const [reminderDismissed, setReminderDismissed] = useState(false);
   const [phase, setPhase] = useState<FcV2Phase>(card.phase);
   const [departureAt, setDepartureAt] = useState<string | null>(card.departureAt ?? null);
   const [durModal, setDurModal] = useState(false);
@@ -208,6 +251,10 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
   const [checkinModal, setCheckinModal] = useState(false);
   const [checkinDetail, setCheckinDetail] = useState("");
   const [doneFlash, setDoneFlash] = useState(false);
+
+  // 收尾批次 B：忘记确认提醒（出发 ≥4 小时未确认 · 未完成）
+  const departedHours = departureAt ? Math.floor((Date.now() - new Date(departureAt).getTime()) / 3600000) : 0;
+  const needReminder = !reminderDismissed && !!departureAt && phase !== "done" && departedHours >= 4;
 
   // 卡片 prop 变化（如真实数据刷新）→ 同步 phase
   useEffect(() => { setPhase(card.phase); }, [card.phase]);
@@ -287,6 +334,16 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r="1" fill="#7c3aed" /></svg>
           <span className="min-w-0 truncate">{card.purpose || (isList ? "清单型 · 做产品/项目" : isTimer ? "固定时间 · 到点自动完成" : isAccum ? "积累型 · 每天坚持" : "学习型 · 学书本知识")}</span>
         </div>
+
+        {/* 收尾批次 B：忘记确认警示条（出发 ≥4 小时未确认 · 琥珀底 + 金左边条） */}
+        {needReminder && (
+          <div className="flex items-center gap-2.5 px-4 py-2.5 text-[13px]" style={{ background: "#FFFBEB", borderLeft: "3px solid var(--v2-brand-gold)", borderBottom: "1px solid #fde68a" }}>
+            <span className="shrink-0">⏰</span>
+            <span className="text-[var(--v2-text)] min-w-0 flex-1">已出发 <b className="text-[#b45309]">{departedHours}</b> 小时没回来确认 —— 做完了？</span>
+            <button onClick={finishFlow} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition shrink-0">补记完成</button>
+            <button onClick={() => setReminderDismissed(true)} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-white text-[var(--v2-text2)] border border-[#fde68a] hover:bg-[var(--v2-brand-bg)] transition shrink-0">还在做，继续</button>
+          </div>
+        )}
 
         {/* 两栏主体：≥860px 两栏（媒体查询），否则单栏（单栏时右栏 order:1 在前，左栏 order:3 沉底） */}
         <div className="fcv2-grid">
@@ -370,6 +427,8 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
               </div>
             )}
             {card.type === "accum-daily" && <div className="text-[10px] text-[var(--v2-text3)]"><b className="text-[var(--v2-text2)]">频率</b> 每日</div>}
+            {/* 收尾批次 D：当月小日历（accum-daily · 打卡日金点 / 今天品牌描边） */}
+            {card.type === "accum-daily" && <MonthCal monthDates={card.monthDates} />}
 
             {/* AI 条（副本 c2-ai） */}
             {card.aiHint && (
@@ -394,15 +453,15 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
                   <>
                     {/* 收尾批次 A2：明天继续（未出发/进行中态 · 次级弱化样式） */}
                     {(phase === "unstarted" || phase === "going") && onContinueTomorrow && (
-                      <button onClick={onContinueTomorrow} disabled={busy} className="text-sm font-semibold rounded-lg px-3 py-2 bg-white text-[var(--v2-brand)] border border-[var(--v2-brand)] hover:bg-[var(--v2-brand-bg)] transition shrink-0 disabled:opacity-50">明天继续</button>
+                      <button onClick={onContinueTomorrow} disabled={busy} className="text-sm font-semibold rounded-lg px-3 py-2.5 min-h-[44px] bg-white text-[var(--v2-brand)] border border-[var(--v2-brand)] hover:bg-[var(--v2-brand-bg)] transition shrink-0 disabled:opacity-50">明天继续</button>
                     )}
-                    <button onClick={mainBtn.action} disabled={busy} className={`text-sm font-semibold rounded-lg px-4 py-2 transition shrink-0 disabled:opacity-50 ${mainBtn.cls}`}>
+                    <button onClick={mainBtn.action} disabled={busy} className={`text-sm font-semibold rounded-lg px-4 py-2.5 min-h-[44px] transition shrink-0 disabled:opacity-50 ${mainBtn.cls}`}>
                       {busy ? "处理中…" : mainBtn.text}
                     </button>
                   </>
                 )}
                 {done && (
-                  <button disabled className={`text-sm font-semibold rounded-lg px-4 py-2 shrink-0 ${mainBtn.cls}`}>{mainBtn.text}</button>
+                  <button disabled className={`text-sm font-semibold rounded-lg px-4 py-2.5 min-h-[44px] shrink-0 ${mainBtn.cls}`}>{mainBtn.text}</button>
                 )}
               </div>
             </div>

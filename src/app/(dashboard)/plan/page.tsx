@@ -267,13 +267,13 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
     : `聚焦：${fDays[0]} + ${fDays[1]} + ${fDays[2]} · 卡片加大`;
 
   return (
-    <div className={`${cardCls} p-4 mb-4 overflow-x-auto`}>
+    <div className={`${cardCls} p-4 mb-4 overflow-x-auto plan-cal`}>
       {/* cs-meta：左=高效时段徽章（聚焦隐藏） · 右=周/聚焦 胶囊切换（设计稿 .gld + .tgl） */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="plan-week-meta flex items-center justify-between mb-3">
         {focus ? (
           <div className="px-3 py-1.5 bg-[var(--v2-purple-bg)] border border-[#c4b5fd] rounded-md text-sm text-[var(--v2-purple-text)]">{fnText}</div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--v2-purple-bg)] border border-[#c4b5fd] rounded-md text-sm text-[var(--v2-purple-text)]">
+          <div className="plan-week-gld flex items-center gap-2 px-3 py-1.5 bg-[var(--v2-purple-bg)] border border-[#c4b5fd] rounded-md text-sm text-[var(--v2-purple-text)]">
             <span className="w-3 h-3 rounded-full bg-[var(--v2-brand)] inline-flex items-center justify-center shrink-0"><span className="w-1 h-1 rounded-full bg-white" /></span>
             {peakHours && peakHours.length > 0 ? (
               <><strong className="font-medium">高效时段</strong> {peakHours.join("时 / ")}时 <span className="text-[var(--v2-text3)]">来自你的行为数据</span></>
@@ -283,15 +283,15 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
           </div>
         )}
         <div className="inline-flex bg-white border border-[var(--v2-border)] rounded-full p-0.5 shrink-0">
-          <button onClick={() => focus && onToggleFocus()} className={`text-sm px-4 py-1.5 rounded-full transition-all ${!focus ? "bg-[var(--v2-brand)] text-white font-medium" : "text-[var(--v2-text3)]"}`}>周</button>
-          <button onClick={() => !focus && onToggleFocus()} className={`text-sm px-4 py-1.5 rounded-full transition-all ${focus ? "bg-[var(--v2-brand)] text-white font-medium" : "text-[var(--v2-text3)]"}`}>聚焦</button>
+          <button onClick={() => focus && onToggleFocus()} className={`text-sm px-4 py-2.5 rounded-full transition-all min-h-[44px] ${!focus ? "bg-[var(--v2-brand)] text-white font-medium" : "text-[var(--v2-text3)]"}`}>周</button>
+          <button onClick={() => !focus && onToggleFocus()} className={`text-sm px-4 py-2.5 rounded-full transition-all min-h-[44px] ${focus ? "bg-[var(--v2-brand)] text-white font-medium" : "text-[var(--v2-text3)]"}`}>聚焦</button>
         </div>
       </div>
 
       {/* 天头（设计稿 .dhr：dhg 32px 时段占位 + dht 52px 时间占位 + 每天 周几/日期/负荷条/到期badge） */}
       <div className="flex border-b border-[var(--v2-border)]">
-        <div className="w-9 shrink-0" />
-        <div className="w-[60px] shrink-0 border-r border-[var(--v2-border)]" />
+        <div className="plan-week-pcol w-9 shrink-0" />
+        <div className="plan-week-tcol w-[60px] shrink-0 border-r border-[var(--v2-border)]" />
         {visibleDays.map((d, i) => {
           const colDate = focusDates ? focusDates[i] : (() => { const dt = new Date(weekStart); dt.setDate(dt.getDate() + d); return dt; })();
           const dayTasks = tasks.filter((t) => focusDates ? localDateStr(new Date(t.startTime)) === localDateStr(colDate) : dayIndex(new Date(t.startTime)) === d);
@@ -300,16 +300,16 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
           const isTodayCell = focusDates ? i === 0 : isThisWeek && d === todayIdx;
           const ddCount = dayTasks.filter((t) => t.deadline && localDateStr(new Date(t.deadline)) === localDateStr(colDate)).length;
           return (
-            <div key={d} className={`flex-1 min-w-0 text-center px-1 pb-1.5 pt-2 border-l border-[var(--v2-border)] ${isTodayCell ? "bg-[#eef2ff]" : ""}`}>
-              <div className={`text-[13px] ${isTodayCell ? "text-[var(--v2-brand)] font-medium" : "text-[var(--v2-text2)]"}`}>
+            <div key={d} className={`plan-week-col plan-week-hd flex-1 min-w-0 text-center px-1 pb-1.5 pt-2 border-l border-[var(--v2-border)] ${isTodayCell ? "bg-[#eef2ff]" : ""}`}>
+              <div className={`plan-week-txt text-[13px] ${isTodayCell ? "text-[var(--v2-brand)] font-medium" : "text-[var(--v2-text2)]"}`}>
                 {focusDates ? (i === 0 ? "今天" : DAYS[dayIndex(colDate)]) : DAYS[d]}{focusDates && i === 0 ? " · 今天" : ""}
               </div>
-              <div className={`text-sm font-medium tabular-nums mt-0.5 ${isTodayCell ? "text-[var(--v2-brand)]" : "text-[var(--v2-text)]"}`}>{colDate.getMonth() + 1}/{colDate.getDate()}</div>
+              <div className={`plan-week-txt text-sm font-medium tabular-nums mt-0.5 ${isTodayCell ? "text-[var(--v2-brand)]" : "text-[var(--v2-text)]"}`}>{colDate.getMonth() + 1}/{colDate.getDate()}</div>
               <div className="h-1 rounded-sm bg-[var(--color-gray-100)] overflow-hidden mt-1 mx-2">
                 <div className="h-full rounded-sm" style={{ width: `${Math.max(3, load)}%`, background: c.bar }} />
               </div>
-              <div className="text-[13px] mt-0.5" style={{ color: c.tx }}>{dayTasks.length === 0 ? "空闲" : `${dayTasks.length}项 · ${load}%`}</div>
-              {ddCount > 0 && <span className="inline-block text-[13px] text-white bg-[var(--color-danger-text)] rounded-full px-1.5 mt-0.5 font-medium">{ddCount}个到期</span>}
+              <div className="plan-week-txt text-[13px] mt-0.5" style={{ color: c.tx }}>{dayTasks.length === 0 ? "空闲" : `${dayTasks.length}项 · ${load}%`}</div>
+              {ddCount > 0 && <span className="plan-week-txt inline-block text-[13px] text-white bg-[var(--color-danger-text)] rounded-full px-1.5 mt-0.5 font-medium">{ddCount}个到期</span>}
             </div>
           );
         })}
@@ -318,7 +318,7 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
       {/* 日历主体（设计稿 .cb：pcol 时段标签列 + tcol 时间列 + 天列） */}
       <div className="flex">
         {/* 时段标签列（设计稿 .pcol：36px 竖排双字 · 无圆角铺满） */}
-        <div className="w-9 shrink-0 relative" style={{ height: totalPx }}>
+        <div className="plan-week-pcol w-9 shrink-0 relative" style={{ height: totalPx }}>
           {PS.filter((p) => p.s < S + totalHours && p.e > S).map((p) => {
             const top = Math.max(0, (p.s - S) * H);
             const hh = (Math.min(p.e, S + totalHours) - Math.max(p.s, S)) * H;
@@ -335,7 +335,7 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
         </div>
 
         {/* 时间列（设计稿 .tcol：60px · 标签左对齐 · 段边界 1.5px 加深线） */}
-        <div className="w-[60px] shrink-0 relative border-r border-[var(--v2-border)]" style={{ height: totalPx }}>
+        <div className="plan-week-tcol w-[60px] shrink-0 relative border-r border-[var(--v2-border)]" style={{ height: totalPx }}>
           {[...hours, S + totalHours].map((h) => (
             <span key={h} className="absolute -translate-y-1/2 text-[13px] font-semibold text-[var(--v2-text2)] tabular-nums z-[1]" style={{ top: (h - S) * H, left: 6, background: "var(--v2-card)", padding: "0 3px" }}>
               {String(h % 24).padStart(2, "0")}:00
@@ -351,7 +351,7 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
           const isTodayCell = focusDates ? i === 0 : isThisWeek && d === todayIdx;
           const dayTasks = tasks.filter((t) => focusDates ? localDateStr(new Date(t.startTime)) === localDateStr(focusDates[i]) : visualDayIdx(t.startTime, weekStart) === d);
           return (
-            <div key={d} className={`flex-1 relative border-l ${isTodayCell ? "bg-[#fafafe]" : ""} ${dragOverDay === d ? "ring-2 ring-inset ring-[var(--v2-brand)]/40" : ""}`} style={{ height: totalPx, borderColor: "var(--v2-border)", minWidth: focus ? 140 : 130 }}
+            <div key={d} className={`plan-week-col flex-1 relative border-l ${isTodayCell ? "bg-[#fafafe]" : ""} ${dragOverDay === d ? "ring-2 ring-inset ring-[var(--v2-brand)]/40" : ""}`} style={{ height: totalPx, borderColor: "var(--v2-border)", minWidth: focus ? 140 : 130 }}
               onDragOver={(e) => {
                 e.preventDefault();
                 // 修复：dropEffect 只接受 none/copy/link/move；"copyMove" 仅 effectAllowed 合法
@@ -406,19 +406,27 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
                   const laneLeft = laneInfo.count > 1 ? `calc(${(laneInfo.lane * 100) / laneInfo.count}% + 2px)` : 4;
                   const laneRight = laneInfo.count > 1 ? `calc(${100 - (100 / laneInfo.count) * (laneInfo.lane + 1)}% + 2px)` : 4;
                   return (
-                    <div key={t.id} className="absolute cursor-pointer hover:shadow-sm transition-shadow z-[1] overflow-hidden"
+                    <div key={t.id} className="plan-tsk absolute cursor-pointer hover:shadow-sm transition-shadow z-[1] overflow-hidden"
                       style={{ top, height: hh, left: laneLeft, right: laneRight, borderRadius: "0 6px 6px 3px", borderLeft: `4px solid ${cs.color}`, background: cs.bg, padding: focus ? "8px 10px" : "7px 8px" }}
                       draggable
                       onDragStart={(e) => { e.dataTransfer.setData("text/task-id", t.id); e.dataTransfer.effectAllowed = "copyMove"; }}
                       onClick={(e) => { e.stopPropagation(); onTaskClick?.(t, { x: e.clientX, y: e.clientY }); }}
                       title={`${t.title}\n${tm} · ${cs.label}${theme ? ` · 主题：${theme}` : ""}\n${t.status === "completed" ? "已完成" : t.status === "in_progress" ? "进行中" : "未开始"}\n拖动可移动 · 点击查看详情`}>
                       {t.source === "ai" && <span className="absolute right-1.5 text-[13px] px-1.5 py-px rounded font-medium leading-[18px] bg-[var(--v2-purple-bg)] text-[var(--v2-brand)]" style={{ top: 4 }}>AI</span>}
-                      <div className="flex items-center gap-1 min-w-0">
-                        <div className="text-[15px] truncate" style={{ fontWeight: 600, lineHeight: 1.35, color: "#111827", paddingRight: t.source === "ai" ? 30 : 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
+                      {/* 标题行：右侧预留 AI 徽章 / 中矮块的时长角标位，截断不撞角标 */}
+                      <div className="flex items-center gap-1.5 min-w-0" style={{ paddingRight: t.source === "ai" ? 30 : hh >= 32 && hh < 46 ? 26 : 0 }}>
+                        <div className="plan-tsk-title text-[15px] truncate" style={{ fontWeight: 600, lineHeight: 1.35, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
                         {theme && <ThemeBadge theme={theme} mini={hh < 40} />}
                       </div>
-                      {hh >= 46 && <div className="text-[13px] text-[var(--v2-text2)] tabular-nums mt-0.5">{tm}{dlShort && <span className="text-[var(--color-danger-text)] font-medium"> · {dlShort}截止</span>}</div>}
-                      {hh >= 32 && <div className="absolute right-1.5 text-[13px] text-[var(--v2-text2)]" style={{ bottom: 4 }}>{ds}</div>}
+                      {/* 时间行（高块：时间 + 时长同行右对齐，不再与右下角标贴叠） */}
+                      {hh >= 46 && (
+                        <div className="flex items-center justify-between gap-2 text-[13px] text-[var(--v2-text2)] tabular-nums mt-1 min-w-0">
+                          <span className="truncate">{tm}{dlShort && <span className="text-[var(--color-danger-text)] font-medium"> · {dlShort}截止</span>}</span>
+                          <span className="shrink-0">{ds}</span>
+                        </div>
+                      )}
+                      {/* 时长角标（中矮块 32-46px：无时间行，右下角独立显示） */}
+                      {hh >= 32 && hh < 46 && <div className="absolute right-1.5 text-[13px] text-[var(--v2-text2)]" style={{ bottom: 4 }}>{ds}</div>}
                     </div>
                   );
                 });
@@ -445,7 +453,7 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
 
       {/* 凌晨折叠（设计稿 .mt：居中 11px 灰） */}
       <div className="flex justify-center mt-1">
-        <button onClick={() => setMidnight((m) => !m)} className="w-full text-center py-1.5 text-[12px] text-[var(--v2-text3)] hover:text-[var(--v2-text2)] transition">
+        <button onClick={() => setMidnight((m) => !m)} className="w-full text-center py-2.5 min-h-[44px] text-[12px] text-[var(--v2-text3)] hover:text-[var(--v2-text2)] transition">
           {midnight ? "收起凌晨 ▲" : "展开凌晨 22:00 - 02:00 ▼"}
         </button>
       </div>
@@ -757,6 +765,15 @@ function TaskDetailPopover({ seed, pos, onClose, onEditTime, onRemove, busy, onA
 }
 export default function PlanPage() {
   const [focus, setFocus] = useState(false); // 默认周视角（设计稿：周/聚焦胶囊，周为默认）
+
+  // 移动端适配（收尾批次）：<860px 自动聚焦 3 列（今天+明+后），列宽自适应不横向溢出
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 860px)");
+    const apply = (m: MediaQueryList | MediaQueryListEvent) => { if (m.matches) setFocus(true); };
+    apply(mq);
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
+  }, []);
   const [weekOffset, setWeekOffset] = useState(0);
   const [scheduled, setScheduled] = useState<SchedTask[]>([]);
   const [active, setActive] = useState<ActiveTask[]>([]);
@@ -936,8 +953,8 @@ export default function PlanPage() {
         </div>
       )}
 
-      {/* 页头（方案顺手项 1：副标题弱化） */}
-      <div className="flex items-end justify-between mb-4">
+      {/* 页头（方案顺手项 1：副标题弱化 · 窄屏换行） */}
+      <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
         <div>
           <h2 className="text-[24px] font-semibold tracking-[-0.3px] text-[var(--v2-text)]">Plan · 规划</h2>
           <p className="text-xs text-[var(--v2-text3)]/70 mt-1">时间放进去，未来才看得见</p>

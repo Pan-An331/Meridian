@@ -500,3 +500,30 @@
 /* Project 主网格：左树弹性 + 右栏固定 300px（副本 v3.1 · 860px 断点） */
 .pt-main{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
 @media(min-width:860px){.pt-main{grid-template-columns:1fr 300px}}
+
+/* ═══════ Plan 移动端适配（收尾批次 · <860px 自动聚焦 3 列，列宽自适应不溢出） ═══════ */
+@media (max-width: 860px) {
+  .plan-cal .plan-week-col{min-width:0 !important}   /* 覆盖内联 130/140px → 3 列自适应 */
+  .plan-cal .plan-week-pcol{width:22px}              /* 时段标签列缩窄 */
+  .plan-cal .plan-week-tcol{width:44px}              /* 时间列缩窄 */
+  .plan-cal .plan-week-meta{flex-wrap:wrap;gap:8px}
+  .plan-cal .plan-week-meta .plan-week-gld{display:none}  /* 高效时段徽章省空间 */
+  .plan-cal .plan-week-txt{font-size:13px}
+  .plan-cal .plan-week-hd{padding:0 2px}
+}
+/* Project 树行窄屏：隐藏阶段徽章防挤（保留 项目/积累/主题） */
+@media (max-width: 860px) {
+  .pt-row .b-stage{display:none}
+  .pt-row .pt-theme{max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+/* 触控优化（收尾批次）：移动端主操作按钮 ≥44px */
+@media (max-width: 860px) {
+  .pt-new-btn{min-height:44px;padding:0 14px;font-size:12px}
+}
+
+/* Plan 任务块标题：桌面 15px / 移动端聚焦窄列 13px（内联样式不参与，类优先） */
+.plan-tsk-title{font-size:15px}
+@media (max-width: 860px) {
+  .plan-tsk-title{font-size:13px}
+}
