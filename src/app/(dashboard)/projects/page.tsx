@@ -400,15 +400,15 @@ export default function ProjectsPage() {
         {lvl === 0 && <span className="pt-badge b-proj">项目</span>}
         {lvl === 1 && !isAccum && <span className="pt-badge b-stage">阶段</span>}
         {isAccum && <span className="pt-badge b-accum">积累</span>}
-        {starOn && <span className="pt-check">执行清单</span>}
         {lvl === 0 && th && <span className="pt-theme">{th.name}</span>}
+        {starOn && <span className="pt-check">执行清单</span>}
         {isAccum && (
           <span
             className={`pt-gold-dot${streaks[node.id]?.todayChecked ? "" : " off"}`}
             title={streaks[node.id]?.todayChecked ? "今日已打卡" : "今日未打卡 · 打卡在右侧习惯区"}
           />
         )}
-        <span className={`pt-star${starOn ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleStar(node); }}>{starOn ? "★" : "☆"}</span>
+        <span className={`pt-star${starOn ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleStar(node); }}>★</span>
         <span className="pt-prog">{prog}</span>
         <span className="pt-opts">
           {lvl < 3 && <button title="新建子项" onClick={(e) => { e.stopPropagation(); newNode(node.id); }}>{Ic.plus}</button>}
@@ -489,36 +489,30 @@ export default function ProjectsPage() {
   const nodeCount = visibleRows.length;
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-[1080px] mx-auto space-y-4">
       <Toast msg={toastMsg} />
 
-      {/* 页头 */}
-      <div className="flex items-start gap-3">
+      {/* 页头（副本 v3.1：标题 + 副标题 + 说明 chips） */}
+      <div className="flex items-end justify-between flex-wrap gap-2.5">
         <div className="min-w-0">
-          <h2 className="text-[24px] font-semibold tracking-[-0.3px] text-[var(--v2-text)]">Project · 项目整理</h2>
-          <div className="text-[13px] text-[var(--v2-text3)] mt-0.5">搭骨架 · 不执行——点节点开档案 · 打卡在右侧习惯区</div>
+          <h2 className="text-[22px] font-extrabold tracking-[-0.3px] text-[var(--v2-text)]">Project · 项目整理</h2>
+          <div className="text-[12px] text-[var(--v2-text3)] mt-1">项目根 = 分组头（浅底）· 层级圆点 + 连接线 · 打卡统一在右侧习惯区</div>
         </div>
-        <div className="flex items-center gap-2 ml-auto flex-none">
-          <div className="text-sm text-[var(--v2-text2)] bg-[var(--v2-card)] border border-[var(--v2-border)] rounded-lg px-3 py-1.5 sh-v2">
-            <span className="text-[var(--v2-brand)] font-semibold tabular-nums">{treeCount}</span> 项目
-          </div>
-          <div className="text-sm text-[var(--v2-text2)] bg-[var(--v2-card)] border border-[var(--v2-border)] rounded-lg px-3 py-1.5 sh-v2">
-            <span className="text-[var(--v2-orange)] font-semibold tabular-nums">{poolList.length}</span> 待整理
-          </div>
-          <button
-            className="text-sm font-medium rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition-all px-4 py-1.5"
-            onClick={() => newNode(null)}
-          >＋ 新建项目</button>
+        <div className="flex gap-1.5 flex-wrap">
+          <span className="text-[10.5px] font-semibold px-2.5 py-1 rounded-[14px] bg-white border border-[#dfe3ea] text-[var(--v2-text2)]">项目根 = 分组头</span>
+          <span className="text-[10.5px] font-semibold px-2.5 py-1 rounded-[14px] bg-white border border-[#dfe3ea] text-[var(--v2-text2)]">圆点分级</span>
+          <span className="text-[10.5px] font-semibold px-2.5 py-1 rounded-[14px] bg-[var(--v2-brand-bg)] border border-[#c7d2fe] text-[var(--v2-brand-deep)]">拖拽 / 新建 / ★</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 items-start">
+      <div className="pt-main">
         {/* ═══ 左：大纲式树 ═══ */}
         <div className={`${cardCls} overflow-hidden`}>
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--v2-border)]">
             <span className="w-[7px] h-[7px] rounded-full bg-[var(--v2-brand)] flex-none" />
             <span className="text-[13px] font-bold text-[var(--v2-text)]">项目树</span>
             <span className="text-[10.5px] text-[var(--v2-text3)] ml-auto">{treeCount} 项目 · {nodeCount} 节点</span>
+            <button className="ml-2 text-[10.5px] font-semibold text-[var(--v2-brand-deep)] bg-[var(--v2-brand-bg)] border-none rounded-md px-2.5 py-1 cursor-pointer hover:bg-[#c7d2fe] transition-colors" onClick={() => newNode(null)}>＋ 新建项目</button>
           </div>
           <input
             ref={newInputRef}
@@ -531,12 +525,12 @@ export default function ProjectsPage() {
               if (e.key === "Escape") { setNewOpen(false); setNewTitle(""); }
             }}
           />
-          <div className="p-2">
+          <div className="p-[8px_6px_10px]">
             {visibleRows.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-[var(--v2-brand-bg)] flex items-center justify-center mb-3">🗂</div>
                 <div className="text-[15px] font-medium text-[var(--v2-text)] mb-1.5">还没有项目</div>
-                <div className="text-sm text-[var(--v2-text3)] mb-4">点右上「＋新建项目」创建第一个项目</div>
+                <div className="text-sm text-[var(--v2-text3)] mb-4">点上方「＋新建项目」创建第一个项目</div>
                 <button className="text-sm font-medium rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition-all px-4 py-1.5" onClick={() => newNode(null)}>＋ 新建项目</button>
               </div>
             ) : (

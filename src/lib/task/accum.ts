@@ -52,9 +52,8 @@ export async function getAccumStats(userId: string, taskId: string): Promise<Acc
   const mondayStr = localDateStr(monday);
   const weekDates = dates.filter((d) => d >= mondayStr && d <= todayStr);
 
-  // 本月
-  const monthPrefix = todayStr.slice(0, 7);
-  const monthDates = dates.filter((d) => d.startsWith(monthPrefix));
+  // 本月（收尾批次：monthDates 透传，mini-cal 消费）
+  const monthDates = filterMonthDates(dates, now);
   const monthTotalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   const totalMinutes = Math.round(logs.reduce((s, l) => s + (l.durationSeconds || 0), 0) / 60);
@@ -69,4 +68,19 @@ export async function getAccumStats(userId: string, taskId: string): Promise<Acc
     monthTotalDays,
     totalMinutes,
   };
+}
+
+/**
+ * 当月打卡日期过滤（纯函数，可单测）：
+ * 从打卡日期数组中取与 now 同月（YYYY-MM 前缀）的日期，升序去重
+ */
+export function filterMonthDates(dates: string[], now: Date = new Date()): string[] {
+  const monthPrefix = localDateStr(now).slice(0, 7);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const d of dates) {
+    if (d.startsWith(monthPrefix) && !seen.has(d)) { seen.add(d); out.push(d); }
+  }
+  out.sort();
+  return out;
 }

@@ -359,6 +359,25 @@ export default function TodayPage() {
     finally { setBusy(false); }
   }, [load]);
 
+  // 收尾批次 A2：明天继续（复制最近排期时段到明天 · Focus Card 次级按钮）
+  const [contToast, setContToast] = useState<string | null>(null);
+  const continueTomorrow = useCallback(async (taskId: string) => {
+    setBusy(true);
+    try {
+      const r = await fetch(`/api/tasks/${taskId}/action`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "continue_tomorrow" }),
+      });
+      if (!r.ok) throw new Error("续排失败");
+      const d = await r.json();
+      const hm = d.nextStart ? new Date(d.nextStart) : null;
+      setContToast(`已排到明天 ${hm ? `${String(hm.getHours()).padStart(2, "0")}:00` : ""} · 明天见`);
+      setTimeout(() => setContToast(null), 2600);
+      await load();
+    } catch { setContToast("续排失败，请重试"); setTimeout(() => setContToast(null), 2600); }
+    finally { setBusy(false); }
+  }, [load]);
+
   // 积累型打卡（checkin TimeLog；FCV2：detail 打卡内容可选）
   const checkin = useCallback(async (taskId: string, detail?: string) => {
     setBusy(true);
@@ -480,6 +499,12 @@ export default function TodayPage() {
 
   return (
     <div className="space-y-4">
+      {/* 收尾批次 A2：明天继续 toast */}
+      {contToast && (
+        <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-[99] bg-[#1f2937] text-white text-[13px] px-4 py-2.5 rounded-xl shadow-lg max-w-[80vw] text-center whitespace-nowrap">
+          {contToast}
+        </div>
+      )}
       {/* V3 §7.1 弹性容器：简单态 880px 三块一屏 / 复杂态 960px 主卡优先路线沉底；200ms 宽度过渡（判定见 measureRef ResizeObserver） */}
       <div className={`today-flex ${complex ? "max-w-[960px]" : "max-w-[880px]"}`}>
       {/* 测量区：问候语 + 主卡 实际高度（≤600 简单 / >600 复杂，滞回 540） */}
@@ -523,6 +548,7 @@ export default function TodayPage() {
             onCheckin={(detail) => checkin(cur.card.id, detail)}
             onPause={(reason) => doAction(cur.card.id, "pause", { reason })}
             onItemToggle={toggleChildItem}
+            onContinueTomorrow={() => continueTomorrow(cur.card.id)}
             busy={busy}
           />
           {cardList.length > 1 && (

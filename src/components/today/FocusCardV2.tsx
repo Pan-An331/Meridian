@@ -53,6 +53,8 @@ interface Props {
   onCheckin?: (detail?: string) => void;
   onSkip?: () => void;
   onPause?: (reason: string) => void;
+  /** 收尾批次 A2：明天继续（复制最近排期时段到明天） */
+  onContinueTomorrow?: () => void;
   busy?: boolean;
   /** 演示模式：允许点按钮切换状态（不依赖后端） */
   demo?: boolean;
@@ -197,7 +199,7 @@ function MemoList({ card, onItemToggle, going }: { card: FocusCardV2Data; onItem
 }
 
 /* ── 主组件 ── */
-export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin, onSkip, onPause, busy, demo }: Props) {
+export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin, onSkip, onPause, onContinueTomorrow, busy, demo }: Props) {
   // 内部状态机：demo 模式或真实卡（出发/暂停为本地模拟）
   const [phase, setPhase] = useState<FcV2Phase>(card.phase);
   const [departureAt, setDepartureAt] = useState<string | null>(card.departureAt ?? null);
@@ -389,9 +391,15 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
                   <button onClick={() => setPauseModal(true)} className="text-sm font-semibold rounded-lg px-3 py-2 bg-[#f3f4f6] text-[var(--v2-text3)] hover:bg-[var(--color-gray-200)] transition shrink-0">暂停</button>
                 )}
                 {!done && (
-                  <button onClick={mainBtn.action} disabled={busy} className={`text-sm font-semibold rounded-lg px-4 py-2 transition shrink-0 disabled:opacity-50 ${mainBtn.cls}`}>
-                    {busy ? "处理中…" : mainBtn.text}
-                  </button>
+                  <>
+                    {/* 收尾批次 A2：明天继续（未出发/进行中态 · 次级弱化样式） */}
+                    {(phase === "unstarted" || phase === "going") && onContinueTomorrow && (
+                      <button onClick={onContinueTomorrow} disabled={busy} className="text-sm font-semibold rounded-lg px-3 py-2 bg-white text-[var(--v2-brand)] border border-[var(--v2-brand)] hover:bg-[var(--v2-brand-bg)] transition shrink-0 disabled:opacity-50">明天继续</button>
+                    )}
+                    <button onClick={mainBtn.action} disabled={busy} className={`text-sm font-semibold rounded-lg px-4 py-2 transition shrink-0 disabled:opacity-50 ${mainBtn.cls}`}>
+                      {busy ? "处理中…" : mainBtn.text}
+                    </button>
+                  </>
                 )}
                 {done && (
                   <button disabled className={`text-sm font-semibold rounded-lg px-4 py-2 shrink-0 ${mainBtn.cls}`}>{mainBtn.text}</button>

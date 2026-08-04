@@ -97,6 +97,70 @@ function CollapseSection({ title, badge, badgeTone = "gray", children }: {
   );
 }
 
+/* ── 续排建议（收尾批次 A1：未完成任务 → 明天继续 · GET /api/plan/continuations） ── */
+interface ContinuationItem {
+  taskId: string;
+  title: string;
+  lastStart: string | null;
+  lastEnd: string | null;
+  suggestedStart: string | null;
+  estimatedMinutes: number | null;
+}
+
+function fmtRange(start: string | null, end: string | null): string {
+  if (!start) return "—";
+  const s = new Date(start);
+  const hm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dayMs = 86400000;
+  const diff = Math.round((s.getTime() - today.getTime()) / dayMs);
+  const dayLabel = diff === 0 ? "今天" : diff === -1 ? "昨天" : diff === 1 ? "明天" : `${s.getMonth() + 1}/${s.getDate()}`;
+  return `${dayLabel} ${hm(s)}-${end ? hm(new Date(end)) : "--:--"}`;
+}
+
+function ContinuationBar({ items, busyId, onContinue }: {
+  items: ContinuationItem[];
+  busyId: string | null;
+  onContinue: (it: ContinuationItem) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`${cardCls} mb-4 overflow-hidden`}>
+      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-[var(--color-gray-50)] transition">
+        <span className="text-sm font-semibold text-[var(--v2-text)]">未完成任务 · 明天继续</span>
+        {items.length > 0 ? (
+          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]">{items.length} 个续排</span>
+        ) : (
+          <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-[var(--color-gray-100)] text-[var(--v2-text2)]">无</span>
+        )}
+        <span className={`ml-auto text-[10px] text-[var(--v2-text3)] transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
+      </button>
+      {open && (
+        <div className="px-4 pb-4">
+          {items.length === 0 ? (
+            <div className="text-sm text-[var(--v2-text3)] py-2 text-center">没有需要续排的任务 🎉</div>
+          ) : (
+            <div className="space-y-1.5">
+              {items.map((it) => (
+                <div key={it.taskId} className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[var(--color-gray-50)] border border-[var(--v2-border)]">
+                  <span className="text-[13px] font-medium text-[var(--v2-text)] min-w-0 truncate flex-1">{it.title}</span>
+                  <span className="text-[11.5px] text-[var(--v2-text3)] whitespace-nowrap">上次 {fmtRange(it.lastStart, it.lastEnd)}</span>
+                  <span className="text-[11.5px] text-[var(--v2-text3)] whitespace-nowrap">→ 明天 {it.suggestedStart ? `${String(new Date(it.suggestedStart).getHours()).padStart(2, "0")}:00` : "--:--"}{it.estimatedMinutes ? ` · ${Math.round(it.estimatedMinutes / 60)}h` : ""}</span>
+                  <button
+                    disabled={busyId === it.taskId}
+                    onClick={() => onContinue(it)}
+                    className="text-[11.5px] font-semibold px-3 py-1.5 rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition-colors disabled:opacity-50 shrink-0"
+                  >{busyId === it.taskId ? "…" : "复制到明天"}</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── 本周截止：统计 + 内容分离（折叠条显示计数，内容区逻辑原样） ── */
 function deadlineStats(tasks: ActiveTask[]) {
   const now = new Date();
@@ -737,6 +801,35 @@ export default function PlanPage() {
   }, [weekOffset, weekStartOf]);
   useEffect(() => { load(); }, [load]);
 
+  // 收尾批次 A1：续排建议（未完成任务 → 明天继续 · load 之后声明）
+  const [continuations, setContinuations] = useState<ContinuationItem[]>([]);
+  const [contBusyId, setContBusyId] = useState<string | null>(null);
+  const [contToast, setContToast] = useState<string | null>(null);
+  const loadContinuations = useCallback(() => {
+    fetch("/api/plan/continuations")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && Array.isArray(d.suggestions)) setContinuations(d.suggestions); })
+      .catch(() => {});
+  }, []);
+  useEffect(() => { loadContinuations(); }, [loadContinuations]);
+  const continueTomorrow = useCallback(async (it: ContinuationItem) => {
+    setContBusyId(it.taskId);
+    try {
+      const r = await fetch(`/api/tasks/${it.taskId}/action`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "continue_tomorrow" }),
+      });
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      const hm = d.nextStart ? new Date(d.nextStart) : null;
+      setContToast(`已排到明天 ${hm ? `${String(hm.getHours()).padStart(2, "0")}:00` : ""} · 任务「${it.title}」`);
+      setTimeout(() => setContToast(null), 2600);
+      setContinuations((prev) => prev.filter((x) => x.taskId !== it.taskId));
+      load(); // 周历刷新：明天出现同时间段块
+    } catch { setContToast("续排失败，请重试"); setTimeout(() => setContToast(null), 2600); }
+    finally { setContBusyId(null); }
+  }, [load]);
+
   // 排期/调整：moveSchedule（修复 P1-4：带 scheduleId 只替换目标那条，防重复任务折叠）
   const saveSchedule = useCallback(async (taskId: string, newStart: string, newEnd: string, scheduleId?: string) => {
     setBusy(true);
@@ -836,6 +929,13 @@ export default function PlanPage() {
 
   return (
     <div>
+      {/* 收尾批次 A1：续排 toast */}
+      {contToast && (
+        <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-[99] bg-[#1f2937] text-white text-[13px] px-4 py-2.5 rounded-xl shadow-lg max-w-[80vw] text-center whitespace-nowrap">
+          {contToast}
+        </div>
+      )}
+
       {/* 页头（方案顺手项 1：副标题弱化） */}
       <div className="flex items-end justify-between mb-4">
         <div>
@@ -870,6 +970,9 @@ export default function PlanPage() {
       <WeekCalendar tasks={scheduled} focus={focus} weekStart={weekStart} weekOffset={weekOffset} peakHours={peakHours}
         onToggleFocus={() => setFocus((f) => !f)} onDropTask={dropTask}
         onTaskClick={(t, pos) => setDetail({ pos: pos ?? null, seed: { taskId: t.id, title: t.title, startTime: t.startTime, endTime: t.endTime, category: t.category, estimatedMinutes: t.estimatedMinutes ?? null, source: t.source } })} />
+
+      {/* 收尾批次 A1：续排建议条（收集箱上方 · 默认收起露 badge） */}
+      <ContinuationBar items={continuations} busyId={contBusyId} onContinue={continueTomorrow} />
 
       {/* 收集箱（贴周历 · 拖拽源） */}
       <IdeaPool ideas={ideas}
