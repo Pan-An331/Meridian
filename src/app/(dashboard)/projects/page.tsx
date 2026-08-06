@@ -34,6 +34,7 @@ interface TreeNode {
   importance: number;
   parentId: string | null;
   children: TreeNode[];
+  star?: boolean;                                                   // ★ 执行清单（后端落库，刷新兜底显示）
   theme?: string | null;                                        // V3 落库主题（契约预留）
   themeColor?: { color: string; deep: string; bg: string } | null; // 后端派生色（契约预留；兼容 {pcolor,pbg,theme}）
   themeColorRaw?: string | null;                                // B7：自定义主题落库色 JSON（原始）
@@ -189,6 +190,13 @@ export default function ProjectsPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // 档案面板数据变更（保存/移出完成/补记/删除）→ 树实时刷新，无需手动刷新页面
+  useEffect(() => {
+    const h = () => { load(true); };
+    window.addEventListener("meridian-task-changed", h);
+    return () => window.removeEventListener("meridian-task-changed", h);
+  }, [load]);
 
   // 习惯区 streak 数据（所有积累型任务）
   useEffect(() => {
@@ -379,7 +387,8 @@ export default function ProjectsPage() {
     const isAccum = node.accumulate;
     const sel = selectedId === node.id;
     const th = nodeTheme(node);
-    const starOn = starSet.has(node.id);
+    // ★：乐观 starSet 优先，后端 node.star 兜底（修复刷新后设置丢失）
+    const starOn = starSet.has(node.id) || !!node.star;
     const zone = dragZone?.id === node.id ? dragZone.zone : null;
     const zoneCls = zone ? ` drag-over-${zone}` : "";
     const isDragging = dragId === node.id;

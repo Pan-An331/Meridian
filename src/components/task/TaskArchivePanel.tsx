@@ -96,6 +96,7 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
       setTimeEdit(false);
       setTimeMin("");
       loadTask();
+      window.dispatchEvent(new CustomEvent("meridian-task-changed"));
     } catch { setSavedTip("补记失败，请重试"); }
     finally { setTimeBusy(false); }
   };
@@ -112,8 +113,26 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
       if (!r.ok) throw new Error();
       setSavedTip("已移出完成 ✓ 状态恢复为「未开始」");
       loadTask();
+      window.dispatchEvent(new CustomEvent("meridian-task-changed"));
     } catch { setSavedTip("操作失败，请重试"); }
     finally { setReopenBusy(false); }
+  };
+
+  // 删除任务（全站唯一删除入口；危险操作需确认；成功后关闭面板并广播刷新）
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const deleteTask = async () => {
+    if (!window.confirm(`确定删除「${task?.title ?? "该任务"}」？\n子任务会一并删除，此操作不可撤销。`)) return;
+    setDeleteBusy(true);
+    try {
+      const r = await fetch(`/api/tasks/${taskId}/action`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete" }),
+      });
+      if (!r.ok) throw new Error();
+      window.dispatchEvent(new CustomEvent("meridian-task-changed"));
+      onClose();
+    } catch { setSavedTip("删除失败，请重试"); }
+    finally { setDeleteBusy(false); }
   };
 
   // 归属链：直读后端 ancestors（C7 已返回标题数组）；本地 idMeta 不再需要
@@ -144,6 +163,7 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
       setTask((prev) => prev ? { ...prev, ...body, category: normalizeCategory(category), purpose: (body.purpose as string) ?? null } : prev);
       setSavedTip(`已保存 ✓ 领域/主题/动机修改已回流 AI 记忆（AgentFeedback）`);
       setThemeEdit(false);
+      window.dispatchEvent(new CustomEvent("meridian-task-changed"));
     } catch { setSavedTip("保存失败，请重试"); }
     finally { setSaving(false); }
   };
@@ -303,6 +323,13 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                 ) : (
                   <button onClick={() => setTimeEdit(true)} className="text-sm ml-auto text-[var(--v2-brand)] font-medium hover:underline">＋ 补记</button>
                 )}
+              </div>
+              {/* 删除任务（全站唯一删除入口 · 危险操作确认后执行） */}
+              <div className="flex justify-end pt-1">
+                <button onClick={deleteTask} disabled={deleteBusy}
+                  className="text-sm px-3 py-1.5 rounded-lg border border-[var(--color-danger-border)] text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)] transition disabled:opacity-50">
+                  {deleteBusy ? "删除中…" : "删除任务"}
+                </button>
               </div>
             </div>
           </Section>
