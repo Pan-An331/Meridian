@@ -70,6 +70,9 @@ model Task {
   // V3：主题（目标，独立字段，自由扩展；预设有 考研/竞赛/身材 + 自定义）
   theme            String?
 
+  // 2026-08-06 B7：自定义主题颜色落库（JSON {"color","deep","bg"}；预设主题可为 null 用 THEMES 派生）
+  themeColor       String?
+
   // Focus Card V2：动机文案（身份层，AI 推断+父级继承+Inbox/档案可改，≤50 字）
   purpose          String?
 

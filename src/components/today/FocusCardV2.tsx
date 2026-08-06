@@ -596,7 +596,6 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
           <span>{plannedLabel ? `预计 ${plannedLabel}` : "待排期"}</span><span className="text-[#e5e7eb]">·</span>
           <span>已用 {elapsedLabel}</span>
           {card.description ? <><span className="text-[#e5e7eb]">·</span><span className="min-w-0 truncate max-w-[160px]">{card.description}</span></> : null}
-          <span className="ml-auto text-[var(--v2-brand)] font-medium cursor-pointer">＋备注</span>
         </div>
       </div>
 

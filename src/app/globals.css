@@ -422,21 +422,22 @@
 .pt-row{position:relative;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .12s;user-select:none;border-left:3px solid transparent;--ind:6px}
 .pt-row:hover{background:#f5f7fa}
 .pt-row.sel{background:var(--v2-brand-bg);border-left-color:var(--v2-brand)}
-.pt-row.lvl0{background:var(--pt-group-bg);border-left:3px solid var(--pcolor,var(--v2-brand));margin-top:6px;font-weight:700;font-size:13.5px;--ind:6px}
+.pt-row.lvl0{background:var(--pt-group-bg);border-left:3px solid var(--pcolor,var(--v2-brand));margin-top:6px;font-weight:700;font-size:14px;--ind:6px}
 .pt-row.lvl0:first-of-type{margin-top:0}
 .pt-row.lvl0:hover{background:#eef1f8}
 .pt-row.lvl0.sel{background:var(--v2-brand-bg);border-left-color:var(--pcolor,var(--v2-brand))}
 .pt-row.lvl0 .pt-prog b{color:var(--pcolor,var(--v2-brand-deep))}
-.pt-row.lvl1{--ind:26px}
-.pt-row.lvl2{--ind:46px}
-.pt-row.lvl3{--ind:66px}
+/* C2/C3：层级真实缩进（文字随层级右移）+ 竖线/连接线移到文字左侧，根治压字 */
+.pt-row.lvl1{--ind:16px;padding-left:16px}
+.pt-row.lvl2{--ind:28px;padding-left:28px}
+.pt-row.lvl3{--ind:40px;padding-left:40px}
 .pt-row.drag-over-child{outline:2px dashed var(--v2-brand);outline-offset:-2px;background:var(--v2-brand-bg)}
 .pt-row.drag-over-before{box-shadow:inset 0 2px 0 0 var(--pt-gold)}
 .pt-row.drag-over-after{box-shadow:inset 0 -2px 0 0 var(--pt-gold)}
 .pt-row.dragging{opacity:.45}
-.pt-indent{position:absolute;left:var(--ind);top:0;bottom:0;width:16px;pointer-events:none}
+.pt-indent{position:absolute;left:var(--ind);top:0;bottom:0;width:18px;pointer-events:none}
 .pt-indent::before{content:"";position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--pt-line)}
-.pt-indent::after{content:"";position:absolute;left:5px;top:50%;width:11px;height:1px;background:var(--pt-line)}
+.pt-indent::after{content:"";position:absolute;left:5px;top:50%;width:12px;height:1px;background:var(--pt-line)}
 .pt-row.lvl0 .pt-indent{display:none}
 .pt-row.no-prev .pt-indent::before{display:none}
 .pt-row.last-group .pt-indent::before{top:0;bottom:50%}
@@ -447,19 +448,19 @@
 .pt-row.lvl2 .pt-hdot i{width:6px;height:6px;background:#c3cad4}
 .pt-row.lvl3 .pt-hdot i{width:5px;height:5px;background:#d6dae1}
 .pt-row.is-accum .pt-hdot i{border-color:var(--pt-gold);background:var(--pt-gold-bg)}
-.pt-theme{font-size:8.5px;font-weight:600;padding:1.5px 6px;border-radius:7px;flex-shrink:0;background:var(--pbg,var(--v2-brand-bg));color:var(--pcolor,var(--v2-brand-deep))}
+.pt-theme{font-size:9.5px;font-weight:600;padding:1.5px 7px;border-radius:7px;flex-shrink:0;background:var(--pbg,var(--v2-brand-bg));color:var(--pcolor,var(--v2-brand-deep))}
 .pt-tw{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:var(--v2-text3);border-radius:4px;flex-shrink:0;font-size:8px;margin-left:-4px;cursor:pointer}
 .pt-tw:hover{background:#e8eaee}
 .pt-tw.empty{visibility:hidden}
-.pt-name{font-size:12.5px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pt-row.lvl0 .pt-name{font-size:13.5px}
+.pt-name{font-size:13px;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-row.lvl0 .pt-name{font-size:14px}
 .pt-row.lvl1 .pt-name{font-weight:500}
-.pt-badge{font-size:8.5px;font-weight:600;padding:1.5px 6px;border-radius:7px;flex-shrink:0}
+.pt-badge{font-size:9.5px;font-weight:600;padding:1.5px 7px;border-radius:7px;flex-shrink:0}
 .b-proj{background:var(--v2-brand-bg);color:var(--v2-brand-deep)}
 .b-stage{background:#eef2f7;color:#475569}
 .b-list{background:#fff0e6;color:#c2410c}
 .b-accum{background:var(--pt-gold-bg);color:#b45309}
-.pt-check{font-size:8.5px;font-weight:600;color:var(--v2-brand-deep);background:var(--v2-brand-bg);border-radius:6px;padding:1.5px 6px;flex-shrink:0;display:none}
+.pt-check{font-size:9.5px;font-weight:600;color:var(--v2-brand-deep);background:var(--v2-brand-bg);border-radius:6px;padding:1.5px 7px;flex-shrink:0;display:none}
 .pt-row.is-list .pt-check{display:inline-block}
 .pt-star{color:#d1d5db;font-size:12px;flex-shrink:0;cursor:pointer;padding:1px 2px}
 .pt-star:hover{color:var(--pt-gold)}

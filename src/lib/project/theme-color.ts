@@ -6,10 +6,13 @@
    ═══════════════════════════════════════════ */
 
 import { DOMAINS, THEMES, themeColor } from "@/lib/plan/colors";
+import { parseThemeColor } from "@/lib/task/theme";
 
 export interface ProjectColorInput {
   theme: string | null;
   category: string | null;
+  /** B7：自定义主题落库色（JSON 字符串；聚合时该主题的落库色优先） */
+  themeColor?: string | null;
 }
 
 export interface ProjectThemeColor {
@@ -50,6 +53,10 @@ export function deriveProjectThemeColor(tasks: ProjectColorInput[]): ProjectThem
     if (c > topThemeCount) { topTheme = th; topThemeCount = c; }
   }
   if (topTheme) {
+    // B7：该主题存在落库色（自定义主题）→ 优先；否则 THEMES 预设
+    const custom = tasks.find((t) => t.theme === topTheme && t.themeColor)?.themeColor;
+    const customColor = parseThemeColor(custom);
+    if (customColor) return { pcolor: customColor.color, pbg: customColor.bg, theme: topTheme };
     const c = themeColor(topTheme);
     if (c) return { pcolor: c.color, pbg: c.bg, theme: topTheme };
     // 理论上 themeColor 非空字符串必返回色（THEMES 或 THEME_FALLBACK），此处防御兜底

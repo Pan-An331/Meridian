@@ -3,6 +3,7 @@ import { getServerSession, unauthorized, badRequest } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { getAccumStats } from "@/lib/task/accum";
 import { createFeedback } from "@/lib/ai/feedback";
+import { normalizeThemeColorInput } from "@/lib/task/theme";
 
 // V3 C7：归属链递归收集（上限 5 级，返回标题数组）
 async function buildAncestors(userId: string, taskId: string | null): Promise<string[]> {
@@ -103,12 +104,24 @@ export async function PUT(
     if (body.theme !== undefined) {
       if (body.theme === null || body.theme === "") {
         data.theme = null;
+        // B7：清主题时同步清落库色
+        data.themeColor = null;
       } else if (typeof body.theme === "string") {
         const theme = body.theme.trim();
         if (theme.length > 20) return badRequest("主题名称不能超过 20 字");
         data.theme = theme;
       } else {
         return badRequest("theme 需为字符串或 null");
+      }
+    }
+    // B7：自定义主题颜色落库（JSON {"color","deep","bg"}；null/空 清除；theme 为空时颜色无意义）
+    if (body.themeColor !== undefined) {
+      if (body.themeColor === null || body.themeColor === "") {
+        data.themeColor = null;
+      } else {
+        const norm = normalizeThemeColorInput(body.themeColor);
+        if (!norm.ok) return badRequest("themeColor 需为 {\"color\",\"deep\",\"bg\"} #hex JSON 或 null");
+        data.themeColor = norm.value;
       }
     }
     // Focus Card V2：purpose 白名单（≤50 字；null/空 清除动机）

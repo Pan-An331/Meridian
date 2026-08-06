@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
     if (allSuccess) {
       for (let i = 0; i < changes.length; i++) {
         const c = changes[i];
+        // B10：用户手动调整排期（拖动/改时间）= 手动接管，AI 来源取消（Plan 不再显示失真 AI 徽章）
+        prisma.task.updateMany({ where: { id: c.taskId, userId: session.user.id, source: "ai" }, data: { source: "user" } }).catch(() => {});
         createFeedback({
           userId: session.user.id,
           taskId: c.taskId,

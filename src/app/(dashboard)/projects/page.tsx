@@ -35,7 +35,8 @@ interface TreeNode {
   parentId: string | null;
   children: TreeNode[];
   theme?: string | null;                                        // V3 落库主题（契约预留）
-  themeColor?: { color: string; deep: string; bg: string } | null; // 后端派生色（契约预留）
+  themeColor?: { color: string; deep: string; bg: string } | null; // 后端派生色（契约预留；兼容 {pcolor,pbg,theme}）
+  themeColorRaw?: string | null;                                // B7：自定义主题落库色 JSON（原始）
   suggestion?: string | null;                                   // 待整理池 AI 建议（契约预留）
 }
 interface TreeResponse {
@@ -95,9 +96,23 @@ function treeDone(list: TreeNode[]): { done: number; total: number } {
 }
 const lvlOf = (n: TreeNode) => (n.level === "project" ? 0 : n.level === "phase" ? 1 : 2);
 
-/* 派生色：后端 themeColor 优先 → 前端按主题/领域推断（V3 规则：AI 拿不准不强猜） */
+/* 派生色：落库色（themeColorRaw）优先 → 树接口派生色（pcolor/pbg）→ THEMES → 推断（V3 规则：AI 拿不准不强猜） */
 function nodeTheme(node: TreeNode): { color: string; deep: string; bg: string; name: string } | null {
-  if (node.themeColor) return { ...node.themeColor, name: node.theme ?? "" };
+  // B7：自定义主题落库色（JSON {"color","deep","bg"}）
+  if (node.themeColorRaw) {
+    try {
+      const raw = JSON.parse(node.themeColorRaw);
+      if (raw && typeof raw.color === "string" && typeof raw.bg === "string") {
+        return { color: raw.color, deep: raw.deep ?? raw.color, bg: raw.bg, name: node.theme ?? "" };
+      }
+    } catch { /* 非法 JSON 忽略 */ }
+  }
+  // 树接口 project 级派生色（{pcolor,pbg,theme} 形态，兼容 {color,deep,bg}）
+  const tc = node.themeColor as { color?: string; deep?: string; bg?: string; pcolor?: string; pbg?: string; theme?: string | null } | null;
+  if (tc) {
+    if (tc.color && tc.deep && tc.bg) return { color: tc.color, deep: tc.deep, bg: tc.bg, name: node.theme ?? "" };
+    if (tc.pcolor) return { color: tc.pcolor, deep: tc.pcolor, bg: tc.pbg ?? "#F8FAFC", name: tc.theme ?? node.theme ?? "" };
+  }
   if (node.theme && THEMES[node.theme]) return { ...THEMES[node.theme], name: node.theme };
   const th = resolveTheme(null, node.title, node.category);
   if (th && THEMES[th]) return { ...THEMES[th], name: th };
@@ -571,7 +586,7 @@ export default function ProjectsPage() {
                     >
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full flex-none" style={{ background: DOMAINS[normalizeCategory(o.category)].border }} />
-                        <span className="text-[12.5px] font-medium min-w-0 truncate flex-1">{o.title}</span>
+                        <span className="text-[13px] font-medium min-w-0 truncate flex-1">{o.title}</span>
                         <span className="text-[9px] text-[var(--v2-text3)] bg-[#f1f5f9] rounded px-1.5 py-px flex-none">{INBOX_SHORT[o.category ?? "other"] ?? "未分类"}</span>
                       </div>
                       {sug && (
@@ -604,7 +619,7 @@ export default function ProjectsPage() {
                   const checked = st?.todayChecked ?? false;
                   return (
                     <div key={h.id} className="pt-habit">
-                      <span className="text-[12.5px] font-medium flex-1 min-w-0 truncate">{h.title}</span>
+                      <span className="text-[13px] font-medium flex-1 min-w-0 truncate">{h.title}</span>
                       {weekDots(h)}
                       <span className="text-[10px] text-[var(--v2-text3)] whitespace-nowrap">连续 <b className="text-[var(--v2-amber)] font-bold">{st?.current ?? 0}</b> 天</span>
                       <button className={`pt-h-check ${checked ? "done" : "idle"}`} onClick={() => { if (!checked) checkin(h.id, h.title); }}>

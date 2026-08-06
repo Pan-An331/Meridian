@@ -10,6 +10,8 @@ export interface TaskCreateParams {
   category?: string | null;
   // V3：主题（独立字段）
   theme?: string | null;
+  // B7：自定义主题落库色（JSON {"color","deep","bg"}）
+  themeColor?: string | null;
   // Focus Card V2：动机文案（≤50 字）
   purpose?: string | null;
   tags?: string | null;
@@ -52,6 +54,7 @@ function buildSimpleTask(draft: InboxDraftItem): BuildResult {
       category: draft.category || null,
       // V3：主题透传
       theme: draft.theme || null,
+      themeColor: draft.themeColor || null,
       // Focus Card V2：动机透传
       purpose: draft.purpose || null,
       complexity: draft.complexity || null,
@@ -99,6 +102,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
     category: draft.category || null,
     // V3：主题透传（根节点继承，子节点同主题）
     theme: draft.theme || null,
+      themeColor: draft.themeColor || null,
     // Focus Card V2：动机透传（根节点持有；子节点由 confirm-service 父级继承）
     purpose: draft.purpose || null,
     complexity: "high",
@@ -115,6 +119,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
       importance: imp,
       category: draft.category || null,
       theme: draft.theme || null,
+      themeColor: draft.themeColor || null,
       purpose: draft.purpose || null,
       complexity: "medium",
       level: "phase",
@@ -131,6 +136,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
         estimatedMinutes: task.estimatedMinutes || null,
         category: draft.category || null,
         theme: draft.theme || null,
+      themeColor: draft.themeColor || null,
         purpose: draft.purpose || null,
         level: "task",
         accumulate: false,
@@ -147,6 +153,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
           estimatedMinutes: child.estimatedMinutes || null,
           category: draft.category || null,
           theme: draft.theme || null,
+      themeColor: draft.themeColor || null,
           purpose: draft.purpose || null,
           level: "phase", // 执行项 = 非锚点层（Today 按 parentId 取下一级）
           accumulate: false,

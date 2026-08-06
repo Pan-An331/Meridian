@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createSchedule } from "@/lib/schedule/service";
 import { createAccumulateSchedules } from "@/lib/schedule/service";
 import { normalizeCategory } from "@/lib/plan/colors";
+import { normalizeThemeColorInput } from "@/lib/task/theme";
 
 const VALID_TYPES = ["inbox", "planned", "scheduled"];
 
@@ -41,12 +42,20 @@ export async function POST(req: NextRequest) {
 
     if (!title?.trim()) return badRequest("任务标题不能为空");
 
-    const type = VALID_TYPES.includes(taskType) ? taskType : "inbox";
+    let type = VALID_TYPES.includes(taskType) ? taskType : "inbox";
+    // B4 修复：子任务创建时继承父级 taskType（前端传 "task" 属非法值会被 fallback 成 inbox，
+    // 导致执行清单子项全部变成"想法"混入收集箱 —— level 与 taskType 两维度混淆）
+    if (!VALID_TYPES.includes(taskType) && parentId) {
+      const parent = await prisma.task.findFirst({ where: { id: parentId, userId: session.user.id }, select: { taskType: true } });
+      if (parent?.taskType && VALID_TYPES.includes(parent.taskType)) type = parent.taskType;
+    }
     const imp = (typeof importance === "number" && importance >= 1 && importance <= 5) ? importance : 3;
     // 分类归一化：统一为小写 DOMAINS key（兼容历史大写枚举）
     const cat = normalizeCategory(body.category);
     // V3：theme 入参归一化（≤20 字，空则 null）
     const theme = typeof body.theme === "string" && body.theme.trim() ? body.theme.trim().slice(0, 20) : null;
+    // B7：自定义主题颜色落库（theme 为空时颜色无意义 → null）
+    const themeColor = theme ? normalizeThemeColorInput(body.themeColor).value : null;
     // Focus Card V2：purpose 入参归一化（≤50 字，空则 null）
     const purpose = typeof body.purpose === "string" && body.purpose.trim() ? body.purpose.trim().slice(0, 50) : null;
     // V5 层级重构：level 白名单 + 积累型标记
@@ -76,6 +85,7 @@ export async function POST(req: NextRequest) {
           taskType: type,
           importance: imp,
           theme,
+          themeColor,
           purpose,
           deadline: deadline ? new Date(deadline) : null,
           estimatedMinutes: calcEstimated || null,

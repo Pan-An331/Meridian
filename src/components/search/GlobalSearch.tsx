@@ -145,7 +145,7 @@ export function GlobalSearch({ compact = false }: { compact?: boolean }) {
                         {cs.label}{h.parentTitle ? ` · 📍 ${h.parentTitle}` : ""}{h.deadline ? ` · ${new Date(h.deadline).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })} 截止` : ""}
                       </span>
                     </span>
-                    <span className="text-[11px] text-[var(--v2-text3)] shrink-0">{h.taskType === "scheduled" ? "时间块" : h.taskType === "planned" ? "截止日" : "想法"}</span>
+                    <span className="text-[11px] text-[var(--v2-text3)] shrink-0">{h.taskType === "scheduled" ? "时间块" : h.taskType === "planned" ? "截止日" : "事项"}</span>
                   </button>
                 );
               })}

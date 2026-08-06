@@ -5,6 +5,7 @@ import { DOMAINS, normalizeCategory, resolveTheme, THEMES } from "@/lib/plan/col
 import { ThemeBadge } from "@/components/task/ThemeBadge";
 import { realTimeToVisualTime } from "@/lib/plan/time";
 import { localDateStr } from "@/lib/date";
+import { timeStateLabel } from "@/lib/task/time-state";
 
 /* ═══════════════════════════════════════════
    Plan · V2 视觉语言（V3 前端先行：主题徽章 + 图例主题 + 重叠分列）
@@ -392,7 +393,11 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
                   const sh = visualHour(t.startTime);
                   const dur = durHours(t);
                   const top = (sh - S) * H;
-                  const hh = Math.max(dur * H, 22);
+                  // B6 修复：未展开凌晨时跨夜任务块（如 23:00-01:00）截断到时间轴末端，不再溢出被裁剪
+                  const axisEndH = S + totalHours;
+                  let hh = Math.max(dur * H, 22);
+                  const truncated = !midnight && sh + dur > axisEndH;
+                  if (truncated) hh = Math.max(22, (axisEndH - sh) * H);
                   const cs = catStyle(t.category);
                   // V3 C6：直读落库 theme（无则 tags/标题推断兜底）
                   const theme = (t as SchedTask).theme ?? resolveTheme(t.tags, t.title, t.category);
@@ -412,7 +417,8 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
                       onDragStart={(e) => { e.dataTransfer.setData("text/task-id", t.id); e.dataTransfer.effectAllowed = "copyMove"; }}
                       onClick={(e) => { e.stopPropagation(); onTaskClick?.(t, { x: e.clientX, y: e.clientY }); }}
                       title={`${t.title}\n${tm} · ${cs.label}${theme ? ` · 主题：${theme}` : ""}\n${t.status === "completed" ? "已完成" : t.status === "in_progress" ? "进行中" : "未开始"}\n拖动可移动 · 点击查看详情`}>
-                      {t.source === "ai" && <span className="absolute right-1.5 text-[13px] px-1.5 py-px rounded font-medium leading-[18px] bg-[var(--v2-purple-bg)] text-[var(--v2-brand)]" style={{ top: 4 }}>AI</span>}
+                      {/* B10：AI 徽章弱化（灰字小标；手动调整后 source→user 自动消失） */}
+                      {t.source === "ai" && <span className="absolute right-1.5 text-[10px] px-1 py-px rounded font-medium leading-[16px] bg-[#f1f5f9] text-[var(--v2-text3)]" style={{ top: 4 }}>AI 建议</span>}
                       {/* 标题行：右侧预留 AI 徽章 / 中矮块的时长角标位，截断不撞角标 */}
                       <div className="flex items-center gap-1.5 min-w-0" style={{ paddingRight: t.source === "ai" ? 30 : hh >= 32 && hh < 46 ? 26 : 0 }}>
                         <div className="plan-tsk-title text-[15px] truncate" style={{ fontWeight: 600, lineHeight: 1.35, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
@@ -427,6 +433,8 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
                       )}
                       {/* 时长角标（中矮块 32-46px：无时间行，右下角独立显示） */}
                       {hh >= 32 && hh < 46 && <div className="absolute right-1.5 text-[13px] text-[var(--v2-text2)]" style={{ bottom: 4 }}>{ds}</div>}
+                      {/* B6：截断提示（跨夜 · 未展开凌晨） */}
+                      {truncated && <div className="absolute right-1.5 bottom-0.5 text-[11px] font-semibold text-[var(--v2-text3)]" style={{ background: cs.bg, padding: "0 3px" }}>⋯ 跨夜</div>}
                     </div>
                   );
                 });
@@ -498,16 +506,16 @@ function WeekCalendar({ tasks, focus, weekStart, weekOffset, onTaskClick, onDrop
   );
 }
 
-/* ── 收集箱（未排期任务：inbox 想法 + planned 截止日） ── */
+/* ── 收集箱（未排期任务：inbox 事项 + planned 截止日） ── */
 function IdeaPool({ ideas, onOpen, onDragStart }: { ideas: ActiveTask[]; onOpen: (idea: ActiveTask) => void; onDragStart: (taskId: string) => void }) {
   return (
     <div className={`${cardCls} p-4`}>
       <div className="flex items-center gap-2 mb-3">
         <span className="text-sm font-semibold text-[var(--v2-text)]">收集箱</span>
-        <span className="text-sm px-2 py-0.5 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-text)]">{ideas.length} 条想法</span>
+        <span className="text-sm px-2 py-0.5 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-text)]">{ideas.length} 条事项</span>
         {ideas.length > 0 && <span className="text-sm text-[var(--v2-text3)]">点击查看详情 · 拖到日历自动转为时间块</span>}
       </div>
-      {ideas.length === 0 && <div className="text-sm text-[var(--v2-text3)] py-3 text-center">没有待排期的想法 · 去 Inbox 倒进来</div>}
+      {ideas.length === 0 && <div className="text-sm text-[var(--v2-text3)] py-3 text-center">没有待安排的 · 去 Inbox 倒进来</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {ideas.map((i) => {
           const cs = catStyle(i.category);
@@ -519,7 +527,7 @@ function IdeaPool({ ideas, onOpen, onDragStart }: { ideas: ActiveTask[]; onOpen:
                   {i.source === "ai" ? "AI 解析" : "手动"}
                 </span>
                 <span className={`text-sm px-1.5 py-0.5 rounded ${i.taskType === "inbox" ? "bg-[var(--color-gray-100)] text-[var(--color-gray-500)]" : "bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]"}`}>
-                  {i.taskType === "inbox" ? "想法" : "截止日"}
+                  {timeStateLabel({ taskType: i.taskType, deadline: i.deadline })}
                 </span>
                 <span className="ml-auto opacity-50 group-hover:opacity-100 flex gap-0.5 cursor-grab" title="拖到日历排期">
                   <span className="w-[3px] h-[11px] rounded-sm bg-[var(--v2-text3)]" />
@@ -617,14 +625,15 @@ function TaskDetailPopover({ seed, pos, onClose, onEditTime, onRemove, busy, onA
   const completed = detail?.status === "completed";
   const isAi = (detail?.source ?? seed.source) === "ai";
 
-  // 定位：点击位置附近弹出，超出视口自动翻转
+  // 定位：点击位置附近弹出，超出视口自动翻转（B3 修复：按实际卡高计算，不再硬编码 420）
   const W = 340, M = 8;
+  const modalH = Math.min(typeof window !== "undefined" ? window.innerHeight * 0.7 : 520, 520);
   const left = pos ? Math.min(Math.max(M, pos.x - W / 2), (typeof window !== "undefined" ? window.innerWidth : 1200) - W - M) : Math.max(M, (typeof window !== "undefined" ? window.innerWidth : 1200) / 2 - W / 2);
-  const top = pos ? Math.min(Math.max(M, pos.y + 12), (typeof window !== "undefined" ? window.innerHeight : 800) - 420) : 80;
+  const top = pos ? Math.min(Math.max(M, pos.y + 12), (typeof window !== "undefined" ? window.innerHeight : 800) - modalH - M) : Math.max(M, ((typeof window !== "undefined" ? window.innerHeight : 800) - modalH) / 2);
 
   return (
     <div className="fixed inset-0 z-50" onClick={onClose}>
-      <div className="absolute bg-white rounded-xl shadow-2xl border border-[var(--v2-border)] flex flex-col overflow-hidden"
+      <div className="absolute bg-white rounded-xl shadow-2xl border border-[var(--v2-border)] flex flex-col overflow-y-auto"
         style={{ left, top, width: W, maxHeight: "min(70vh, 520px)" }}
         onClick={(e) => e.stopPropagation()}>
         {/* 头部 */}
@@ -633,7 +642,7 @@ function TaskDetailPopover({ seed, pos, onClose, onEditTime, onRemove, busy, onA
             <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
               <span className="text-sm px-1.5 py-0.5 rounded" style={{ background: cs.bg, color: cs.color }}>{cs.label}</span>
               <span className="text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] text-[var(--color-gray-500)]">
-                {detail?.taskType === "scheduled" ? "时间块" : detail?.taskType === "planned" ? "截止日" : "想法"}
+                {timeStateLabel({ taskType: detail?.taskType, deadline: detail?.deadline, startTime: seed.startTime ?? undefined })}
               </span>
               {isAi && <span className="text-sm px-1.5 py-0.5 rounded bg-[var(--v2-purple-bg)] text-[var(--v2-purple)]">AI 生成</span>}
               {completed && <span className="text-sm px-1.5 py-0.5 rounded bg-[var(--color-success-bg)] text-[var(--color-success-text)]">已完成</span>}
@@ -692,8 +701,8 @@ function TaskDetailPopover({ seed, pos, onClose, onEditTime, onRemove, busy, onA
 
           {detail?.taskType === "inbox" && (
             <div className="rounded-lg bg-[var(--v2-amber-bg)] border border-[var(--color-warning-border)] p-3">
-              <div className="text-sm text-[#b45309] mb-1.5">想法 · 执行清单</div>
-              <div className="text-sm text-[var(--color-plan-task-deadline-text)]">无时间约束 · 勾选完成一项，或拖到日历转为时间块</div>
+              <div className="text-sm text-[#b45309] mb-1.5">事项 · 执行清单</div>
+              <div className="text-sm text-[var(--color-plan-task-deadline-text)]">未安排时间 · 勾选完成一项，或拖到日历转为时间块</div>
               {detail.estimatedMinutes ? <div className="text-sm text-[var(--color-plan-task-deadline-text)] mt-1">预估 {detail.estimatedMinutes} 分钟</div> : null}
             </div>
           )}
@@ -1063,21 +1072,20 @@ function ScheduleModalInner({ target, busy, onSave, onClose }: {
   onSave: (taskId: string, newStart: string, newEnd: string) => void;
   onClose: () => void;
 }) {
-  const [start, setStart] = useState(() => {
-    if (target.initialStart) return target.initialStart.slice(0, 16);
-    const d = new Date(Date.now() + 30 * 60000);
+  // B2 修复：initialStart 是 UTC ISO 串，必须转本地时间再进 datetime-local（原来直接 slice(0,16) 差 8 小时）
+  const toLocalInput = (d: Date) => {
     const pad = (n: number) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const [start, setStart] = useState(() => {
+    if (target.initialStart) return toLocalInput(new Date(target.initialStart));
+    return toLocalInput(new Date(Date.now() + 30 * 60000));
   });
   const [end, setEnd] = useState(() => {
     if (target.initialStart) {
-      const d = new Date(new Date(target.initialStart).getTime() + 3600000);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return toLocalInput(new Date(new Date(target.initialStart).getTime() + 3600000));
     }
-    const d = new Date(Date.now() + 90 * 60000);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return toLocalInput(new Date(Date.now() + 90 * 60000));
   });
 
   return (

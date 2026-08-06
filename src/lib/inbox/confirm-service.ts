@@ -4,6 +4,7 @@ import type { InboxDraftItem } from "@/types/inbox";
 import { createDecisionLog } from "@/lib/ai/decision-log";
 import { createAccumulateSchedules } from "@/lib/schedule/service";
 import { normalizeCategory } from "@/lib/plan/colors";
+import { normalizeThemeColorInput } from "@/lib/task/theme";
 import { createFeedback } from "@/lib/ai/feedback";
 
 /** V3：领域白名单（7 类封顶，无 competition） */
@@ -59,6 +60,8 @@ export async function confirmDraftItems(userId: string, draftId: string, confirm
         category: (cat === "other" ? null : cat) as string,
         // V3：theme 白名单——非空字符串 ≤20 字，null 清除
         theme: typeof item.theme === "string" && item.theme.trim() ? item.theme.trim().slice(0, 20) : null,
+        // B7：自定义主题落库色归一化（#hex JSON；theme 为空时无意义 → null）
+        themeColor: item.theme ? normalizeThemeColorInput(item.themeColor).value : null,
         // Focus Card V2：purpose 白名单——≤50 字，null 清除
         purpose: normalizePurpose(item.purpose),
       };

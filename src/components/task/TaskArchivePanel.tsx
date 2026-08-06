@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DOMAINS, normalizeCategory, resolveTheme, THEMES, THEME_FALLBACK, themeColor } from "@/lib/plan/colors";
+import { parseThemeColor } from "@/lib/task/theme";
 import { ThemeBadge } from "@/components/task/ThemeBadge";
 
 /* ═══════════════════════════════════════════
@@ -34,7 +35,7 @@ const THEME_PRESETS = ["考研", "竞赛", "身材"];
 const THEME_SWATCHES = ["#DB2777", "#F97316", "#F59E0B", "#16A34A", "#0D9488", "#2563EB", "#7C3AED", "#E11D48", "#92400E", "#64748B"];
 
 const TYPE_LABEL: Record<string, { label: string; desc: string }> = {
-  inbox: { label: "想法", desc: "先收着，不安排" },
+  inbox: { label: "事项", desc: "未安排时间，先收着" },
   planned: { label: "截止日", desc: "定 deadline，Plan 排期" },
   scheduled: { label: "时间块", desc: "占日历，直接执行" },
 };
@@ -53,6 +54,8 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<string>("other");
   const [theme, setTheme] = useState<string | null>(null);
+  // B7：当前主题落库色（自定义主题的颜色不再丢失；预设主题为 null 用 THEMES 派生）
+  const [customThemeColor, setCustomThemeColor] = useState<{ color: string; deep: string; bg: string } | null>(null);
   const [themeEdit, setThemeEdit] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customColor, setCustomColor] = useState(THEME_SWATCHES[5]);
@@ -60,23 +63,46 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
   const [purpose, setPurpose] = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
   const [savedTip, setSavedTip] = useState<string | null>(null);
+  // 实际用时手动补记（完成未计时时）
+  const [timeEdit, setTimeEdit] = useState(false);
+  const [timeMin, setTimeMin] = useState("");
+  const [timeBusy, setTimeBusy] = useState(false);
 
   // 加载任务（V3 C7 聚合：theme/ancestors/schedules/accumStats/aiFields + FCV2 purpose/departureAt 后端已返回）
-  useEffect(() => {
-    let cancelled = false;
+  const loadTask = useCallback(() => {
     setErr(false);
     fetch(`/api/tasks/${taskId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => { if (!cancelled) { setTask(d); setTitle(d.title ?? ""); setCategory(normalizeCategory(d.category)); setTheme(d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category)); setPurpose(d.purpose ?? ""); setEstimatedMinutes(d.estimatedMinutes ? String(d.estimatedMinutes) : ""); } })
-      .catch(() => { if (!cancelled) setErr(true); });
-    return () => { cancelled = true; };
+      .then((d) => { setTask(d); setTitle(d.title ?? ""); setCategory(normalizeCategory(d.category)); setTheme(d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category)); setCustomThemeColor(parseThemeColor(d.themeColor)); setPurpose(d.purpose ?? ""); setEstimatedMinutes(d.estimatedMinutes ? String(d.estimatedMinutes) : ""); })
+      .catch(() => setErr(true));
   }, [taskId]);
+  useEffect(() => { loadTask(); }, [loadTask]);
+
+  // 补记实际用时（POST /api/tasks/[id]/time-log → 刷新）
+  const addTimeLog = async () => {
+    const min = Number(timeMin);
+    if (!Number.isFinite(min) || min < 1 || min > 1440) return;
+    setTimeBusy(true);
+    try {
+      const r = await fetch(`/api/tasks/${taskId}/time-log`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ durationMinutes: Math.round(min) }),
+      });
+      if (!r.ok) throw new Error();
+      setSavedTip(`已补记 ${Math.round(min)} 分钟 ✓`);
+      setTimeEdit(false);
+      setTimeMin("");
+      loadTask();
+    } catch { setSavedTip("补记失败，请重试"); }
+    finally { setTimeBusy(false); }
+  };
 
   // 归属链：直读后端 ancestors（C7 已返回标题数组）；本地 idMeta 不再需要
   const ancestry = useMemo(() => (task?.ancestors ?? []), [task]);
 
   const cs = DOMAINS[category as keyof typeof DOMAINS] ?? DOMAINS.other;
-  const typeInfo = task ? (TYPE_LABEL[task.taskType] ?? TYPE_LABEL.inbox) : TYPE_LABEL.inbox;
+  // 三态标签（派生态）：有 deadline → 截止日（即使创建意图是 inbox）；否则按 taskType 映射
+  const typeInfo = task ? (task.deadline ? TYPE_LABEL.planned : (TYPE_LABEL[task.taskType] ?? TYPE_LABEL.inbox)) : TYPE_LABEL.inbox;
   const actualMin = Math.round((task?.timeLogs ?? []).reduce((s, l) => s + (l.durationSeconds ?? 0), 0) / 60);
 
   const save = async () => {
@@ -87,8 +113,8 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
       const body: Record<string, unknown> = {
         title: title.trim() || task.title,
         category,
-        // V3 阶段 C3：PUT 白名单已支持 theme（null 清除）→ 真实持久化
-        ...(theme ? { theme } : { theme: null }),
+        // V3 阶段 C3：PUT 白名单已支持 theme（null 清除）→ 真实持久化；B7：自定义主题颜色一并落库
+        ...(theme ? { theme, ...(customThemeColor ? { themeColor: JSON.stringify(customThemeColor) } : { themeColor: null }) } : { theme: null, themeColor: null }),
         // FCV2：purpose（≤50 字；空 → null 清除）
         ...(purpose.trim() ? { purpose: purpose.trim().slice(0, 50) } : { purpose: null }),
         ...(estimatedMinutes ? { estimatedMinutes: Math.max(1, Number(estimatedMinutes)) } : { estimatedMinutes: null }),
@@ -130,7 +156,7 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                   />
                   <div className="flex items-center gap-1.5 flex-wrap mt-2">
                     <span className="text-sm px-1.5 py-0.5 rounded" style={{ background: cs.bg, color: cs.border }}>{cs.label}</span>
-                    {theme && <ThemeBadge theme={theme} />}
+                    {theme && <ThemeBadge theme={theme} color={customThemeColor} />}
                     <span className="text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] text-[var(--color-gray-500)]">{typeInfo.label}</span>
                     {task && (
                       <span className={`text-sm px-1.5 py-0.5 rounded ${task.status === "completed" ? "bg-[var(--color-success-bg)] text-[var(--color-success-text)]" : task.status === "in_progress" ? "bg-[var(--color-brand-50)] text-[var(--v2-brand-deep)]" : "bg-[var(--color-gray-100)] text-[var(--color-gray-500)]"}`}>
@@ -172,14 +198,14 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                   {THEME_PRESETS.map((t) => {
                     const c = themeColor(t) ?? THEME_FALLBACK;
                     return (
-                      <button key={t} onClick={() => setTheme(theme === t ? null : t)}
+                      <button key={t} onClick={() => { setTheme(theme === t ? null : t); setCustomThemeColor(null); }}
                         className="inline-flex items-center gap-1.5 text-sm px-2 py-1 rounded-md border transition"
                         style={{ background: theme === t ? c.bg : "#fff", color: theme === t ? c.deep : "var(--v2-text2)", borderColor: theme === t ? c.color : "var(--v2-border)" }}>
                         <span className="w-2 h-2 rounded-full" style={{ background: c.color }} />{t}
                       </button>
                     );
                   })}
-                  <button onClick={() => setTheme(null)} className={`text-sm px-2 py-1 rounded-md border transition ${theme === null ? "border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]" : "border-[var(--v2-border)] text-[var(--v2-text3)]"}`}>无主题</button>
+                  <button onClick={() => { setTheme(null); setCustomThemeColor(null); }} className={`text-sm px-2 py-1 rounded-md border transition ${theme === null ? "border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]" : "border-[var(--v2-border)] text-[var(--v2-text3)]"}`}>无主题</button>
                 </div>
                 {themeEdit && (
                   <div className="mt-2 border border-[var(--v2-brand-border)] bg-[var(--v2-brand-bg)] rounded-lg p-2.5">
@@ -189,9 +215,9 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                       <button onClick={() => {
                         const name = customName.trim();
                         if (!name) return;
-                        const color = customColor;
-                        const c = themeColor(name) ?? { color, deep: color, bg: "#F8FAFC" };
+                        // B7：确定即保存（theme + 选色落库，不再两步操作丢颜色）
                         setTheme(name);
+                        setCustomThemeColor({ color: customColor, deep: customColor, bg: "#F8FAFC" });
                         setThemeEdit(false);
                         setCustomName("");
                       }} className="px-2.5 py-1 text-sm font-medium rounded bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)]">确定</button>
@@ -226,6 +252,22 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                 <button onClick={save} disabled={saving} className="text-sm font-medium px-3.5 py-1.5 rounded-lg bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition disabled:opacity-50">
                   {saving ? "保存中…" : "保存修改"}
                 </button>
+              </div>
+              {/* 实际用时（手动补记 · 完成未计时时） */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[var(--v2-text3)]">实际用时</span>
+                <b className="text-sm text-[var(--v2-text)]">{actualMin > 0 ? `${actualMin} 分钟` : "—"}</b>
+                {timeEdit ? (
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <input type="number" min={1} max={1440} value={timeMin} onChange={(e) => setTimeMin(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") addTimeLog(); if (e.key === "Escape") { setTimeEdit(false); setTimeMin(""); } }}
+                      placeholder="分钟" className="w-16 px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)]" autoFocus />
+                    <button onClick={addTimeLog} disabled={timeBusy || !(Number(timeMin) > 0)} className="text-sm px-2 py-1 rounded bg-[var(--v2-brand)] text-white disabled:opacity-50">确定</button>
+                    <button onClick={() => { setTimeEdit(false); setTimeMin(""); }} className="text-sm px-2 py-1 rounded border border-[var(--v2-border)] text-[var(--v2-text2)]">✕</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setTimeEdit(true)} className="text-sm ml-auto text-[var(--v2-brand)] font-medium hover:underline">＋ 补记</button>
+                )}
               </div>
             </div>
           </Section>

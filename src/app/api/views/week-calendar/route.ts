@@ -4,7 +4,7 @@ import { getServerSession, unauthorized } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { resolveDomain, normalizeCategory } from "@/lib/plan/colors";
 import { deduplicateByDay } from "@/lib/plan/service";
-import { themeColor } from "@/lib/task/theme";
+import { themeColor, themeColorWithCustom } from "@/lib/task/theme";
 
 /** 分类兜底：数据库为空时按标题/标签推断（旧数据没有 category 字段值） */
 function effCategory(task: { category: string | null; tags: string | null; title: string }): string | null {
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   const [timeLogs, scheduleEntries, allActiveTasks, userModel] = await Promise.all([
     prisma.timeLog.findMany({ where: { userId, startedAt: { gte: weekStart, lt: weekEnd } }, include: { task: { select: { id: true, title: true, taskType: true, status: true, importance: true, category: true, tags: true, theme: true } } }, orderBy: { startedAt: "asc" } }),
-    prisma.schedule.findMany({ where: { userId, scheduledStart: { gte: weekStart, lt: weekEnd } }, include: { task: { select: { id: true, title: true, taskType: true, status: true, importance: true, category: true, tags: true, theme: true, estimatedMinutes: true, source: true, deadline: true, description: true, level: true, accumulate: true } } }, orderBy: { scheduledStart: "asc" } }),
+    prisma.schedule.findMany({ where: { userId, scheduledStart: { gte: weekStart, lt: weekEnd } }, include: { task: { select: { id: true, title: true, taskType: true, status: true, importance: true, category: true, tags: true, theme: true, themeColor: true, estimatedMinutes: true, source: true, deadline: true, description: true, level: true, accumulate: true } } }, orderBy: { scheduledStart: "asc" } }),
     prisma.task.findMany({ where: { userId, status: { in: ["not_started", "in_progress", "delayed"] } }, orderBy: [{ importance: "desc" }, { deadline: "asc" }], take: 20, include: { children: { select: { id: true, title: true, status: true, completedAt: true } } } }),
     prisma.userModel.findUnique({ where: { userId }, select: { peakHours: true } }),
   ]);
@@ -39,10 +39,10 @@ export async function GET(req: NextRequest) {
   // 统一去重（修复 P1-1：与 plan/service 共用同一规则，同任务同自然日取最新）
   const deduped = deduplicateByDay(scheduleEntries);
 
-  const scheduledTasks = deduped.map(entry => ({ id: entry.task.id, scheduleId: entry.id, title: entry.task.title, taskType: entry.task.taskType, status: entry.task.status, importance: entry.task.importance, category: effCategory(entry.task), tags: entry.task.tags ?? null, theme: entry.task.theme ?? null, themeColor: entry.task.theme ? themeColor(entry.task.theme) : null, estimatedMinutes: entry.task.estimatedMinutes ?? null, source: entry.task.source ?? "user", deadline: entry.task.deadline?.toISOString() ?? null, description: entry.task.description ?? null, level: entry.task.level ?? "task", accumulate: entry.task.accumulate ?? false, startTime: entry.scheduledStart.toISOString(), endTime: entry.scheduledEnd?.toISOString() ?? null }));
+  const scheduledTasks = deduped.map(entry => ({ id: entry.task.id, scheduleId: entry.id, title: entry.task.title, taskType: entry.task.taskType, status: entry.task.status, importance: entry.task.importance, category: effCategory(entry.task), tags: entry.task.tags ?? null, theme: entry.task.theme ?? null, themeColor: themeColorWithCustom(entry.task.theme, entry.task.themeColor), estimatedMinutes: entry.task.estimatedMinutes ?? null, source: entry.task.source ?? "user", deadline: entry.task.deadline?.toISOString() ?? null, description: entry.task.description ?? null, level: entry.task.level ?? "task", accumulate: entry.task.accumulate ?? false, startTime: entry.scheduledStart.toISOString(), endTime: entry.scheduledEnd?.toISOString() ?? null }));
 
-  // 收集箱 = 未排期任务（inbox 想法 + planned 截止日，不含 scheduled 已排期）
-  const plannedTasks = allActiveTasks.filter(t => t.taskType !== "scheduled" && !deduped.some(e => e.taskId === t.id)).map(t => ({ id: t.id, title: t.title, taskType: t.taskType, status: t.status, importance: t.importance, category: effCategory(t), theme: t.theme ?? null, deadline: t.deadline?.toISOString() ?? null, estimatedMinutes: t.estimatedMinutes ?? null, source: t.source ?? "user", children: t.children.map(c => ({ id: c.id, title: c.title, status: c.status, completedAt: c.completedAt?.toISOString() ?? null })) }));
+  // 收集箱 = 未排期的顶层可安排任务（B4：排除子任务 parentId + 容器 project/phase —— 执行清单子项不再混入）
+  const plannedTasks = allActiveTasks.filter(t => t.taskType !== "scheduled" && !deduped.some(e => e.taskId === t.id) && !t.parentId && (t.level == null || t.level === "task")).map(t => ({ id: t.id, title: t.title, taskType: t.taskType, status: t.status, importance: t.importance, category: effCategory(t), theme: t.theme ?? null, deadline: t.deadline?.toISOString() ?? null, estimatedMinutes: t.estimatedMinutes ?? null, source: t.source ?? "user", children: t.children.map(c => ({ id: c.id, title: c.title, status: c.status, completedAt: c.completedAt?.toISOString() ?? null })) }));
   const activeTasks = allActiveTasks.map(t => ({ id: t.id, title: t.title, taskType: t.taskType, status: t.status, importance: t.importance, category: effCategory(t), theme: t.theme ?? null, deadline: t.deadline?.toISOString() ?? null, estimatedMinutes: t.estimatedMinutes ?? null, tags: t.tags ?? null, source: t.source ?? "user", children: t.children.map(c => ({ id: c.id, title: c.title, status: c.status, completedAt: c.completedAt?.toISOString() ?? null })) }));
 
   // V3 C6：本周出现的主题图例（去重，含配色）

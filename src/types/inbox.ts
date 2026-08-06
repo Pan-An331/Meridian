@@ -27,6 +27,8 @@ export interface InboxDraftItem {
   repeatMinutes?: number;
   // V3：主题（目标，独立字段；AI 拿不准留空，不强猜）
   theme?: string | null;
+  // B7：自定义主题落库色（JSON {"color","deep","bg"}；预设主题为 null）
+  themeColor?: string | null;
   // Focus Card V2：动机文案（AI 推断/父级继承/可改，≤50 字；拿不准留空）
   purpose?: string | null;
 }

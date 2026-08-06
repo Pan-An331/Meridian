@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { InboxDraftItem, BreakdownPhase } from "@/types/inbox";
 import { DOMAINS, resolveTheme } from "@/lib/plan/colors";
 import { ThemeBadge } from "@/components/task/ThemeBadge";
+import { parseThemeColor } from "@/lib/task/theme";
 
 /* ═══════════════════════════════════════════
    Inbox · V2 视觉语言（V3 前端先行：主题 chips + 分类 7 类含竞赛提示）
@@ -17,7 +18,7 @@ const CAT_LABEL: Record<string, string> = {
   course: "课程", learning: "学习", practice: "实践",
   health: "健康", life: "生活", external: "社团/学校", other: "未分类",
 };
-const TYPE_LABEL: Record<string, string> = { planned: "截止日", scheduled: "排期", inbox: "想法" };
+const TYPE_LABEL: Record<string, string> = { planned: "截止日", scheduled: "时间块", inbox: "事项" };
 const CAT_OPTIONS = Object.entries(DOMAINS).map(([key, d]) => ({ key, label: d.label }));
 /* V3 主题预设（考研/竞赛/身材 + 自定义选色） */
 const THEME_PRESETS = ["考研", "竞赛", "身材"];
@@ -107,8 +108,32 @@ function InputCanvas({ greeting, onSubmit, loading }: {
 }
 
 /* ── 简单卡 ── */
-function SimpleCard({ item, onConfirm, onDismiss, onEdit }: { item: InboxDraftItem; onConfirm: () => void; onDismiss: () => void; onEdit: () => void }) {
+function SimpleCard({ item, onConfirm, onDismiss, onEdit, onModify }: {
+  item: InboxDraftItem; onConfirm: () => void; onDismiss: () => void; onEdit: () => void;
+  onModify?: (patch: Partial<InboxDraftItem>) => void;
+}) {
   const confidence = Math.round((item.confidence ?? 0.7) * 100);
+  // B8：时间安排动作（加子任务/设每天/设有截止）+ 重要性三档（不叫"选类型"，叫"安排时间"）
+  const [childTitle, setChildTitle] = useState("");
+  const [addingChild, setAddingChild] = useState(false);
+  const [deadlineVal, setDeadlineVal] = useState("");
+  const [addingDeadline, setAddingDeadline] = useState(false);
+  const addChild = () => {
+    const v = childTitle.trim();
+    if (!v) return;
+    const phases = item.breakdown?.phases?.length ? item.breakdown.phases : [];
+    onModify?.({
+      breakdown: {
+        shouldBreakdown: true,
+        reason: item.breakdown?.reason ?? "手动添加子任务",
+        phases: [...phases, { title: `清单 ${phases.length + 1}`, phaseOrder: phases.length, tasks: [{ title: v, estimatedMinutes: 0 }] }],
+      },
+    });
+    setChildTitle("");
+    setAddingChild(false);
+  };
+  const impLevels = [1, 2, 3, 4, 5];
+  const impLabel = (n: number) => (n <= 2 ? "低" : n === 3 ? "中" : "高");
   return (
     <div className={`${cardCls} p-4 mb-2.5`}>
       <div className="flex items-start gap-2.5 mb-2">
@@ -120,9 +145,10 @@ function SimpleCard({ item, onConfirm, onDismiss, onEdit }: { item: InboxDraftIt
           )}
           <div className="text-sm text-[var(--v2-text3)] flex flex-wrap gap-1.5">
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{CAT_LABEL[item.category] ?? item.category}</span>
-            {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} /> : null; })()}
+            {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} color={parseThemeColor(item.themeColor)} /> : null; })()}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{TYPE_LABEL[item.taskType] ?? item.taskType}</span>
             {item.estimatedMinutes ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {item.estimatedMinutes}min</span> : null}
+            {item.deadline && <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] rounded">截止 {new Date(item.deadline).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</span>}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">置信度 {confidence}%</span>
           </div>
         </div>
@@ -134,6 +160,45 @@ function SimpleCard({ item, onConfirm, onDismiss, onEdit }: { item: InboxDraftIt
       </div>
       {item.aiReason && (
         <div className="text-sm text-[var(--v2-brand-deep)] px-2.5 py-1.5 bg-[var(--v2-brand-bg)] rounded leading-[1.5]">{item.aiReason}</div>
+      )}
+      {/* B8：时间安排动作 + 重要性三档 */}
+      {onModify && (
+        <div className="flex items-center gap-1.5 mt-2.5 flex-wrap pt-2.5 border-t border-dashed border-[var(--v2-border)]">
+          {addingChild ? (
+            <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+              <input value={childTitle} onChange={(e) => setChildTitle(e.target.value)} autoFocus
+                onKeyDown={(e) => { if (e.key === "Enter") addChild(); if (e.key === "Escape") { setAddingChild(false); setChildTitle(""); } }}
+                placeholder="子任务标题，回车添加" className="flex-1 min-w-0 px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)]" />
+              <button onClick={addChild} disabled={!childTitle.trim()} className="text-sm px-2 py-1 rounded bg-[var(--v2-brand)] text-white disabled:opacity-50">确定</button>
+            </div>
+          ) : addingDeadline ? (
+            <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+              <input type="date" value={deadlineVal} onChange={(e) => setDeadlineVal(e.target.value)} autoFocus
+                className="flex-1 min-w-0 px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)]" />
+              <button onClick={() => { if (deadlineVal) { onModify({ deadline: new Date(deadlineVal + "T23:59:59").toISOString() }); setAddingDeadline(false); setDeadlineVal(""); } }} disabled={!deadlineVal} className="text-sm px-2 py-1 rounded bg-[var(--v2-brand)] text-white disabled:opacity-50">确定</button>
+            </div>
+          ) : (
+            <>
+              <button onClick={() => setAddingChild(true)} className="text-xs px-2 py-1 rounded border border-[var(--v2-border)] text-[var(--v2-text2)] hover:border-[var(--v2-brand)] transition">＋ 加子任务</button>
+              <button onClick={() => onModify({ accumulate: !item.accumulate, ...(!item.accumulate ? { taskType: "planned" } : {}) })}
+                className={`text-xs px-2 py-1 rounded border transition ${item.accumulate ? "border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]" : "border-[var(--v2-border)] text-[var(--v2-text2)] hover:border-[var(--v2-brand)]"}`}>
+                {item.accumulate ? "✓ 每天重复" : "设为每天"}
+              </button>
+              {item.deadline ? (
+                <button onClick={() => onModify({ deadline: undefined })} className="text-xs px-2 py-1 rounded border border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]">✓ 有截止 · 取消</button>
+              ) : (
+                <button onClick={() => setAddingDeadline(true)} className="text-xs px-2 py-1 rounded border border-[var(--v2-border)] text-[var(--v2-text2)] hover:border-[var(--v2-brand)] transition">设有截止</button>
+              )}
+            </>
+          )}
+          <span className="ml-auto flex items-center gap-0.5">
+            {impLevels.map((n) => (
+              <button key={n} onClick={() => onModify({ importance: n })}
+                className={`text-xs px-1.5 py-0.5 rounded transition ${(item.importance ?? 3) === n ? "bg-[var(--v2-amber)] text-white font-semibold" : "text-[var(--v2-text3)] hover:text-[var(--v2-amber)]"}`}
+                title={`重要性：${impLabel(n)}`}>{impLabel(n)}</button>
+            ))}
+          </span>
+        </div>
       )}
     </div>
   );
@@ -155,7 +220,7 @@ function ComplexCard({ item, onConfirm, onDismiss, onEdit }: { item: InboxDraftI
           )}
           <div className="text-sm text-[var(--v2-text3)] flex flex-wrap gap-1.5">
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{CAT_LABEL[item.category] ?? item.category}</span>
-            {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} /> : null; })()}
+            {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} color={parseThemeColor(item.themeColor)} /> : null; })()}
             {item.estimatedMinutes ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {item.estimatedMinutes}min</span> : null}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">置信度 {Math.round((item.confidence ?? 0.7) * 100)}%</span>
           </div>
@@ -204,9 +269,15 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
   const [themeEdit, setThemeEdit] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customColor, setCustomColor] = useState(THEME_SWATCHES[5]);
+  // B7：当前主题落库色（自定义主题颜色不再丢失；预设主题为 null 用 THEMES 派生）
+  const [themeColor, setThemeColor] = useState<{ color: string; deep: string; bg: string } | null>(() => {
+    try { return item.themeColor ? JSON.parse(item.themeColor) : null; } catch { return null; }
+  });
   // FCV2：动机（AI 推断可改，≤50 字）
   const [purpose, setPurpose] = useState(item.purpose ?? "");
   const [estimatedMinutes, setEstimatedMinutes] = useState(item.estimatedMinutes ? String(item.estimatedMinutes) : "");
+  // B8：重要性（小事/大事，1-5）
+  const [importance, setImportance] = useState(item.importance ?? 3);
   const [children, setChildren] = useState<{ title: string; estimatedMinutes: number }[]>(
     item.breakdown?.phases.flatMap((p) => p.tasks.map((t) => ({ title: t.title, estimatedMinutes: t.estimatedMinutes }))) ?? []
   );
@@ -218,6 +289,9 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
       description: description.trim() || undefined,
       category,
       theme,
+      importance,
+      // B7：自定义主题颜色落库（主题为空或预设 → null）
+      themeColor: theme && themeColor ? JSON.stringify(themeColor) : null,
       // FCV2：动机（空 → null；≤50 字）
       purpose: purpose.trim() ? purpose.trim().slice(0, 50) : null,
       estimatedMinutes: estimatedMinutes ? Math.max(1, Number(estimatedMinutes)) : undefined,
@@ -270,14 +344,14 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
             {THEME_PRESETS.map((t) => {
               const c = themeInfo(t)!;
               return (
-                <button key={t} onClick={() => setTheme(theme === t ? null : t)}
+                <button key={t} onClick={() => { setTheme(theme === t ? null : t); setThemeColor(null); }}
                   className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-md border transition"
                   style={{ background: theme === t ? c.bg : "#fff", color: theme === t ? c.deep : "var(--v2-text2)", borderColor: theme === t ? c.color : "var(--v2-border)" }}>
                   <span className="w-2 h-2 rounded-full" style={{ background: c.color }} />{t}
                 </button>
               );
             })}
-            <button onClick={() => setTheme(null)} className={`text-sm px-2.5 py-1 rounded-md border transition ${theme === null ? "border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]" : "border-[var(--v2-border)] text-[var(--v2-text3)]"}`}>无主题</button>
+            <button onClick={() => { setTheme(null); setThemeColor(null); }} className={`text-sm px-2.5 py-1 rounded-md border transition ${theme === null ? "border-[var(--v2-brand)] bg-[var(--v2-brand-bg)] text-[var(--v2-brand-deep)]" : "border-[var(--v2-border)] text-[var(--v2-text3)]"}`}>无主题</button>
           </div>
           {themeEdit && (
             <div className="mt-2 border border-[var(--v2-brand-border)] bg-[var(--v2-brand-bg)] rounded-lg p-2.5">
@@ -287,7 +361,9 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
                 <button onClick={() => {
                   const name = customName.trim();
                   if (!name) return;
+                  // B7：确定即保存（theme + 选色落库，不再两步操作丢颜色）
                   setTheme(name);
+                  setThemeColor({ color: customColor, deep: customColor, bg: "#F8FAFC" });
                   setThemeEdit(false);
                   setCustomName("");
                 }} className="px-2.5 py-1 text-sm font-medium rounded bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)]">确定</button>
@@ -313,6 +389,17 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
             <label className="text-sm text-[var(--v2-text3)] block mb-1">预估时长（分钟）</label>
             <input type="number" min={1} value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)}
               className="w-full px-2.5 py-1.5 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white" />
+          </div>
+          <div>
+            <label className="text-sm text-[var(--v2-text3)] block mb-1">重要性（小事/大事）</label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} onClick={() => setImportance(n)}
+                  className={`flex-1 text-sm px-1 py-1.5 rounded border transition ${importance === n ? "bg-[var(--v2-amber)] text-white border-[var(--v2-amber)] font-semibold" : "bg-white text-[var(--v2-text2)] border-[var(--v2-border)]"}`}>
+                  {n <= 2 ? "低" : n === 3 ? "中" : "高"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         {children.length > 0 && (
@@ -423,6 +510,11 @@ export default function InboxPage() {
     setEditingId(null);
   };
 
+  // B8：时间安排动作/重要性 → 局部更新草稿项
+  const modifyItem = (id: string, patch: Partial<InboxDraftItem>) => {
+    setResult((prev) => prev ? { ...prev, items: prev.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) } : prev);
+  };
+
   // 撤销：删除刚创建的任务（已完成的不删）
   const undo = async (entry: { title: string; count: number; taskIds: string[] }) => {
     setConfirming(true);
@@ -474,7 +566,7 @@ export default function InboxPage() {
             ) : (
               item.breakdown?.shouldBreakdown
                 ? <ComplexCard key={item.id} item={item} onConfirm={() => confirmOne(item)} onDismiss={() => dismiss(item)} onEdit={() => setEditingId(item.id)} />
-                : <SimpleCard key={item.id} item={item} onConfirm={() => confirmOne(item)} onDismiss={() => dismiss(item)} onEdit={() => setEditingId(item.id)} />
+                : <SimpleCard key={item.id} item={item} onConfirm={() => confirmOne(item)} onDismiss={() => dismiss(item)} onEdit={() => setEditingId(item.id)} onModify={(patch) => modifyItem(item.id, patch)} />
             )
           ))}
         </>

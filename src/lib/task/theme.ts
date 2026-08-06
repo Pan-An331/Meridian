@@ -25,6 +25,46 @@ export function themeColor(theme: string | null | undefined) {
   return colorsThemeColor(theme);
 }
 
+/* ═══════════════════════════════════════════
+   2026-08-06 B7：自定义主题颜色落库
+   · Task.themeColor 存 JSON {"color","deep","bg"}（自定义主题的颜色不再丢失）
+   ═══════════════════════════════════════════ */
+
+export interface ThemeColorValue { color: string; deep: string; bg: string }
+
+/** 落库色 JSON 解析（非法 → null） */
+export function parseThemeColor(json: string | null | undefined): ThemeColorValue | null {
+  if (!json) return null;
+  try {
+    const d = JSON.parse(json);
+    if (d && typeof d.color === "string" && typeof d.deep === "string" && typeof d.bg === "string") {
+      return { color: d.color, deep: d.deep, bg: d.bg };
+    }
+  } catch { /* 非法 JSON 忽略 */ }
+  return null;
+}
+
+/** 主题色解析：落库色优先 → THEMES 预设 → 灰兜底 */
+export function themeColorWithCustom(theme: string | null | undefined, custom: string | null | undefined): ThemeColorValue | null {
+  const c = parseThemeColor(custom);
+  if (c) return c;
+  return themeColor(theme);
+}
+
+/** 入参归一化：themeColor JSON（color/deep/bg 均为 #hex，≤ 200 字防滥用） */
+export function normalizeThemeColorInput(input: unknown): { value: string | null; ok: boolean } {
+  if (input === null || input === undefined || input === "") return { value: null, ok: true };
+  if (typeof input !== "string" || input.length > 200) return { value: null, ok: false };
+  try {
+    const d = JSON.parse(input);
+    const HEX = /^#[0-9a-fA-F]{6}$/;
+    if (d && typeof d.color === "string" && HEX.test(d.color) && typeof d.deep === "string" && HEX.test(d.deep) && typeof d.bg === "string" && HEX.test(d.bg)) {
+      return { value: JSON.stringify({ color: d.color, deep: d.deep, bg: d.bg }), ok: true };
+    }
+  } catch { /* 非法 JSON */ }
+  return { value: null, ok: false };
+}
+
 export interface NormalizedTheme {
   /** 合法主题名（≤20 字）或 null（清除） */
   value: string | null;

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { FocusCardV2, type FocusCardV2Data, type FcV2Phase, type FcV2Type } from "@/components/today/FocusCardV2";
 
@@ -307,18 +307,32 @@ function StatusBar({ state, onSave }: { state: TodayResponse["currentState"]; on
   );
 }
 
-/* ── 今日路线 ── */
-function RouteCard({ route }: { route: TimelineItem[] }) {
+/* ── 今日路线（B5：点击项切换 Focus Card + hover「提前执行」） ── */
+function RouteCard({ route, onSelect, onStartNow, busy }: {
+  route: TimelineItem[];
+  onSelect?: (taskId: string) => void;
+  onStartNow?: (taskId: string) => void;
+  busy?: boolean;
+}) {
   return (
     <div className="bg-[var(--v2-card)] border border-[var(--v2-border)] rounded-xl sh-v2 overflow-hidden mb-2">
       <div className="px-3.5 pt-2.5 pb-1 text-sm font-semibold text-[var(--v2-text2)]">今日路线</div>
       {route.length === 0 && <div className="px-3.5 pb-3 text-sm text-[var(--v2-text3)]">今天还没有安排</div>}
       {route.map((r) => (
-        <div key={r.taskId + r.start} className="flex items-center gap-2 px-3.5 py-[5px]">
+        <div key={r.taskId + r.start} onClick={() => onSelect?.(r.taskId)}
+          className={`group flex items-center gap-2 px-3.5 py-[5px] ${onSelect ? "cursor-pointer hover:bg-[var(--v2-brand-bg)]/50 transition" : ""}`}>
           <span className="text-sm text-[var(--v2-text3)] min-w-[36px] tabular-nums">{new Date(r.start).toTimeString().slice(0, 5)}</span>
           <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: r.isCurrent ? "#3B82F6" : "var(--color-gray-300)" }} />
-          <span className={`text-sm flex-1 ${r.isCurrent ? "font-medium text-[var(--v2-text)]" : "text-[var(--v2-text2)]"}`}>{r.title}</span>
+          <span className={`text-sm flex-1 min-w-0 truncate ${r.isCurrent ? "font-medium text-[var(--v2-text)]" : "text-[var(--v2-text2)]"}`}>{r.title}</span>
           {r.isCurrent && <span className="text-xs px-1.5 py-px rounded-lg font-medium bg-[#DBEAFE] text-[#1E40AF]">进行中</span>}
+          {!r.isCurrent && onStartNow && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onStartNow(r.taskId); }}
+              disabled={busy}
+              className="text-xs px-2 py-1 rounded-lg font-medium bg-[var(--v2-brand)] text-white opacity-0 group-hover:opacity-100 transition disabled:opacity-50 shrink-0"
+              title="提前执行：开始该任务并切入 Focus Card"
+            >提前执行</button>
+          )}
         </div>
       ))}
     </div>
@@ -532,10 +546,28 @@ export default function TodayPage() {
     await load();
   }, [load]);
 
-  // 卡片：只显示一个 —— 优先当前任务；无当前任务时显示第一个必做任务；都没有则空态
+  // B5：今日路线点击选中的任务（切到 Focus Card 展示；null = 默认当前任务）
+  const [routeSel, setRouteSel] = useState<string | null>(null);
+
+  // 卡片：路线选中优先 → 当前任务；无当前任务时显示第一个必做任务；都没有则空态
   const cards = useCallback((): { card: FocusCard; tagLabel: string; statText: string; hint: string }[] => {
     if (!data) return [];
     const list: { card: FocusCard; tagLabel: string; statText: string; hint: string }[] = [];
+    const curId = data.currentTask?.id ?? null;
+    // 路线选中（非当前任务）→ 前置该任务的基础卡（含提前执行语义）
+    if (routeSel && routeSel !== curId) {
+      const tl = data.todayTimeline.find((t) => t.taskId === routeSel);
+      if (tl) {
+        list.push({
+          card: {
+            id: tl.taskId, parent: "今日路线", title: tl.title, type: "checklist",
+            plannedMinutes: 0, doneCount: 0, totalCount: 1,
+            progress: 0, elapsedMinutes: 0, items: [], aiExec: "",
+          },
+          tagLabel: "清单型", statText: "待开始", hint: "提前执行 · 点「出发」开始计时",
+        });
+      }
+    }
     if (data.currentTask) {
       const { card, extra } = toCard(data.currentTask);
       list.push({ card, ...extra });
@@ -553,7 +585,7 @@ export default function TodayPage() {
       }
     }
     return list;
-  }, [data]);
+  }, [data, routeSel]);
 
   const cardList = cards();
   const cur = cardList[Math.min(cardIdx, Math.max(0, cardList.length - 1))];
@@ -561,22 +593,7 @@ export default function TodayPage() {
 
   // V3 §7.1 弹性双态：渲染后测量「问候语 + 主卡」实际高度判定（不写死清单条数阈值）
   // 滞回带宽 40px 防 max-w 切换引起高度回振（>560 进复杂态 / ≤520 回简单态）
-  // 2026-08-03 18:1x 用户反馈：档位 760/880 偏窄（低于需求 880-960 下限）→ 上调 880/960；阈值 600→560 让中等任务（5-6 项）也能进复杂态
-  const [complex, setComplex] = useState(false);
-  const measureRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = measureRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        const h = e.contentRect.height;
-        setComplex((prev) => h > 560 || (prev && h > 520));
-      }
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
+  // D-新3：Today 全宽，删除弹性双态测量逻辑（原 2026-08-03 V3 §7.1）
   if (loading) return <div className="space-y-3"><div className="h-8 w-56 rounded bg-[var(--color-gray-100)] animate-pulse" /><div className="h-64 rounded-xl bg-[var(--color-gray-100)] animate-pulse" /><div className="h-10 rounded-lg bg-[var(--color-gray-100)] animate-pulse" /></div>;
   if (error) return (
     <div className="text-center py-16">
@@ -595,10 +612,9 @@ export default function TodayPage() {
           {contToast}
         </div>
       )}
-      {/* V3 §7.1 弹性容器：简单态 880px 三块一屏 / 复杂态 960px 主卡优先路线沉底；200ms 宽度过渡（判定见 measureRef ResizeObserver） */}
-      <div className={`today-flex ${complex ? "max-w-[960px]" : "max-w-[880px]"}`}>
-      {/* 测量区：问候语 + 主卡 实际高度（≤600 简单 / >600 复杂，滞回 540） */}
-      <div ref={measureRef} className="space-y-4">
+      {/* D-新3：Today 全宽（推翻 V3 §7.1 弹性双态 · 与其他页面统一宽度体系） */}
+      <div className="mx-auto max-w-[1080px]">
+      <div className="space-y-4">
       {/* 页头：问候独立行 + 统计徽章（布局提示移入设置页，不再占位 · 窄屏换行） */}
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
         <div>
@@ -661,17 +677,19 @@ export default function TodayPage() {
           </div>
         </div>
       )}
-      </div>{/* /measureRef：问候语 + 主卡 测量区结束 */}
 
       {/* 今日路线 | AI 调整助手（today-row2：900px 断点双栏 · 核心决策链之后） */}
       <div className="today-row2">
-        <RouteCard route={data?.todayTimeline ?? []} />
+        <RouteCard route={data?.todayTimeline ?? []} busy={busy}
+          onSelect={(taskId) => { setRouteSel(taskId); setCardIdx(0); }}
+          onStartNow={(taskId) => { setRouteSel(taskId); setCardIdx(0); doAction(taskId, "start"); }} />
         <AiPanel text={aiPanelText} recommendations={data?.recommended ?? []} onAdopt={adopt} busy={busy} />
       </div>
 
       {/* 今日状态（沉底折叠条 · 方案 §1：默认收起，低频自我汇报） */}
       <StatusBar state={data?.currentState ?? { energy: null, focus: null, mood: null, stress: null, stateDescription: null }} onSave={saveState} />
-      </div>{/* /today-flex：弹性容器结束 */}
+      </div>{/* /space-y-4：内容区结束 */}
+      </div>{/* /max-w-1080：全宽容器结束 */}
     </div>
   );
 }

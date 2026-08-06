@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   if (!task) return NextResponse.json({ error: "任务不存在" }, { status: 404 });
 
   if (newParentId) {
-    const parent = await prisma.task.findFirst({ where: { id: newParentId, userId: session.user.id }, select: { id: true } });
+    const parent = await prisma.task.findFirst({ where: { id: newParentId, userId: session.user.id }, select: { id: true, level: true } });
     if (!parent) return NextResponse.json({ error: "目标父任务不存在" }, { status: 404 });
     // 循环防护：newParentId 不能是 taskId 自身或其任意层级子孙
     if (newParentId === taskId) return badRequest("不能挂到自己下面");
@@ -45,9 +45,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // B9 修复：层级随父级语义推导（level = 可安排性）
+  // 仅拖拽挂载（无 sortOrder）时推导：无父级 → project；父是 project → phase；父是 phase/task → task
+  // 换序（带 sortOrder）不动 level，避免同级排序误改层级
+  let newLevel: "project" | "phase" | "task" | undefined;
+  if (sortOrder === undefined) {
+    newLevel = "project";
+    if (newParentId) {
+      const parent = await prisma.task.findFirst({ where: { id: newParentId, userId: session.user.id }, select: { level: true } });
+      newLevel = parent?.level === "project" ? "phase" : "task";
+    }
+  }
+
   await prisma.task.update({
     where: { id: taskId },
-    data: { parentId: newParentId, ...(sortOrder !== undefined ? { sortOrder } : {}) },
+    data: { parentId: newParentId, ...(newLevel ? { level: newLevel } : {}), ...(sortOrder !== undefined ? { sortOrder } : {}) },
   });
 
   // 写观察（层级调整行为，供 pattern mining）

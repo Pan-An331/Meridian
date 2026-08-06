@@ -20,6 +20,8 @@ interface TreeNode {
   category: string | null;
   theme: string | null;
   themeColor: { pcolor: string; pbg: string; theme: string | null } | null;
+  /** B7：原始落库色（自定义主题 JSON，内部聚合用，不进前端契约） */
+  themeColorRaw?: string | null;
   estimatedMinutes: number | null;
   deadline: string | null;
   importance: number;
@@ -37,7 +39,7 @@ interface TreeNode {
 // 树内原始节点（轻量）
 interface RawNode {
   id: string; title: string; level: string | null; status: string; accumulate: boolean;
-  completedAt: Date | null; category: string | null; theme: string | null;
+  completedAt: Date | null; category: string | null; theme: string | null; themeColor: string | null;
   estimatedMinutes: number | null; deadline: Date | null; importance: number;
   parentId: string | null; star: boolean; sortOrder: number;
 }
@@ -50,7 +52,7 @@ export async function GET() {
     where: { userId: session.user.id },
     select: {
       id: true, title: true, level: true, status: true, accumulate: true,
-      completedAt: true, category: true, theme: true, estimatedMinutes: true,
+      completedAt: true, category: true, theme: true, themeColor: true, estimatedMinutes: true,
       deadline: true, importance: true, parentId: true, sortOrder: true, star: true,
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -63,6 +65,7 @@ export async function GET() {
       accumulate: t.accumulate, completedAt: t.completedAt?.toISOString() ?? null,
       category: t.category, theme: t.theme ?? null,
       themeColor: null, // 阶段 A：project 级派生色（子树聚合后填）
+      themeColorRaw: t.themeColor ?? null,
       estimatedMinutes: t.estimatedMinutes,
       deadline: t.deadline?.toISOString() ?? null, importance: t.importance,
       parentId: t.parentId, star: t.star,
@@ -97,11 +100,11 @@ export async function GET() {
   for (const r of roots) aggregateCompletion(r);
 
   // ── 阶段 A：project 级派生色（子树任务 theme/category 主频聚合）──
-  function collectDescendants(node: TreeNode): { theme: string | null; category: string | null }[] {
-    const acc: { theme: string | null; category: string | null }[] = [];
+  function collectDescendants(node: TreeNode): { theme: string | null; category: string | null; themeColor: string | null }[] {
+    const acc: { theme: string | null; category: string | null; themeColor: string | null }[] = [];
     const walk = (n: TreeNode) => {
       for (const c of n.children) {
-        acc.push({ theme: c.theme, category: c.category });
+        acc.push({ theme: c.theme, category: c.category, themeColor: c.themeColorRaw ?? null });
         walk(c);
       }
     };
