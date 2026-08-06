@@ -339,9 +339,15 @@ export default function ProjectsPage() {
       const dn = findNode(trees, dragId);
       if (dn && isDescendant(dn, node.id)) { setDragZone(null); return; }
     }
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const zone: "child" | "before" | "after" = y < rect.height / 3 ? "before" : y > (rect.height * 2) / 3 ? "after" : "child";
+    // 性能修复（浏览器卡退根因）：待整理池源只支持"挂为子级"，跳过 before/after 计算；
+    // 且同值 setState 返回 prev（React 不重渲染）→ 拖动时跨节点才触发一次渲染
+    const zone: "child" | "before" | "after" = dragSource === "pool"
+      ? "child"
+      : (e.clientY - e.currentTarget.getBoundingClientRect().top) < e.currentTarget.getBoundingClientRect().height / 3
+        ? "before"
+        : (e.clientY - e.currentTarget.getBoundingClientRect().top) > (e.currentTarget.getBoundingClientRect().height * 2) / 3
+          ? "after"
+          : "child";
     setDragZone((prev) => (prev?.id === node.id && prev.zone === zone ? prev : { id: node.id, zone }));
   }, [dragId, dragSource, trees]);
 
@@ -466,7 +472,7 @@ export default function ProjectsPage() {
         onDragStart={(e) => { setDragId(node.id); setDragSource("tree"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", node.id); }}
         onDragEnd={clearDrag}
         onDragOver={(e) => onRowDragOver(e, node)}
-        onDragLeave={() => { if (dragZone?.id === node.id) setDragZone(null); }}
+        onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragZone((prev) => (prev?.id === node.id ? null : prev)); }}
         onDrop={(e) => onRowDrop(e, node)}
         onClick={() => { setSelectedId(node.id); openArchive(node.id); }}
       >
@@ -610,7 +616,7 @@ export default function ProjectsPage() {
           />
           <div
             className={`p-[8px_6px_10px] ${treeBlankDragOver ? "ring-2 ring-[var(--v2-brand)] ring-offset-2 rounded-lg" : ""}`}
-            onDragOver={(e) => { if (dragSource === "pool") { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setTreeBlankDragOver(true); } }}
+            onDragOver={(e) => { if (dragSource === "pool") { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setTreeBlankDragOver((prev) => prev ? prev : true); } }}
             onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setTreeBlankDragOver(false); }}
             onDrop={onTreeBlankDrop}
           >
@@ -636,7 +642,7 @@ export default function ProjectsPage() {
         <div className="flex flex-col gap-3.5 min-w-0">
           {/* 待整理池 */}
           <div className={`${cardCls} overflow-hidden transition ${poolDragOver ? "ring-2 ring-[var(--pt-gold)]" : ""}`}
-            onDragOver={(e) => { if (dragSource === "tree") { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setPoolDragOver(true); } }}
+            onDragOver={(e) => { if (dragSource === "tree") { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setPoolDragOver((prev) => prev ? prev : true); } }}
             onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setPoolDragOver(false); }}
             onDrop={onPoolDrop}
           >
