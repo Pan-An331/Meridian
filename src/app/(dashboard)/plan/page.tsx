@@ -838,6 +838,13 @@ export default function PlanPage() {
       .catch(() => {});
   }, []);
   useEffect(() => { loadContinuations(); }, [loadContinuations]);
+
+  // Bug 修复：档案面板删除/移出完成等变更 → 收集箱/周历实时刷新（不再残留已删任务）
+  useEffect(() => {
+    const h = () => { load(true); loadContinuations(); };
+    window.addEventListener("meridian-task-changed", h);
+    return () => window.removeEventListener("meridian-task-changed", h);
+  }, [load, loadContinuations]);
   const continueTomorrow = useCallback(async (it: ContinuationItem) => {
     setContBusyId(it.taskId);
     try {

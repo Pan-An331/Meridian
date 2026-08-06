@@ -431,6 +431,13 @@ export default function TodayPage() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // Bug 修复：档案面板删除/移出完成等变更 → 今日卡片/路线实时刷新
+  useEffect(() => {
+    const h = () => { load(); };
+    window.addEventListener("meridian-task-changed", h);
+    return () => window.removeEventListener("meridian-task-changed", h);
+  }, [load]);
+
   // 任务操作：完成 / 跳过
   const doAction = useCallback(async (taskId: string, action: string, extra: Record<string, unknown> = {}) => {
     setBusy(true);
