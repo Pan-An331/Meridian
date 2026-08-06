@@ -1111,7 +1111,9 @@ function ScheduleModalInner({ target, busy, onSave, onClose }: {
       </div>
       <div className="flex justify-end gap-2 mt-4">
         <button onClick={onClose} className="px-3 py-1.5 text-sm rounded border border-[var(--v2-border)] bg-white text-[var(--v2-text2)] hover:bg-[var(--color-gray-50)] transition">取消</button>
-        <button onClick={() => onSave(target.taskId, start, end)} disabled={busy || !start || !end}
+        {/* 时区根治：datetime-local 是本地无时区值，必须转 UTC ISO 再提交，
+            否则后端按服务器时区（Vercel=UTC）解析 → 9 点被存成 UTC 9 点 → 显示 17 点/20 点 */}
+        <button onClick={() => onSave(target.taskId, new Date(start).toISOString(), new Date(end).toISOString())} disabled={busy || !start || !end}
           className="px-3.5 py-1.5 text-sm font-medium rounded bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)] transition disabled:opacity-50">
           {busy ? "保存中…" : "排入计划"}
         </button>

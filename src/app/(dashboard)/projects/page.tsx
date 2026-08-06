@@ -358,6 +358,8 @@ export default function ProjectsPage() {
       if (zone === "child") {
         // 成为子级（池→树 或 树内）
         await moveNode(id, node.id);
+        // 拖入后自动展开目标节点（否则折叠状态下任务"消失"看似拖拽失败）
+        setExpanded((prev) => new Set(prev).add(node.id));
         showToast(`${src === "pool" ? "已挂入" : `「${name}」已挂入`}「${targetName}」`);
       } else {
         // 换序：插入到 target 同级前/后（tree 源）

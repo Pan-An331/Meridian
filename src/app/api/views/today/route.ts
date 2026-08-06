@@ -223,8 +223,12 @@ export async function GET() {
     if (cs) {
       const t = await prisma.task.findUnique({ where: { id: cs.taskId }, select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true } });
       if (t) {
+        // 修复：Priority 2 的"预计"必须按排期时长算（原硬编码 0 → Focus Card 显示待排期/0 分钟）
+        const plannedMin = cs.scheduledEnd && cs.scheduledEnd > cs.scheduledStart
+          ? Math.round((cs.scheduledEnd.getTime() - cs.scheduledStart.getTime()) / 60000)
+          : 0;
         currentTask = await buildCurrentTaskCard(userId, t, cs, {
-          elapsedMinutes: 0, plannedMinutes: 0, completionPercent: 0,
+          elapsedMinutes: 0, plannedMinutes: plannedMin, completionPercent: 0,
         });
       }
     }
