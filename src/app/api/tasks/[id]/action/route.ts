@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { recordAcceptFeedback } from "@/lib/ai/feedback";
 import { getTaskExecutionStats } from "@/lib/task/execution";
 import { moveSchedule, deleteFutureSchedules, addSchedule } from "@/lib/schedule/service";
+import { resolveAnchorTask } from "@/lib/task/anchor";
 
 // V5 D2：完成联动 —— 兄弟全完成 → 父自动完成（递归向上；cancelled 不阻塞；上限 5 级）
 async function autoCompleteParents(userId: string, childTaskId: string) {
@@ -45,12 +46,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       if (existing.status === "completed" || existing.status === "cancelled") {
         return badRequest("已完成/已取消的任务不可重新开始");
       }
+      // 锚点下沉：出发容器（项目/大阶段）→ 落到第一个 task 锚点子级（Today 按用户设置的任务层级执行）
+      const anchorId = await resolveAnchorTask(session.user.id, id);
       // 互斥：同一时刻只允许一个 in_progress（事务内把其他进行中任务置回）
       // FCV2 C5：出发——departureAt 为空则写当前时间（出发时刻；补记时长默认值来源 + 忘记确认兜底）
       await prisma.$transaction(async (tx) => {
         await tx.task.updateMany({ where: { userId: session.user.id, status: "in_progress" }, data: { status: "not_started" } });
         await tx.task.update({
-          where: { id },
+          where: { id: anchorId },
           data: {
             status: "in_progress", completedAt: null, snoozeUntil: null,
             ...(existing.departureAt ? {} : { departureAt: new Date() }),
@@ -58,8 +61,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         });
       });
       // 如果任务的排期是 AI 生成的，记录"采纳"反馈（学习闭环）
-      const aiSch = await prisma.schedule.findFirst({ where: { taskId: id, source: "ai" }, orderBy: { createdAt: "desc" } });
-      if (aiSch) recordAcceptFeedback(session.user.id, id, aiSch.scheduledStart.toISOString(), aiSch.scheduledEnd?.toISOString() || aiSch.scheduledStart.toISOString()).catch(() => {});
+      const aiSch = await prisma.schedule.findFirst({ where: { taskId: anchorId, source: "ai" }, orderBy: { createdAt: "desc" } });
+      if (aiSch) recordAcceptFeedback(session.user.id, anchorId, aiSch.scheduledStart.toISOString(), aiSch.scheduledEnd?.toISOString() || aiSch.scheduledStart.toISOString()).catch(() => {});
       return NextResponse.json({ started: true });
     case "pause":
       if (existing.status === "completed" || existing.status === "cancelled") return badRequest("已完成/已取消的任务不可暂停");

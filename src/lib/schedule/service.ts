@@ -2,9 +2,12 @@
 
 import { prisma } from "@/lib/prisma";
 import { createDecisionLog } from "@/lib/ai/decision-log";
+import { resolveAnchorTask } from "@/lib/task/anchor";
 import type { Prisma } from "@prisma/client";
 
 export async function createSchedule(userId: string, taskId: string, start: Date, end: Date): Promise<{ id: string }> {
+  // 锚点下沉：容器排期 → 落到第一个 task 锚点子级（Plan/Today 按用户设置的任务层级展示）
+  taskId = await resolveAnchorTask(userId, taskId);
   // Delete any existing schedules first to prevent duplicates (Step27 bugfix)
   // 事务化：先删后建原子执行，避免中途失败丢 schedule
   const schedule = await prisma.$transaction(async (tx) => {
@@ -16,6 +19,7 @@ export async function createSchedule(userId: string, taskId: string, start: Date
 }
 
 export async function createScheduleWithSource(userId: string, taskId: string, start: Date, end: Date, source: string): Promise<{ id: string }> {
+  taskId = await resolveAnchorTask(userId, taskId);
   const schedule = await prisma.$transaction(async (tx) => {
     await tx.schedule.deleteMany({ where: { taskId, userId } });
     return tx.schedule.create({ data: { userId, taskId, scheduledStart: start, scheduledEnd: end, source } });
@@ -28,6 +32,8 @@ export async function createScheduleWithSource(userId: string, taskId: string, s
  * Add a single Schedule WITHOUT deleting existing ones. Used for repeat/batch creation.
  */
 export async function addSchedule(userId: string, taskId: string, start: Date, end: Date, source = "user"): Promise<{ id: string }> {
+  // 锚点下沉：容器排期 → task 锚点子级（用户手动拖拽 / AI 排期统一入口）
+  taskId = await resolveAnchorTask(userId, taskId);
   const schedule = await prisma.schedule.create({
     data: { userId, taskId, scheduledStart: start, scheduledEnd: end, source }
   });
@@ -95,19 +101,26 @@ export async function createAccumulateSchedules(
  * 传入 targetScheduleId 时只替换目标那条（重复任务场景，修复：原实现会清空所有重复排期）。
  */
 export async function moveSchedule(userId: string, taskId: string, newStart: Date, newEnd: Date, targetScheduleId?: string): Promise<{ id: string; oldStart: string | null }> {
+  // 锚点下沉：拖动容器上的（旧）排期 → 迁移到 task 锚点子级
+  const effectiveTaskId = await resolveAnchorTask(userId, taskId);
+  // 删除域用原始 taskId（历史 schedule 挂在容器上也能被正确移除）
   const oldWhere = targetScheduleId ? { id: targetScheduleId, userId, taskId } : { taskId, userId };
   const oldSchedule = await prisma.schedule.findFirst({ where: oldWhere, orderBy: { scheduledStart: "desc" } });
   const oldStart = oldSchedule?.scheduledStart.toISOString() || null;
 
   const schedule = await prisma.$transaction(async (tx) => {
     await tx.schedule.deleteMany({ where: oldWhere });
-    const s = await tx.schedule.create({ data: { userId, taskId, scheduledStart: newStart, scheduledEnd: newEnd, source: "user" } });
+    // 下沉时清掉锚点旧排期，避免重复
+    if (effectiveTaskId !== taskId) {
+      await tx.schedule.deleteMany({ where: { taskId: effectiveTaskId, userId } });
+    }
+    const s = await tx.schedule.create({ data: { userId, taskId: effectiveTaskId, scheduledStart: newStart, scheduledEnd: newEnd, source: "user" } });
     const verify = await tx.schedule.findUnique({ where: { id: s.id } });
     if (!verify || verify.scheduledStart.getTime() !== newStart.getTime()) throw new Error("schedule_verify_failed");
     return s;
   });
 
-  createDecisionLog({ userId, action: "schedule_move", targetId: taskId, reasoning: "用户修改时间", actionDetail: JSON.stringify({ oldStart, newStart: newStart.toISOString(), targetScheduleId: targetScheduleId || null }) }).catch(() => {});
+  createDecisionLog({ userId, action: "schedule_move", targetId: effectiveTaskId, reasoning: "用户修改时间", actionDetail: JSON.stringify({ oldStart, newStart: newStart.toISOString(), targetScheduleId: targetScheduleId || null }) }).catch(() => {});
   return { id: schedule.id, oldStart };
 }
 
@@ -133,6 +146,8 @@ export async function deleteAllSchedules(taskId: string): Promise<number> {
  * 已过去的历史排期保留，不删除。
  */
 export async function replaceSchedule(userId: string, taskId: string, newStart: Date, newEnd: Date, source: string): Promise<{ id: string }> {
+  // 锚点下沉：AI 批量重排容器 → task 锚点子级
+  taskId = await resolveAnchorTask(userId, taskId);
   const now = new Date();
   const schedule = await prisma.$transaction(async (tx) => {
     await tx.schedule.deleteMany({

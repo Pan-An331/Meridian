@@ -257,13 +257,26 @@ export default function ProjectsPage() {
     return r.json();
   }, []);
 
-  /* ── ★ 清单开关（乐观 + PUT star，后端就绪后落库） ── */
+  /* ── ★ 清单开关（乐观 starSet + 本地树同步 + PUT 落库：设置后即时生效，无需刷新） ── */
   const toggleStar = useCallback((node: TreeNode) => {
     const on = !starSet.has(node.id);
     setStarSet((prev) => {
       const n = new Set(prev);
       if (on) n.add(node.id); else n.delete(node.id);
       return n;
+    });
+    // 本地树同步：直接改对应节点 star，starOn 立即生效（不依赖 load/刷新）
+    setTrees((prev) => {
+      const walk = (list: TreeNode[]): boolean => {
+        for (const t of list) {
+          if (t.id === node.id) { t.star = on; return true; }
+          if (walk(t.children)) return true;
+        }
+        return false;
+      };
+      const next = prev.map((t) => ({ ...t }));
+      walk(next);
+      return next;
     });
     updateTask(node.id, { star: on }).catch(() => {});
     showToast(on ? `已设为「执行清单」· Today 可出发勾选` : `已取消清单 · 变为纯结构节点`);
