@@ -279,6 +279,8 @@ export default function ProjectsPage() {
       return next;
     });
     updateTask(node.id, { star: on }).catch(() => {});
+    // Bug3 修复：★ 变更广播 → Plan 收集箱/Today 实时刷新（否则需手动刷新才更新显示）
+    window.dispatchEvent(new CustomEvent("meridian-task-changed"));
     showToast(on ? `已设为「执行清单」· Today 可出发勾选` : `已取消清单 · 变为纯结构节点`);
   }, [starSet, updateTask, showToast]);
 
@@ -406,8 +408,9 @@ export default function ProjectsPage() {
     const o = poolList.find((x) => x.id === id);
     try {
       const th = o ? resolveTheme(null, o.title, o.category) : null;
+      // Bug1 修复：POST /api/tasks 直接返回 task 本体（含 id），不是 { task } —— 原 d.task?.id 恒 undefined → moveNode 落空
       const d = await createTask({ title: th ?? o?.title ?? "新项目", level: "project", taskType: "task" });
-      await moveNode(id, d.task?.id ?? "");
+      await moveNode(id, d?.id ?? "");
       showToast(`已新建项目「${th ?? o?.title ?? "新项目"}」并挂入`);
       await load(true);
     } catch { setError(true); }
@@ -457,7 +460,7 @@ export default function ProjectsPage() {
         className={`pt-row lvl${lvl}${isAccum ? " is-accum" : ""}${starOn ? " is-list" : ""}${sel ? " sel" : ""}${noPrev ? " no-prev" : ""}${lastGroup ? " last-group" : ""}${zoneCls}${isDragging ? " dragging" : ""}`}
         style={lvl === 0 && th ? ({ "--pcolor": th.color, "--pbg": th.bg } as React.CSSProperties) : undefined}
         draggable
-        onDragStart={(e) => { setDragId(node.id); setDragSource("tree"); e.dataTransfer.effectAllowed = "move"; }}
+        onDragStart={(e) => { setDragId(node.id); setDragSource("tree"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", node.id); }}
         onDragEnd={clearDrag}
         onDragOver={(e) => onRowDragOver(e, node)}
         onDragLeave={() => { if (dragZone?.id === node.id) setDragZone(null); }}
@@ -514,7 +517,7 @@ export default function ProjectsPage() {
       } else {
         const th = resolveTheme(null, o.title, o.category);
         const d = await createTask({ title: th ?? o.title, level: "project", taskType: "task" });
-        await moveNode(o.id, d.task?.id ?? "");
+        await moveNode(o.id, d?.id ?? "");
         showToast(`已新建项目「${th ?? o.title}」并挂入`);
       }
       await load(true);
@@ -652,7 +655,7 @@ export default function ProjectsPage() {
                       className={`pt-pool-item${poolDragging ? " dragging" : ""}`}
                       title="拖拽到左侧项目树 = 挂为子级"
                       draggable
-                      onDragStart={(e) => { setDragId(o.id); setDragSource("pool"); e.dataTransfer.effectAllowed = "move"; }}
+                      onDragStart={(e) => { setDragId(o.id); setDragSource("pool"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", o.id); }}
                       onDragEnd={clearDrag}
                     >
                       <div className="flex items-center gap-2">
