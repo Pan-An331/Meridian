@@ -46,11 +46,14 @@ export async function POST(req: NextRequest) {
   }
 
   // B9 修复：层级随父级语义推导（level = 可安排性）
-  // 仅拖拽挂载（无 sortOrder）时推导：无父级 → project；父是 project → phase；父是 phase/task → task
+  // 仅拖拽挂载（无 sortOrder）时推导：
+  //   - 有父级：父是 project → phase；父是 phase/task → task
+  //   - 无父级（解挂载/拖到根）= 该节点成为"孤儿任务"进池 → 保持 task 锚点（可安排）
+  //     （修复：原推导无父级→project，拖出项目的任务被误升为"项目"级 —— 收集箱出现项目条目 + Plan 锚点下沉到子任务）
   // 换序（带 sortOrder）不动 level，避免同级排序误改层级
   let newLevel: "project" | "phase" | "task" | undefined;
   if (sortOrder === undefined) {
-    newLevel = "project";
+    newLevel = "task";
     if (newParentId) {
       const parent = await prisma.task.findFirst({ where: { id: newParentId, userId: session.user.id }, select: { level: true } });
       newLevel = parent?.level === "project" ? "phase" : "task";
