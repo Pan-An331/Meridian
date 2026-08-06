@@ -41,11 +41,13 @@ export async function GET(req: NextRequest) {
 
   const scheduledTasks = deduped.map(entry => ({ id: entry.task.id, scheduleId: entry.id, title: entry.task.title, taskType: entry.task.taskType, status: entry.task.status, importance: entry.task.importance, category: effCategory(entry.task), tags: entry.task.tags ?? null, theme: entry.task.theme ?? null, themeColor: themeColorWithCustom(entry.task.theme, entry.task.themeColor), estimatedMinutes: entry.task.estimatedMinutes ?? null, source: entry.task.source ?? "user", deadline: entry.task.deadline?.toISOString() ?? null, description: entry.task.description ?? null, level: entry.task.level ?? "task", accumulate: entry.task.accumulate ?? false, startTime: entry.scheduledStart.toISOString(), endTime: entry.scheduledEnd?.toISOString() ?? null }));
 
-  // 收集箱 = 本周无排期的顶层可安排任务（Bug 修复：仅放行顶层 task + 无子任务的"叶子容器"；
-  // 有子任务的 project/phase（真实项目/阶段结构）不进收集箱 —— 避免"收集箱一直保持项目名"）
+  // 收集箱 = 本周无排期的可安排任务
+  // · 顶层 task / 无子任务的叶子容器 → 放行
+  // · 有子任务的 project/phase（真项目/阶段）→ 不放行（避免"收集箱一直保持项目名"）
+  // · 已挂入项目树但标记 ★（执行清单）的任务 → 放行（★ = 可安排锚点，即使有 parentId 也可排期/拖动）
   const plannedTasks = allActiveTasks.filter(t =>
     !deduped.some(e => e.taskId === t.id) &&
-    !t.parentId &&
+    (!t.parentId || t.star) &&
     (t.level == null || t.level === "task" || t.children.length === 0)
   ).map(t => ({ id: t.id, title: t.title, taskType: t.taskType, status: t.status, importance: t.importance, category: effCategory(t), theme: t.theme ?? null, deadline: t.deadline?.toISOString() ?? null, estimatedMinutes: t.estimatedMinutes ?? null, source: t.source ?? "user", children: t.children.map(c => ({ id: c.id, title: c.title, status: c.status, completedAt: c.completedAt?.toISOString() ?? null })) }));
   const activeTasks = allActiveTasks.map(t => ({ id: t.id, title: t.title, taskType: t.taskType, status: t.status, importance: t.importance, category: effCategory(t), theme: t.theme ?? null, deadline: t.deadline?.toISOString() ?? null, estimatedMinutes: t.estimatedMinutes ?? null, tags: t.tags ?? null, source: t.source ?? "user", children: t.children.map(c => ({ id: c.id, title: c.title, status: c.status, completedAt: c.completedAt?.toISOString() ?? null })) }));

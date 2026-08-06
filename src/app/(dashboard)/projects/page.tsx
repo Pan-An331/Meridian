@@ -375,6 +375,44 @@ export default function ProjectsPage() {
     } catch { setError(true); }
   }, [dragId, dragSource, dragZone, trees, moveNode, load, showToast, clearDrag]);
 
+  /* ── 待整理池 drop（问题2：树任务可拖回池 = 解挂载；池项拖回自身忽略） ── */
+  const [poolDragOver, setPoolDragOver] = useState(false);
+  const onPoolDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPoolDragOver(false);
+    const id = dragId;
+    const src = dragSource;
+    const name = src === "tree" ? findNode(trees, id ?? "")?.title ?? "" : "";
+    clearDrag();
+    if (!id || src !== "tree") return;
+    try {
+      await moveNode(id, null);
+      showToast(`「${name}」已移出项目 → 待整理池`);
+      await load(true);
+    } catch { setError(true); }
+  }, [dragId, dragSource, trees, moveNode, load, showToast, clearDrag]);
+
+  /* ── 树区空白 drop（问题3：待整理 task 拖入空白 = 自动生成项目并挂入） ── */
+  const [treeBlankDragOver, setTreeBlankDragOver] = useState(false);
+  const onTreeBlankDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTreeBlankDragOver(false);
+    const id = dragId;
+    const src = dragSource;
+    clearDrag();
+    if (!id || src !== "pool") return;
+    const o = poolList.find((x) => x.id === id);
+    try {
+      const th = o ? resolveTheme(null, o.title, o.category) : null;
+      const d = await createTask({ title: th ?? o?.title ?? "新项目", level: "project", taskType: "task" });
+      await moveNode(id, d.task?.id ?? "");
+      showToast(`已新建项目「${th ?? o?.title ?? "新项目"}」并挂入`);
+      await load(true);
+    } catch { setError(true); }
+  }, [dragId, dragSource, poolList, createTask, moveNode, load, showToast, clearDrag]);
+
   /* ── 行渲染（flatten + 连接线重算） ── */
   const visibleRows = useMemo(() => {
     const rows: { node: TreeNode; lvl: number; hasKids: boolean; isOpen: boolean }[] = [];
@@ -564,7 +602,12 @@ export default function ProjectsPage() {
               if (e.key === "Escape") { setNewOpen(false); setNewTitle(""); }
             }}
           />
-          <div className="p-[8px_6px_10px]">
+          <div
+            className={`p-[8px_6px_10px] ${treeBlankDragOver ? "ring-2 ring-[var(--v2-brand)] ring-offset-2 rounded-lg" : ""}`}
+            onDragOver={(e) => { if (dragSource === "pool") { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setTreeBlankDragOver(true); } }}
+            onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setTreeBlankDragOver(false); }}
+            onDrop={onTreeBlankDrop}
+          >
             {visibleRows.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-[var(--v2-brand-bg)] flex items-center justify-center mb-3">🗂</div>
@@ -586,7 +629,11 @@ export default function ProjectsPage() {
         {/* ═══ 右栏三区 ═══ */}
         <div className="flex flex-col gap-3.5 min-w-0">
           {/* 待整理池 */}
-          <div className={`${cardCls} overflow-hidden`} style={{ borderColor: "var(--pt-gold-border)" }}>
+          <div className={`${cardCls} overflow-hidden transition ${poolDragOver ? "ring-2 ring-[var(--pt-gold)]" : ""}`}
+            onDragOver={(e) => { if (dragSource === "tree") { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setPoolDragOver(true); } }}
+            onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setPoolDragOver(false); }}
+            onDrop={onPoolDrop}
+          >
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--v2-border)]">
               <span className="w-[7px] h-[7px] rounded-full bg-[var(--pt-gold)] flex-none" />
               <span className="text-[13px] font-bold text-[var(--v2-text)]">待整理 · 今天要归位的</span>
