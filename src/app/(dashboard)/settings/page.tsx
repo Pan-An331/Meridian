@@ -441,7 +441,8 @@ function AiConfigCard() {
   const PRESETS = [
     { name: "OpenAI", provider: "openai", baseUrl: "https://api.openai.com/v1", model: "gpt-4o" },
     { name: "通义千问", provider: "qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-max" },
-    { name: "DeepSeek", provider: "deepseek", baseUrl: "https://api.deepseek.com", model: "deepseek-chat" },
+    // DeepSeek-V4（2026-07-31 正式版）：旧别名 deepseek-chat/deepseek-reasoner 已于 2026-07-24 退役
+    { name: "DeepSeek V4", provider: "deepseek", baseUrl: "https://api.deepseek.com", model: "deepseek-v4-flash" },
     { name: "自定义", provider: "custom", baseUrl: "", model: "" },
   ];
 
