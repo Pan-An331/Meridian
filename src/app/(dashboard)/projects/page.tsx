@@ -354,8 +354,10 @@ export default function ProjectsPage() {
   const onRowDrop = useCallback(async (e: React.DragEvent, node: TreeNode) => {
     e.preventDefault();
     e.stopPropagation();
-    const id = dragId;
-    const src = dragSource;
+    // 拖拽可靠性根治：id/source 优先读 dataTransfer（drag 会话内恒定），React state 兜底
+    // （修复：跨容器拖拽时 React state 可能竞态丢失 → 待整理拖入项目始终失败，而树内拖拽正常）
+    const id = dragId ?? e.dataTransfer.getData("text/plain");
+    const src = dragSource ?? (e.dataTransfer.getData("application/x-task-source") || "tree");
     const zone = dragZone?.id === node.id ? dragZone.zone : "child";
     clearDrag();
     if (!id || !src || id === node.id) return;
@@ -392,8 +394,8 @@ export default function ProjectsPage() {
     e.preventDefault();
     e.stopPropagation();
     setPoolDragOver(false);
-    const id = dragId;
-    const src = dragSource;
+    const id = dragId ?? e.dataTransfer.getData("text/plain");
+    const src = dragSource ?? (e.dataTransfer.getData("application/x-task-source") || "tree");
     const name = src === "tree" ? findNode(trees, id ?? "")?.title ?? "" : "";
     clearDrag();
     if (!id || src !== "tree") return;
@@ -410,8 +412,8 @@ export default function ProjectsPage() {
     e.preventDefault();
     e.stopPropagation();
     setTreeBlankDragOver(false);
-    const id = dragId;
-    const src = dragSource;
+    const id = dragId ?? e.dataTransfer.getData("text/plain");
+    const src = dragSource ?? (e.dataTransfer.getData("application/x-task-source") || "tree");
     clearDrag();
     if (!id || src !== "pool") return;
     const o = poolList.find((x) => x.id === id);
@@ -469,7 +471,7 @@ export default function ProjectsPage() {
         className={`pt-row lvl${lvl}${isAccum ? " is-accum" : ""}${starOn ? " is-list" : ""}${sel ? " sel" : ""}${noPrev ? " no-prev" : ""}${lastGroup ? " last-group" : ""}${zoneCls}${isDragging ? " dragging" : ""}`}
         style={lvl === 0 && th ? ({ "--pcolor": th.color, "--pbg": th.bg } as React.CSSProperties) : undefined}
         draggable
-        onDragStart={(e) => { setDragId(node.id); setDragSource("tree"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", node.id); }}
+        onDragStart={(e) => { setDragId(node.id); setDragSource("tree"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", node.id); e.dataTransfer.setData("application/x-task-source", "tree"); }}
         onDragEnd={clearDrag}
         onDragOver={(e) => onRowDragOver(e, node)}
         onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragZone((prev) => (prev?.id === node.id ? null : prev)); }}
@@ -616,7 +618,7 @@ export default function ProjectsPage() {
           />
           <div
             className={`p-[8px_6px_10px] ${treeBlankDragOver ? "ring-2 ring-[var(--v2-brand)] ring-offset-2 rounded-lg" : ""}`}
-            onDragOver={(e) => { if (dragSource === "pool") { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setTreeBlankDragOver((prev) => prev ? prev : true); } }}
+            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = dragSource === "pool" ? "copy" : "move"; setTreeBlankDragOver((prev) => prev ? prev : true); }}
             onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setTreeBlankDragOver(false); }}
             onDrop={onTreeBlankDrop}
           >
@@ -664,7 +666,7 @@ export default function ProjectsPage() {
                       className={`pt-pool-item${poolDragging ? " dragging" : ""}`}
                       title="拖拽到左侧项目树 = 挂为子级"
                       draggable
-                      onDragStart={(e) => { setDragId(o.id); setDragSource("pool"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", o.id); }}
+                      onDragStart={(e) => { setDragId(o.id); setDragSource("pool"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", o.id); e.dataTransfer.setData("application/x-task-source", "pool"); }}
                       onDragEnd={clearDrag}
                     >
                       <div className="flex items-center gap-2">
