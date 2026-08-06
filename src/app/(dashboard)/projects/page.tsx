@@ -559,8 +559,16 @@ export default function ProjectsPage() {
               ) : (
                 poolList.map((o) => {
                   const sug = suggestionOf(o);
+                  const poolDragging = dragId === o.id;
                   return (
-                    <div key={o.id} className="pt-pool-item">
+                    <div
+                      key={o.id}
+                      className={`pt-pool-item${poolDragging ? " dragging" : ""}`}
+                      title="拖拽到左侧项目树 = 挂为子级"
+                      draggable
+                      onDragStart={(e) => { setDragId(o.id); setDragSource("pool"); e.dataTransfer.effectAllowed = "move"; }}
+                      onDragEnd={clearDrag}
+                    >
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full flex-none" style={{ background: DOMAINS[normalizeCategory(o.category)].border }} />
                         <span className="text-[12.5px] font-medium min-w-0 truncate flex-1">{o.title}</span>
@@ -572,7 +580,7 @@ export default function ProjectsPage() {
                           <button className="pt-ai-btn" onClick={() => attachPool(o, sug.projId)}>挂入</button>
                         </div>
                       )}
-                      <div className="text-[9px] text-[var(--v2-text3)] mt-1.5">或拖拽到左侧任意项目</div>
+                      <div className="pt-pool-hint text-[9px] text-[var(--v2-text3)] mt-1.5 opacity-60 transition-opacity">⇱ 按住拖拽到左侧任意项目（树内可挂子级/换序）</div>
                     </div>
                   );
                 })

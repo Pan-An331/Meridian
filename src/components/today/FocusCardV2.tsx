@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    FocusCardV2 — Today 启动台核心卡（规格 docs/FocusCard-V2-UI设计规格.html + UI示例/FocusCard-V2-UI副本.html）
@@ -51,6 +51,8 @@ interface Props {
   onStart?: () => void;
   onComplete?: (durationMinutes?: number) => void;
   onItemToggle?: (itemId: string) => void;
+  /** P1-11：清单新增项（今日页 → POST /api/tasks 建子任务；不传则隐藏加号） */
+  onItemAdd?: (title: string) => void;
   onCheckin?: (detail?: string) => void;
   onSkip?: () => void;
   onPause?: (reason: string) => void;
@@ -206,15 +208,60 @@ function ModalFoot({ onOk, onCancel, okText = "确定" }: { onOk: () => void; on
 }
 
 /* ── 清单（v2-memo 样式：底 #fff9e6 / 左边条 #f5a623 / 标题字 #8b6914 / 勾选框 #d4a853 + 小标题虚线） ── */
-function MemoList({ card, onItemToggle, going }: { card: FocusCardV2Data; onItemToggle?: (id: string) => void; going: boolean }) {
+function MemoList({ card, onItemToggle, onItemAdd, going }: { card: FocusCardV2Data; onItemToggle?: (id: string) => void; onItemAdd?: (title: string) => void; going: boolean }) {
   const items = card.items ?? [];
   const nextIdx = items.findIndex((it) => !it.done);
   const title = LIST_TITLE[card.type];
+  // P1-11：加号展开 inline 输入 → 回车/确定提交（标题空或重复时不提交）
+  const [adding, setAdding] = useState(false);
+  const [addTitle, setAddTitle] = useState("");
+  const addInputRef = useRef<HTMLInputElement>(null);
+  const submitAdd = () => {
+    const v = addTitle.trim();
+    if (!v) return;
+    onItemAdd?.(v);
+    setAddTitle("");
+    setAdding(false);
+  };
   return (
     <div className="rounded-lg mt-1.5" style={{ background: "#fff9e6", borderLeft: "3px solid #f5a623", padding: "7px 6px" }}>
-      <div className="text-[10.5px] font-semibold tracking-[0.3px] px-1 pb-1.5 mb-1" style={{ color: "#8b6914", borderBottom: "1px dashed rgba(139,105,20,0.3)" }}>{title}</div>
-      {items.length === 0 ? (
-        <div className="text-sm px-2 py-2 text-[var(--v2-text3)]">暂无{title} · 可「＋拆成小节」</div>
+      <div className="flex items-center text-[10.5px] font-semibold tracking-[0.3px] px-1 pb-1.5 mb-1" style={{ color: "#8b6914", borderBottom: "1px dashed rgba(139,105,20,0.3)" }}>
+        <span>{title}</span>
+        {onItemAdd && (
+          <button
+            onClick={() => { setAdding((v) => !v); if (!adding) setTimeout(() => addInputRef.current?.focus(), 0); }}
+            className="ml-auto w-[18px] h-[18px] rounded flex items-center justify-center text-[12px] leading-none transition"
+            style={{ color: "#8b6914", background: "rgba(245,166,35,0.12)" }}
+            title={`新增${title}项`}
+          >＋</button>
+        )}
+      </div>
+      {adding && (
+        <div className="flex items-center gap-1.5 px-1 pb-1.5">
+          <input
+            ref={addInputRef}
+            value={addTitle}
+            onChange={(e) => setAddTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); submitAdd(); }
+              if (e.key === "Escape") { setAdding(false); setAddTitle(""); }
+            }}
+            onBlur={() => { if (!addTitle.trim()) setAdding(false); }}
+            placeholder={`新增一项…`}
+            maxLength={100}
+            className="flex-1 min-w-0 px-2 py-1 text-[12px] rounded border outline-none bg-white"
+            style={{ borderColor: "#f5a623", color: "var(--v2-text)" }}
+          />
+          <button
+            onClick={submitAdd}
+            disabled={!addTitle.trim()}
+            className="text-[11px] font-semibold px-2 py-1 rounded disabled:opacity-40 transition"
+            style={{ background: "#f5a623", color: "#fff" }}
+          >确定</button>
+        </div>
+      )}
+      {items.length === 0 && !adding ? (
+        <div className="text-sm px-2 py-2 text-[var(--v2-text3)]">暂无{title} · 点右上「＋」拆成小节</div>
       ) : (
         <ul className="space-y-[2px]">
           {items.map((it, i) => {
@@ -240,7 +287,7 @@ function MemoList({ card, onItemToggle, going }: { card: FocusCardV2Data; onItem
 }
 
 /* ── 主组件 ── */
-export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin, onSkip, onPause, onContinueTomorrow, busy, demo }: Props) {
+export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd, onCheckin, onSkip, onPause, onContinueTomorrow, busy, demo }: Props) {
   // 内部状态机：demo 模式或真实卡（出发/暂停为本地模拟）
   // 收尾批次 B：忘记确认提示条（session 级关闭，不持久化）
   const [reminderDismissed, setReminderDismissed] = useState(false);
@@ -310,6 +357,9 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
   const doneCount = (card.items ?? []).filter((it) => it.done).length;
   const totalCount = (card.items ?? []).length || 1;
   const depLabel = departureAt ? new Date(departureAt).toTimeString().slice(0, 5) : null;
+  // P1-2：无排期不显示「预计 0 分钟」→ 待排期（灰字弱化）；未开始且 0 用时 → 「—」
+  const plannedLabel = card.plannedMinutes > 0 ? `${card.plannedMinutes} 分钟` : null;
+  const elapsedLabel = card.elapsedMinutes > 0 ? `${card.elapsedMinutes} 分钟` : going ? "0 分钟" : "—";
 
   const mainBtn = done
     ? { text: "已完成 ✓", cls: "bg-[#d1d5db] text-[#6b7280] cursor-default" }
@@ -395,8 +445,8 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
                 <div><b className="text-[var(--v2-text2)]">时段</b> {new Date(card.scheduledStart).toTimeString().slice(0, 5)} - {card.scheduledEnd ? new Date(card.scheduledEnd).toTimeString().slice(0, 5) : "--"}</div>
               )}
               {isTimer && card.location && <div><b className="text-[var(--v2-text2)]">地点</b> {card.location}</div>}
-              <div><b className="text-[var(--v2-text2)]">预计</b> {card.plannedMinutes} 分钟</div>
-              <div><b className="text-[var(--v2-text2)]">已用</b> {card.elapsedMinutes} 分钟</div>
+              <div><b className="text-[var(--v2-text2)]">预计</b> {plannedLabel ?? <span className="text-[var(--v2-text3)]">待排期</span>}</div>
+              <div><b className="text-[var(--v2-text2)]">已用</b> {elapsedLabel}</div>
             </div>
 
             {/* 积累统计（副本两栏：统计三格在左栏） */}
@@ -491,20 +541,20 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
               <div className="mt-2">
                 <div className="flex items-center text-[10.5px] text-[var(--v2-text3)]">
                   {card.type === "checklist" ? "执行清单" : "知识点"} <b className="text-[var(--v2-text2)] ml-1.5">{doneCount}/{totalCount} {card.type === "checklist" ? "已完成" : "已学"}</b>
-                  <span className="ml-auto">总耗时 {card.elapsedMinutes} 分钟</span>
+                  <span className="ml-auto">总耗时 {elapsedLabel}</span>
                 </div>
                 <div className="h-[5px] rounded-full bg-[#f1f5f9] overflow-hidden mt-1">
                   <div className="h-full rounded-full" style={{ width: `${(doneCount / totalCount) * 100}%`, background: color }} />
                 </div>
                 {/* 执行清单（v2-memo）——始终在右栏执行区 */}
-                <MemoList card={card} onItemToggle={onItemToggle} going={going} />
+                <MemoList card={card} onItemToggle={onItemToggle} onItemAdd={onItemAdd} going={going} />
               </div>
             )}
 
             {card.type === "accum-weekly" && (
               <div className="mt-2">
                 <div className="flex items-center text-[10.5px] text-[var(--v2-text3)] mb-1">今日练 <b className="text-[var(--v2-text2)] ml-1">{(card.items ?? []).length} 个动作</b></div>
-                <MemoList card={card} onItemToggle={onItemToggle} going={going} />
+                <MemoList card={card} onItemToggle={onItemToggle} onItemAdd={onItemAdd} going={going} />
               </div>
             )}
 
@@ -513,7 +563,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
               {done ? (
                 <div className="flex items-center gap-2 text-[11px] text-[var(--v2-text3)] bg-[#f8fafc] rounded-lg px-3 py-2 border border-dashed border-[var(--v2-border)]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                  {isAccum ? (checkinDetail ? `已打卡 · ${checkinDetail}` : "已打卡 ✓") : "已完成 ✓"} · 已记 {card.elapsedMinutes} 分钟
+                  {isAccum ? (checkinDetail ? `已打卡 · ${checkinDetail}` : "已打卡 ✓") : "已完成 ✓"} · 已记 {elapsedLabel}
                 </div>
               ) : going || phase === "confirm" ? (
                 isAccum ? (
@@ -543,8 +593,8 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onCheckin
         {/* E 元信息行 */}
         <div className="flex items-center gap-1.5 flex-wrap px-4 py-2.5 border-t border-[#f1f5f9] text-[10px] text-[var(--v2-text3)]">
           <span>{card.parent}</span><span className="text-[#e5e7eb]">·</span>
-          <span>预计 {card.plannedMinutes} 分钟</span><span className="text-[#e5e7eb]">·</span>
-          <span>已用 {card.elapsedMinutes} 分钟</span>
+          <span>{plannedLabel ? `预计 ${plannedLabel}` : "待排期"}</span><span className="text-[#e5e7eb]">·</span>
+          <span>已用 {elapsedLabel}</span>
           {card.description ? <><span className="text-[#e5e7eb]">·</span><span className="min-w-0 truncate max-w-[160px]">{card.description}</span></> : null}
           <span className="ml-auto text-[var(--v2-brand)] font-medium cursor-pointer">＋备注</span>
         </div>

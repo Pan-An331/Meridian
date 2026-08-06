@@ -504,6 +504,24 @@ export default function TodayPage() {
     finally { setBusy(false); }
   }, [load]);
 
+  // P1-11：清单新增项（乐观更新 → POST /api/tasks 建子任务 → 刷新落库）
+  const addChildItem = useCallback(async (parentId: string, title: string) => {
+    const tmp: { id: string; text: string; done: boolean } = { id: `tmp-${Date.now()}`, text: title, done: false };
+    // 乐观：立即出现在清单（仅当前任务卡可本地写；mustDo 兜底卡无 children 源则跳过）
+    setData((prev) => (prev?.currentTask ? { ...prev, currentTask: { ...prev.currentTask, children: [...(prev.currentTask.children ?? []), tmp] } } : prev));
+    try {
+      const r = await fetch("/api/tasks", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, parentId, level: "task", taskType: "task" }),
+      });
+      if (!r.ok) throw new Error("创建失败");
+      await load();
+    } catch {
+      setError(true);
+      await load(); // 回滚乐观项
+    }
+  }, [load]);
+
   // 保存备注（Focus Card → 任务 description）
   const saveNote = useCallback(async (taskId: string, note: string) => {
     const r = await fetch(`/api/tasks/${taskId}`, {
@@ -620,6 +638,7 @@ export default function TodayPage() {
             onCheckin={(detail) => checkin(cur.card.id, detail)}
             onPause={(reason) => doAction(cur.card.id, "pause", { reason })}
             onItemToggle={toggleChildItem}
+            onItemAdd={(title) => addChildItem(cur.card.id, title)}
             onContinueTomorrow={() => continueTomorrow(cur.card.id)}
             busy={busy}
           />

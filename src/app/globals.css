@@ -476,8 +476,11 @@
 .pt-new-input.show{display:block}
 .pt-tip{margin:10px 10px 2px;padding-top:10px;border-top:1px dashed var(--v2-border);font-size:9.5px;color:var(--v2-text3);text-align:center;line-height:1.7}
 .pt-tip b{color:var(--v2-amber);font-weight:600}
-.pt-pool-item{border:1px solid var(--v2-border);border-radius:10px;padding:9px 11px;margin-bottom:7px;background:#fafbfc;transition:all .12s;border-left:3px solid transparent}
-.pt-pool-item:hover{border-left-color:var(--pt-gold);border-color:var(--pt-gold-border)}
+.pt-pool-item{border:1px solid var(--v2-border);border-radius:10px;padding:9px 11px;margin-bottom:7px;background:#fafbfc;transition:all .12s;border-left:3px solid transparent;cursor:grab}
+.pt-pool-item:hover{border-left-color:var(--pt-gold);border-color:var(--pt-gold-border);box-shadow:0 1px 4px rgba(245,166,35,.15)}
+.pt-pool-item:active{cursor:grabbing}
+.pt-pool-item.dragging{opacity:.45}
+.pt-pool-item:hover .pt-pool-hint{color:var(--v2-amber);opacity:1}
 .pt-ai-sug{font-size:10px;color:var(--v2-amber);background:var(--v2-amber-bg);border:1px dashed var(--pt-gold-border);border-radius:7px;padding:3px 8px;flex:1;min-width:0}
 .pt-ai-btn{font-size:10px;font-weight:600;color:#fff;background:var(--v2-brand);border:none;border-radius:7px;padding:3.5px 9px;cursor:pointer;flex-shrink:0}
 .pt-ai-btn:hover{background:var(--v2-brand-deep)}

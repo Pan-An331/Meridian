@@ -45,6 +45,15 @@ function InputCanvas({ greeting, onSubmit, loading }: {
     if (taRef.current) taRef.current.style.height = "auto";
   };
 
+  // P1-4：取消输入 = 清空 + 失焦 + 高度复位（关闭输入框，不只是清空）
+  const closeInput = () => {
+    setValue("");
+    if (taRef.current) {
+      taRef.current.style.height = "auto";
+      taRef.current.blur();
+    }
+  };
+
   return (
     <div className={`${cardCls} mb-4 flex flex-col overflow-hidden`}>
       <div className="flex-1 px-6 sm:px-8 pt-8 pb-2.5">
@@ -55,7 +64,12 @@ function InputCanvas({ greeting, onSubmit, loading }: {
           onChange={(e) => { setValue(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px"; }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-            if (e.key === "Escape") { setValue(""); }
+            // P1-4：Escape = 关闭输入框（清空 + 失焦），不再只是清空值
+            if (e.key === "Escape") { e.preventDefault(); closeInput(); }
+          }}
+          onBlur={() => {
+            // P1-4：失焦关闭 —— 内容为空时收起输入框（视觉关闭）；有内容保留防误丢
+            if (!value.trim() && taRef.current) taRef.current.style.height = "auto";
           }}
           rows={1}
           placeholder="把脑子里的事倒进来… 例如：周六上午准备电赛方案，顺便把实验报告写了"
@@ -66,15 +80,27 @@ function InputCanvas({ greeting, onSubmit, loading }: {
         <span>
           <kbd className="font-sans text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] border border-[var(--v2-border)] text-[var(--v2-text2)]">Enter</kbd> 发送
           <kbd className="font-sans text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] border border-[var(--v2-border)] text-[var(--v2-text2)] ml-1.5">Shift+Enter</kbd> 换行
-          <kbd className="font-sans text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] border border-[var(--v2-border)] text-[var(--v2-text2)] ml-1.5">Esc</kbd> 清空
+          <kbd className="font-sans text-sm px-1.5 py-0.5 rounded bg-[var(--color-gray-100)] border border-[var(--v2-border)] text-[var(--v2-text2)] ml-1.5">Esc</kbd> 关闭输入
         </span>
-        <button
-          onClick={send}
-          disabled={loading || !value.trim()}
-          className={`text-sm px-4 py-1.5 rounded font-medium transition ${loading ? "bg-[var(--color-brand-50)] text-[var(--v2-brand)] cursor-wait" : value.trim() ? "bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)]" : "bg-[var(--color-gray-100)] text-[var(--v2-text3)] cursor-not-allowed"}`}
-        >
-          {loading ? "AI 整理中…" : "AI 整理"}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* P1-4：✕ 取消按钮 —— 任意时刻退出输入，不强制完成 */}
+          {value.trim() && (
+            <button
+              onClick={closeInput}
+              className="text-sm px-2.5 py-1.5 rounded border border-[var(--v2-border)] bg-white text-[var(--v2-text3)] hover:text-[var(--v2-amber)] hover:border-[var(--v2-amber)]/50 transition"
+              title="取消输入（Esc）"
+            >
+              ✕ 取消
+            </button>
+          )}
+          <button
+            onClick={send}
+            disabled={loading || !value.trim()}
+            className={`text-sm px-4 py-1.5 rounded font-medium transition ${loading ? "bg-[var(--color-brand-50)] text-[var(--v2-brand)] cursor-wait" : value.trim() ? "bg-[var(--v2-brand)] text-white hover:bg-[var(--v2-brand-deep)]" : "bg-[var(--color-gray-100)] text-[var(--v2-text3)] cursor-not-allowed"}`}
+          >
+            {loading ? "AI 整理中…" : "AI 整理"}
+          </button>
+        </div>
       </div>
     </div>
   );
