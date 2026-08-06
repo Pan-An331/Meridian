@@ -183,8 +183,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ continued: true, nextStart: start.toISOString() });
     }
     case "delete":
-      if (existing.status === "completed") return badRequest("已完成的任务不可删除");
-      // 事务化删除（子任务无级联需手动删；timeLog/schedule/feedback 由数据库级联清理）
+      // 放开已完成任务的删除（用户最终控制权红线；事务内级联删子任务）
+      // 原实现拒绝 completed → 用户误触完成后无法删除，被困在已完成状态
       await prisma.$transaction(async (tx) => {
         await tx.task.deleteMany({ where: { parentId: id } });
         await tx.task.delete({ where: { id } });

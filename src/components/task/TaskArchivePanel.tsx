@@ -100,6 +100,22 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
     finally { setTimeBusy(false); }
   };
 
+  // 移出完成（reopen → 未开始；解决"完成后被困住"）
+  const [reopenBusy, setReopenBusy] = useState(false);
+  const reopenTask = async () => {
+    setReopenBusy(true);
+    try {
+      const r = await fetch(`/api/tasks/${taskId}/action`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reopen" }),
+      });
+      if (!r.ok) throw new Error();
+      setSavedTip("已移出完成 ✓ 状态恢复为「未开始」");
+      loadTask();
+    } catch { setSavedTip("操作失败，请重试"); }
+    finally { setReopenBusy(false); }
+  };
+
   // 归属链：直读后端 ancestors（C7 已返回标题数组）；本地 idMeta 不再需要
   const ancestry = useMemo(() => (task?.ancestors ?? []), [task]);
 
@@ -166,6 +182,15 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                       <span className={`text-sm px-1.5 py-0.5 rounded ${task.status === "completed" ? "bg-[var(--color-success-bg)] text-[var(--color-success-text)]" : task.status === "in_progress" ? "bg-[var(--color-brand-50)] text-[var(--v2-brand-deep)]" : "bg-[var(--color-gray-100)] text-[var(--color-gray-500)]"}`}>
                         {task.status === "completed" ? "已完成" : task.status === "in_progress" ? "进行中" : "未开始"}
                       </span>
+                    )}
+                    {/* 修复：已完成任务提供「移出完成」入口（reopen → 未开始，状态可逆） */}
+                    {task?.status === "completed" && (
+                      <button
+                        onClick={reopenTask}
+                        disabled={reopenBusy}
+                        className="text-sm px-2 py-0.5 rounded border border-[var(--v2-border)] text-[var(--v2-text2)] hover:border-[var(--v2-brand)] hover:text-[var(--v2-brand)] transition disabled:opacity-50"
+                        title="把任务移出已完成状态（恢复为未开始）"
+                      >移出完成</button>
                     )}
                   </div>
                 </>
