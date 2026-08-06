@@ -17,6 +17,8 @@ export interface InboxDraftItem {
   startTime?: string;
   endTime?: string;
   estimatedMinutes?: number;
+  // P1-10：预估单位（min/hour/day；estimatedMinutes 存分钟）
+  estimatedUnit?: "min" | "hour" | "day";
   complexity?: "low" | "medium" | "high";
   aiReason: string;
   confidence: number;

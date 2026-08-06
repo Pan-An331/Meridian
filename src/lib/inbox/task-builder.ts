@@ -7,6 +7,8 @@ export interface TaskCreateParams {
   importance: number;
   deadline?: Date | null;
   estimatedMinutes?: number | null;
+  // P1-10：预估单位（min/hour/day；estimatedMinutes 存分钟）
+  estimatedUnit?: string | null;
   category?: string | null;
   // V3：主题（独立字段）
   theme?: string | null;
@@ -51,6 +53,7 @@ function buildSimpleTask(draft: InboxDraftItem): BuildResult {
       importance: imp,
       deadline: draft.deadline ? new Date(draft.deadline + "T23:59:59") : null,
       estimatedMinutes: draft.estimatedMinutes || null,
+      estimatedUnit: draft.estimatedUnit || null,
       category: draft.category || null,
       // V3：主题透传
       theme: draft.theme || null,
@@ -134,6 +137,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
         taskType: "planned",
         importance: imp,
         estimatedMinutes: task.estimatedMinutes || null,
+        estimatedUnit: draft.estimatedUnit || null,
         category: draft.category || null,
         theme: draft.theme || null,
       themeColor: draft.themeColor || null,
@@ -151,6 +155,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
           taskType: "planned",
           importance: imp,
           estimatedMinutes: child.estimatedMinutes || null,
+          estimatedUnit: draft.estimatedUnit || null,
           category: draft.category || null,
           theme: draft.theme || null,
       themeColor: draft.themeColor || null,

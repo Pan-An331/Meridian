@@ -73,6 +73,9 @@ model Task {
   // 2026-08-06 B7：自定义主题颜色落库（JSON {"color","deep","bg"}；预设主题可为 null 用 THEMES 派生）
   themeColor       String?
 
+  // P1-10：预估单位（min/hour/day；estimatedMinutes 始终存分钟，unit 记录用户输入粒度）
+  estimatedUnit    String?
+
   // Focus Card V2：动机文案（身份层，AI 推断+父级继承+Inbox/档案可改，≤50 字）
   purpose          String?
 

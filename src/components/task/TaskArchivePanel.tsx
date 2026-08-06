@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DOMAINS, normalizeCategory, resolveTheme, THEMES, THEME_FALLBACK, themeColor } from "@/lib/plan/colors";
 import { parseThemeColor } from "@/lib/task/theme";
+import { normalizeEstimateUnit, ESTIMATE_UNITS, ESTIMATE_UNIT_LABEL, toMinutes, type EstimateUnit } from "@/lib/task/estimate";
 import { ThemeBadge } from "@/components/task/ThemeBadge";
 
 /* ═══════════════════════════════════════════
@@ -67,13 +68,15 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
   const [timeEdit, setTimeEdit] = useState(false);
   const [timeMin, setTimeMin] = useState("");
   const [timeBusy, setTimeBusy] = useState(false);
+  // P1-10：预估单位（分钟/小时/天）
+  const [estUnit, setEstUnit] = useState<EstimateUnit>("min");
 
   // 加载任务（V3 C7 聚合：theme/ancestors/schedules/accumStats/aiFields + FCV2 purpose/departureAt 后端已返回）
   const loadTask = useCallback(() => {
     setErr(false);
     fetch(`/api/tasks/${taskId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => { setTask(d); setTitle(d.title ?? ""); setCategory(normalizeCategory(d.category)); setTheme(d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category)); setCustomThemeColor(parseThemeColor(d.themeColor)); setPurpose(d.purpose ?? ""); setEstimatedMinutes(d.estimatedMinutes ? String(d.estimatedMinutes) : ""); })
+      .then((d) => { setTask(d); setTitle(d.title ?? ""); setCategory(normalizeCategory(d.category)); setTheme(d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category)); setCustomThemeColor(parseThemeColor(d.themeColor)); setPurpose(d.purpose ?? ""); setEstimatedMinutes(d.estimatedMinutes ? String(d.estimatedMinutes) : ""); setEstUnit(normalizeEstimateUnit(d.estimatedUnit) ?? "min"); })
       .catch(() => setErr(true));
   }, [taskId]);
   useEffect(() => { loadTask(); }, [loadTask]);
@@ -117,7 +120,8 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
         ...(theme ? { theme, ...(customThemeColor ? { themeColor: JSON.stringify(customThemeColor) } : { themeColor: null }) } : { theme: null, themeColor: null }),
         // FCV2：purpose（≤50 字；空 → null 清除）
         ...(purpose.trim() ? { purpose: purpose.trim().slice(0, 50) } : { purpose: null }),
-        ...(estimatedMinutes ? { estimatedMinutes: Math.max(1, Number(estimatedMinutes)) } : { estimatedMinutes: null }),
+        // P1-10：预估按单位换算成分钟（estimatedMinutes 内部标准）+ 记录单位
+        ...(estimatedMinutes ? { estimatedMinutes: toMinutes(Number(estimatedMinutes), estUnit), estimatedUnit: estUnit } : { estimatedMinutes: null, estimatedUnit: null }),
       };
       const r = await fetch(`/api/tasks/${taskId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!r.ok) throw new Error();
@@ -233,9 +237,15 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
               </div>
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <span className="text-sm text-[var(--v2-text3)] block mb-1">预估（分钟）</span>
-                  <input type="number" min={1} value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)}
-                    className="w-full px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white" />
+                  <span className="text-sm text-[var(--v2-text3)] block mb-1">预估（分钟/小时/天）</span>
+                  <div className="flex gap-1.5">
+                    <input type="number" min={1} value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)}
+                      className="flex-1 min-w-0 w-full px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white" />
+                    <select value={estUnit} onChange={(e) => setEstUnit(e.target.value as EstimateUnit)}
+                      className="shrink-0 px-1.5 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white">
+                      {ESTIMATE_UNITS.map((u) => <option key={u} value={u}>{ESTIMATE_UNIT_LABEL[u]}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <span className="text-sm text-[var(--v2-text3)] block mb-1">计划状态</span>

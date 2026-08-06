@@ -5,6 +5,7 @@ import type { InboxDraftItem, BreakdownPhase } from "@/types/inbox";
 import { DOMAINS, resolveTheme } from "@/lib/plan/colors";
 import { ThemeBadge } from "@/components/task/ThemeBadge";
 import { parseThemeColor } from "@/lib/task/theme";
+import { ESTIMATE_UNITS, ESTIMATE_UNIT_LABEL, formatEstimate, toMinutes, type EstimateUnit } from "@/lib/task/estimate";
 
 /* ═══════════════════════════════════════════
    Inbox · V2 视觉语言（V3 前端先行：主题 chips + 分类 7 类含竞赛提示）
@@ -147,7 +148,7 @@ function SimpleCard({ item, onConfirm, onDismiss, onEdit, onModify }: {
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{CAT_LABEL[item.category] ?? item.category}</span>
             {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} color={parseThemeColor(item.themeColor)} /> : null; })()}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{TYPE_LABEL[item.taskType] ?? item.taskType}</span>
-            {item.estimatedMinutes ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {item.estimatedMinutes}min</span> : null}
+            {(() => { const est = formatEstimate(item.estimatedMinutes, item.estimatedUnit); return est ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {est}</span> : null; })()}
             {item.deadline && <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] rounded">截止 {new Date(item.deadline).toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })}</span>}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">置信度 {confidence}%</span>
           </div>
@@ -221,7 +222,7 @@ function ComplexCard({ item, onConfirm, onDismiss, onEdit }: { item: InboxDraftI
           <div className="text-sm text-[var(--v2-text3)] flex flex-wrap gap-1.5">
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">{CAT_LABEL[item.category] ?? item.category}</span>
             {(() => { const th = item.theme ?? resolveTheme(null, item.title); return th ? <ThemeBadge theme={th} color={parseThemeColor(item.themeColor)} /> : null; })()}
-            {item.estimatedMinutes ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {item.estimatedMinutes}min</span> : null}
+            {(() => { const est = formatEstimate(item.estimatedMinutes, item.estimatedUnit); return est ? <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">约 {est}</span> : null; })()}
             <span className="inline-flex items-center px-[7px] py-[1px] bg-[var(--color-gray-50)] rounded">置信度 {Math.round((item.confidence ?? 0.7) * 100)}%</span>
           </div>
         </div>
@@ -276,6 +277,8 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
   // FCV2：动机（AI 推断可改，≤50 字）
   const [purpose, setPurpose] = useState(item.purpose ?? "");
   const [estimatedMinutes, setEstimatedMinutes] = useState(item.estimatedMinutes ? String(item.estimatedMinutes) : "");
+  // P1-10：预估单位（分钟/小时/天）
+  const [estUnit, setEstUnit] = useState<EstimateUnit>(item.estimatedUnit ?? "min");
   // B8：重要性（小事/大事，1-5）
   const [importance, setImportance] = useState(item.importance ?? 3);
   const [children, setChildren] = useState<{ title: string; estimatedMinutes: number }[]>(
@@ -294,7 +297,8 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
       themeColor: theme && themeColor ? JSON.stringify(themeColor) : null,
       // FCV2：动机（空 → null；≤50 字）
       purpose: purpose.trim() ? purpose.trim().slice(0, 50) : null,
-      estimatedMinutes: estimatedMinutes ? Math.max(1, Number(estimatedMinutes)) : undefined,
+      estimatedMinutes: estimatedMinutes ? (toMinutes(Number(estimatedMinutes), estUnit) ?? undefined) : undefined,
+      estimatedUnit: estimatedMinutes ? estUnit : undefined,
     };
     if (item.breakdown?.shouldBreakdown && children.length > 0) {
       let ci = 0;
@@ -386,9 +390,15 @@ function EditPanel({ item, onSave, onCancel }: { item: InboxDraftItem; onSave: (
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <label className="text-sm text-[var(--v2-text3)] block mb-1">预估时长（分钟）</label>
-            <input type="number" min={1} value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white" />
+            <label className="text-sm text-[var(--v2-text3)] block mb-1">预估（分钟/小时/天）</label>
+            <div className="flex gap-1.5">
+              <input type="number" min={1} value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)}
+                className="flex-1 min-w-0 px-2.5 py-1.5 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white" />
+              <select value={estUnit} onChange={(e) => setEstUnit(e.target.value as EstimateUnit)}
+                className="shrink-0 px-1.5 py-1.5 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)] bg-white">
+                {ESTIMATE_UNITS.map((u) => <option key={u} value={u}>{ESTIMATE_UNIT_LABEL[u]}</option>)}
+              </select>
+            </div>
           </div>
           <div>
             <label className="text-sm text-[var(--v2-text3)] block mb-1">重要性（小事/大事）</label>

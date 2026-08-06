@@ -380,7 +380,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
     <div className="w-full" style={{ minWidth: card.type === "timer" || card.type === "learning" ? "min(360px, 100%)" : "min(420px, 100%)" }}>
       <div className="bg-white rounded-[14px] border border-[var(--v2-border)] overflow-hidden shadow-[0_1px_3px_rgba(16,24,40,0.05)]" style={doneFlash ? { boxShadow: "0 0 0 2px #16a34a" } : undefined}>
         {/* A 动机行（紫 · 横跨两栏顶部 · V3 §7.1：11.5px → 12.5px） */}
-        <div className="flex items-center gap-2 px-4 py-[7px] text-[12.5px]" style={{ background: "var(--v2-purple-bg)", color: "#7c3aed", borderBottom: "1px solid #ede9fe" }}>
+        <div className="flex items-center gap-2 px-4 py-[7px] text-[13px]" style={{ background: "var(--v2-purple-bg)", color: "#7c3aed", borderBottom: "1px solid #ede9fe" }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r="1" fill="#7c3aed" /></svg>
           <span className="min-w-0 truncate">{card.purpose || (isList ? "清单型 · 做产品/项目" : isTimer ? "固定时间 · 到点自动完成" : isAccum ? "积累型 · 每天坚持" : "学习型 · 学书本知识")}</span>
         </div>
@@ -401,7 +401,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
           <div className="fcv2-left px-4 py-3 space-y-2.5 min-w-0">
             <div>
               <div className="text-[9px] tracking-[0.4px] text-[var(--v2-text3)] mb-0.5">所属项目</div>
-              <div className="text-[14px] font-semibold text-[var(--v2-text)]">{card.parent}</div>
+              <div className="text-[15px] font-semibold text-[var(--v2-text)]">{card.parent}</div>
             </div>
 
             {/* 项目阶段（副本 c2-proj-progress + c2-stage-list） */}
@@ -440,7 +440,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
             <div className="h-px bg-[#f0f0f0]" />
 
             {/* 元信息（副本 c2-meta-line） */}
-            <div className="text-[10px] text-[var(--v2-text3)] space-y-0.5">
+            <div className="text-[10.5px] text-[var(--v2-text3)] space-y-0.5">
               {isTimer && card.scheduledStart && (
                 <div><b className="text-[var(--v2-text2)]">时段</b> {new Date(card.scheduledStart).toTimeString().slice(0, 5)} - {card.scheduledEnd ? new Date(card.scheduledEnd).toTimeString().slice(0, 5) : "--"}</div>
               )}
@@ -493,7 +493,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
           <div className="fcv2-right px-4 py-3 min-w-0">
             {/* B 行动区 */}
             <div className="flex items-center justify-between gap-2.5">
-              <h3 className="text-[20px] font-bold tracking-[-0.3px] text-[var(--v2-text)] leading-[1.3] min-w-0">{card.title}</h3>
+              <h3 className="text-[22px] font-bold tracking-[-0.3px] text-[var(--v2-text)] leading-[1.3] min-w-0">{card.title}</h3>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className={`text-[9.5px] font-semibold px-2 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
                 {going && !isTimer && (
@@ -591,7 +591,7 @@ export function FocusCardV2({ card, onStart, onComplete, onItemToggle, onItemAdd
         </div>
 
         {/* E 元信息行 */}
-        <div className="flex items-center gap-1.5 flex-wrap px-4 py-2.5 border-t border-[#f1f5f9] text-[10px] text-[var(--v2-text3)]">
+        <div className="flex items-center gap-1.5 flex-wrap px-4 py-2.5 border-t border-[#f1f5f9] text-[10.5px] text-[var(--v2-text3)]">
           <span>{card.parent}</span><span className="text-[#e5e7eb]">·</span>
           <span>{plannedLabel ? `预计 ${plannedLabel}` : "待排期"}</span><span className="text-[#e5e7eb]">·</span>
           <span>已用 {elapsedLabel}</span>

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getAccumStats } from "@/lib/task/accum";
 import { createFeedback } from "@/lib/ai/feedback";
 import { normalizeThemeColorInput } from "@/lib/task/theme";
+import { normalizeEstimateUnit } from "@/lib/task/estimate";
 
 // V3 C7：归属链递归收集（上限 5 级，返回标题数组）
 async function buildAncestors(userId: string, taskId: string | null): Promise<string[]> {
@@ -98,6 +99,16 @@ export async function PUT(
     if (body.taskType !== undefined) data.taskType = body.taskType;
     if (body.deadline !== undefined) data.deadline = body.deadline ? new Date(body.deadline) : null;
     if (body.estimatedMinutes !== undefined) data.estimatedMinutes = body.estimatedMinutes || null;
+    // P1-10：预估单位（min/hour/day；null/空 清除；非法拒绝）
+    if (body.estimatedUnit !== undefined) {
+      if (body.estimatedUnit === null || body.estimatedUnit === "") {
+        data.estimatedUnit = null;
+      } else {
+        const unit = normalizeEstimateUnit(body.estimatedUnit);
+        if (!unit) return badRequest("estimatedUnit 需为 min/hour/day");
+        data.estimatedUnit = unit;
+      }
+    }
     if (body.tags !== undefined) data.tags = body.tags || null;
     if (body.parentId !== undefined) data.parentId = body.parentId || null;
     // V3 C3：theme 白名单（≤20 字；null/空 清除主题）

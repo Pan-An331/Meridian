@@ -5,6 +5,7 @@ import { createSchedule } from "@/lib/schedule/service";
 import { createAccumulateSchedules } from "@/lib/schedule/service";
 import { normalizeCategory } from "@/lib/plan/colors";
 import { normalizeThemeColorInput } from "@/lib/task/theme";
+import { normalizeEstimateUnit } from "@/lib/task/estimate";
 
 const VALID_TYPES = ["inbox", "planned", "scheduled"];
 
@@ -39,6 +40,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { title, description, taskType, importance, startTime, endTime, deadline, estimatedMinutes, tags, parentId } = body;
+    // P1-10：预估单位（min/hour/day，白名单；estimatedMinutes 存分钟）
+    const estimatedUnit = normalizeEstimateUnit(body.estimatedUnit);
 
     if (!title?.trim()) return badRequest("任务标题不能为空");
 
@@ -89,6 +92,7 @@ export async function POST(req: NextRequest) {
           purpose,
           deadline: deadline ? new Date(deadline) : null,
           estimatedMinutes: calcEstimated || null,
+          estimatedUnit,
           tags: tags || null,
           parentId: parentId || null,
           category: cat === "other" ? null : cat,

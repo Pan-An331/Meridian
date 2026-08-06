@@ -138,6 +138,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       await prisma.taskExecutionFeedback.create({ data: { userId: session.user.id, taskId: id, reason: reason || "user_adjust" } }).catch(() => {});
       return NextResponse.json({ adjusted: true });
     }
+    case "skip_item": {
+      // Bug3 修复：跳过 = 把当前执行清单项顺延到末尾（仅调整执行顺序）
+      // 不删除任务、不动排期、不触发项目完成联动（原 reschedule 会 deleteFutureSchedules + 误伤项目状态）
+      const children = await prisma.task.findMany({
+        where: { userId: session.user.id, parentId: id, status: { notIn: ["completed", "cancelled"] } },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select: { id: true, sortOrder: true },
+      });
+      const next = children[0];
+      if (next && children.length > 1) {
+        const maxOrder = Math.max(...children.map(c => c.sortOrder ?? 0));
+        await prisma.task.update({ where: { id: next.id }, data: { sortOrder: maxOrder + 1 } });
+      }
+      prisma.userObservation.create({
+        data: { userId: session.user.id, type: "skip", taskId: id, category: existing.category, detail: JSON.stringify({ reason: reason || "user_skip_item" }) },
+      }).catch(() => {});
+      return NextResponse.json({ skipped: true });
+    }
     case "reschedule":
       await deleteFutureSchedules(session.user.id, id);
       await prisma.taskExecutionFeedback.create({ data: { userId: session.user.id, taskId: id, reason: reason || "user_reschedule" } }).catch(() => {});
@@ -180,6 +198,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (action === "complete") {
     const stats = await getTaskExecutionStats(id);
     await prisma.task.update({ where: { id }, data: { actualMinutes: stats.actualMinutes } });
+
+    // Bug2 修复：完成父任务时同步完成第一个未完成子任务（执行清单当前高亮项），
+    // 保证"标记完成"时执行清单与专注时间一起更新（原实现只补记时长，清单项不勾选）
+    const nextChild = await prisma.task.findFirst({
+      where: { userId: session.user.id, parentId: id, status: { notIn: ["completed", "cancelled"] } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { id: true },
+    });
+    if (nextChild) {
+      await prisma.task.update({ where: { id: nextChild.id }, data: { status: "completed", completedAt: new Date() } });
+    }
 
     // FCV2 C5：回来确认——body 带 durationMinutes 时补记 TimeLog
     // 起点 = departureAt（出发时刻）或最近一条 start 类型日志的 startedAt；endedAt = 起点 + duration

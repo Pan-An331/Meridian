@@ -462,6 +462,8 @@
 .b-accum{background:var(--pt-gold-bg);color:#b45309}
 .pt-check{font-size:9.5px;font-weight:600;color:var(--v2-brand-deep);background:var(--v2-brand-bg);border-radius:6px;padding:1.5px 7px;flex-shrink:0;display:none}
 .pt-row.is-list .pt-check{display:inline-block}
+/* 设计改进：完成状态绿色标记（替代删除线） */
+.pt-done-tag{font-size:9.5px;font-weight:600;color:#059669;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:1px 7px;flex-shrink:0;white-space:nowrap}
 .pt-star{color:#d1d5db;font-size:12px;flex-shrink:0;cursor:pointer;padding:1px 2px}
 .pt-star:hover{color:var(--pt-gold)}
 .pt-star.on{color:var(--pt-gold)}

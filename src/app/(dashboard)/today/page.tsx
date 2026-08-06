@@ -504,19 +504,21 @@ export default function TodayPage() {
     finally { setBusy(false); }
   }, [load]);
 
-  // 子任务勾选（完成 ↔ 重新打开）
+  // 子任务勾选（完成 ↔ 取消完成；Bug1 修复：已勾选的再次点击 = reopen 取消完成）
   const toggleChildItem = useCallback(async (childId: string) => {
     setBusy(true);
     try {
+      const item = data?.currentTask?.children.find((c) => c.id === childId);
+      const action = item?.done ? "reopen" : "complete";
       const r = await fetch(`/api/tasks/${childId}/action`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "complete" }),
+        body: JSON.stringify({ action }),
       });
       if (!r.ok) throw new Error("操作失败");
       await load();
     } catch { setError(true); }
     finally { setBusy(false); }
-  }, [load]);
+  }, [data, load]);
 
   // P1-11：清单新增项（乐观更新 → POST /api/tasks 建子任务 → 刷新落库）
   const addChildItem = useCallback(async (parentId: string, title: string) => {
@@ -650,7 +652,7 @@ export default function TodayPage() {
             card={toCardV2(data?.currentTask ?? { id: cur.card.id, title: cur.card.title, description: null, taskType: null, category: null, parentTitle: null, children: [], scheduledStart: null, scheduledEnd: null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: 0, completionPercent: 0 } as CurrentTask, treeCache)}
             onStart={() => doAction(cur.card.id, "start")}
             onComplete={(min) => doAction(cur.card.id, "complete", min && min > 0 ? { durationMinutes: min } : {})}
-            onSkip={() => doAction(cur.card.id, "reschedule", { reason: "user_skip_today" })}
+            onSkip={() => doAction(cur.card.id, "skip_item", { reason: "user_skip_item" })}
             onCheckin={(detail) => checkin(cur.card.id, detail)}
             onPause={(reason) => doAction(cur.card.id, "pause", { reason })}
             onItemToggle={toggleChildItem}

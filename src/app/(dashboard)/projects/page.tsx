@@ -411,7 +411,9 @@ export default function ProjectsPage() {
           <span className="pt-tw empty">·</span>
         )}
         <span className="pt-hdot"><i /></span>
-        <span className="pt-name" style={isDone ? { textDecoration: "line-through", color: "var(--v2-text3)" } : undefined}>{node.title}</span>
+        {/* 设计改进：完成状态不用删除线，名称旁绿色「✓ 完成」标记 */}
+        <span className="pt-name" style={isDone ? { color: "var(--v2-text3)" } : undefined}>{node.title}</span>
+        {isDone && <span className="pt-done-tag">✓ 完成</span>}
         {lvl === 0 && <span className="pt-badge b-proj">项目</span>}
         {lvl === 1 && !isAccum && <span className="pt-badge b-stage">阶段</span>}
         {isAccum && <span className="pt-badge b-accum">积累</span>}
