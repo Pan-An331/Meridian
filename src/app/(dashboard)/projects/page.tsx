@@ -35,6 +35,7 @@ interface TreeNode {
   parentId: string | null;
   children: TreeNode[];
   star?: boolean;                                                   // ★ 执行清单（后端落库，刷新兜底显示）
+  hasSchedule?: boolean | null;                                     // 待整理池：是否已排期（透明化）
   theme?: string | null;                                        // V3 落库主题（契约预留）
   themeColor?: { color: string; deep: string; bg: string } | null; // 后端派生色（契约预留；兼容 {pcolor,pbg,theme}）
   themeColorRaw?: string | null;                                // B7：自定义主题落库色 JSON（原始）
@@ -302,7 +303,7 @@ export default function ProjectsPage() {
       setNewOpen(false);
       showToast(`已创建「${v}」${parent ? ` → 挂入 ${parent.title}` : ""}`);
       await load();
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [newTitle, newTarget, trees, createTask, load, showToast]);
 
   /* ── 同级排序（↑↓） ── */
@@ -321,7 +322,7 @@ export default function ProjectsPage() {
       }
       showToast(`已${dir < 0 ? "上移" : "下移"}「${node.title}」`);
       await load(true);
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [trees, moveNode, load, showToast]);
 
   /* ── 拖拽 ── */
@@ -376,7 +377,7 @@ export default function ProjectsPage() {
         showToast(`「${name}」已调整顺序`);
       }
       await load(true);
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [dragId, dragSource, dragZone, trees, moveNode, load, showToast, clearDrag]);
 
   /* ── 待整理池 drop（问题2：树任务可拖回池 = 解挂载；池项拖回自身忽略） ── */
@@ -394,7 +395,7 @@ export default function ProjectsPage() {
       await moveNode(id, null);
       showToast(`「${name}」已移出项目 → 待整理池`);
       await load(true);
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [dragId, dragSource, trees, moveNode, load, showToast, clearDrag]);
 
   /* ── 树区空白 drop（问题3：待整理 task 拖入空白 = 自动生成项目并挂入） ── */
@@ -415,7 +416,7 @@ export default function ProjectsPage() {
       await moveNode(id, d?.id ?? "");
       showToast(`已新建项目「${th ?? o?.title ?? "新项目"}」并挂入`);
       await load(true);
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [dragId, dragSource, poolList, createTask, moveNode, load, showToast, clearDrag]);
 
   /* ── 行渲染（flatten + 连接线重算） ── */
@@ -523,7 +524,7 @@ export default function ProjectsPage() {
         showToast(`已新建项目「${th ?? o.title}」并挂入`);
       }
       await load(true);
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [trees, moveNode, createTask, load, showToast]);
 
   /* ── 习惯区打卡 ── */
@@ -540,7 +541,7 @@ export default function ProjectsPage() {
         setStreaks((prev) => ({ ...prev, [id]: d.streak }));
         showToast(`已打卡「${title}」· 连续 ${d.streak?.current ?? 0} 天`);
       }
-    } catch { setError(true); }
+    } catch (err) { showToast(`操作失败：${(err as Error).message || "请重试"}`); }
   }, [showToast]);
 
   const weekDots = (t: TreeNode) => {
@@ -671,7 +672,7 @@ export default function ProjectsPage() {
                           <button className="pt-ai-btn" onClick={() => attachPool(o, sug.projId)}>挂入</button>
                         </div>
                       )}
-                      <div className="pt-pool-hint text-[9px] text-[var(--v2-text3)] mt-1.5 opacity-60 transition-opacity">⇱ 按住拖拽到左侧任意项目（树内可挂子级/换序）</div>
+                      <div className="pt-pool-hint text-[9px] text-[var(--v2-text3)] mt-1.5 opacity-60 transition-opacity">⇱ 按住拖拽到左侧任意项目（树内可挂子级/换序）{o.hasSchedule ? " · ⏱ 已排期到 Plan，拖动仍可挂入项目" : ""}</div>
                     </div>
                   );
                 })

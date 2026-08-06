@@ -34,6 +34,7 @@ interface TreeNode {
   weekCount?: number | null;
   children: TreeNode[];
   suggestion?: Suggestion | null; // 仅 orphans 顶层使用
+  hasSchedule?: boolean | null;   // 待整理池：是否已排期（与 Plan 共用记录透明化）
 }
 
 // 树内原始节点（轻量）
@@ -134,6 +135,18 @@ export async function GET() {
 
   for (const o of orphans) {
     o.suggestion = suggestTarget({ title: o.title, theme: o.theme }, candidateTargets);
+  }
+
+  // 2026-08-06：待整理池排期状态（问题2 透明化 —— 待整理与 Plan 共用同一条任务记录，
+  // 被排期的任务仍显示在待整理池，但应明确标注"已排期"避免"拖不进项目"的误解）
+  if (orphans.length > 0) {
+    const schedCounts = await prisma.schedule.groupBy({
+      by: ["taskId"],
+      where: { userId: session.user.id, taskId: { in: orphans.map(o => o.id) } },
+      _count: { taskId: true },
+    });
+    const schedMap = new Map(schedCounts.map(s => [s.taskId, s._count.taskId]));
+    for (const o of orphans) o.hasSchedule = (schedMap.get(o.id) ?? 0) > 0;
   }
 
   // ── 积累型：streak 透传（树接口复用，阶段 C 需求：积累型返回连续天数）──

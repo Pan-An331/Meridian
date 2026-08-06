@@ -43,19 +43,26 @@ export async function getDailyPlan(userId: string, date: Date): Promise<DailyPla
 }
 
 /**
- * Delete a plan item by taskId — removes the schedule, keeps the Task.
+ * Delete a plan item by taskId — removes ALL schedules (task + descendants), keeps the Task.
  * The task will reappear in UnscheduledPool on next Plan load.
+ * 修复：原实现只删"最新一条"排期 —— 锚点下沉/历史重复排期挂在子任务上时残留，
+ * 导致"移除后任务仍显示已安排、不回收集箱/待整理"（问题3 根因）。
+ * 现改为：收集任务及其全部子孙（递归）的排期一并删除。
  */
 export async function deletePlanItem(userId: string, taskId: string) {
-  const schedule = await prisma.schedule.findFirst({
-    where: { taskId, userId },
-    orderBy: { createdAt: "desc" },
-  });
-  if (!schedule) return { deleted: 0 };
+  // 收集该任务 + 所有子孙 id（锚点下沉可能把排期落在子任务上）
+  const ids = [taskId];
+  const stack = [taskId];
+  let guard = 0;
+  while (stack.length > 0 && guard < 50) {
+    const cur = stack.pop()!;
+    const children = await prisma.task.findMany({ where: { userId, parentId: cur }, select: { id: true } });
+    for (const c of children) { ids.push(c.id); stack.push(c.id); }
+    guard++;
+  }
 
-  const { deleteScheduleById } = await import("@/lib/schedule/service");
-  await deleteScheduleById(schedule.id, schedule.userId);
-  return { deleted: 1, taskId: schedule.taskId };
+  const result = await prisma.schedule.deleteMany({ where: { taskId: { in: ids }, userId } });
+  return { deleted: result.count, taskId };
 }
 
 /**
