@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, description, taskType, importance, startTime, endTime, deadline, estimatedMinutes, tags, parentId } = body;
+    const { title, description, taskType, importance, startTime, endTime, deadline, estimatedMinutes, tags, parentId, star } = body;
+    // BUG-20260808-053：star（★ 执行清单）创建时落库——原实现忽略该字段，
+    // 导致 API 直接创建"执行清单"任务时锚点解析失败（排期被 BFS 到子任务，Today 显示细小事项）
     // P1-10：预估单位（min/hour/day，白名单；estimatedMinutes 存分钟）
     const estimatedUnit = normalizeEstimateUnit(body.estimatedUnit);
 
@@ -101,6 +103,8 @@ export async function POST(req: NextRequest) {
           // V5：层级语义 + 积累型
           level,
           accumulate,
+          // BUG-20260808-053：★ 执行清单标记创建时落库（UI 路径经 PUT 落库正常，API 路径此前丢失）
+          star: !!star,
         },
         include: { children: true },
       });
