@@ -259,8 +259,27 @@ export async function DELETE(
     return badRequest("已完成的任务不可删除（成长记录永久保留）");
   }
 
-  await prisma.timeLog.deleteMany({ where: { taskId: id } });
-  await prisma.task.deleteMany({ where: { parentId: id } });
-  await prisma.task.delete({ where: { id } });
+  // BUG-20260808-054（原 BUG-051）：递归收集全部子孙（多级），显式级联删除——
+  // 数据库外键级联不可靠（实测父删子孙残留为孤儿 → 孤儿子任务混入 mustDo 抢占主卡）。
+  const allIds: string[] = [id];
+  const queue = [id];
+  while (queue.length > 0) {
+    const cur = queue.shift()!;
+    const kids = await prisma.task.findMany({
+      where: { parentId: cur },
+      select: { id: true },
+    });
+    for (const k of kids) {
+      allIds.push(k.id);
+      queue.push(k.id);
+    }
+  }
+
+  await prisma.$transaction([
+    prisma.timeLog.deleteMany({ where: { taskId: { in: allIds } } }),
+    prisma.schedule.deleteMany({ where: { taskId: { in: allIds } } }),
+    prisma.taskExecutionFeedback.deleteMany({ where: { taskId: { in: allIds } } }),
+    prisma.task.deleteMany({ where: { id: { in: allIds } } }),
+  ]);
   return NextResponse.json({ success: true });
 }

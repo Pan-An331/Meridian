@@ -16,7 +16,15 @@ export async function generateTodayDecision(userId: string): Promise<TodayDecisi
 
   const [allTasks, schedules, userState] = await Promise.all([
     prisma.task.findMany({
-      where: { userId, status: { in: ["not_started", "in_progress", "delayed"] } },
+      // BUG-20260808-054：mustDo 候选过滤两类结构异常任务——
+      // ① 孤儿子任务（parentId 指向已删除的父）：parent relation 解析为 null → 排除；
+      // ② inbox 类型（未确认的想法，未结构化）：只允许结构化任务参与执行决策
+      where: {
+        userId,
+        status: { in: ["not_started", "in_progress", "delayed"] },
+        taskType: { not: "inbox" },
+        OR: [{ parentId: null }, { parent: { isNot: null } }],
+      },
       orderBy: [{ importance: "desc" }, { deadline: "asc" }],
     }),
     prisma.schedule.findMany({

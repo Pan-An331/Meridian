@@ -265,21 +265,24 @@ export async function GET() {
   // 修复：mustDo/recommended 补完整卡字段（Focus Card 兜底卡需要真实清单；
   // 否则 currentTask 为空时前端 children=[] → hasChildren=false → 误判"知识点"且清单消失）
   const enhanceCard = async (m: { taskId: string; title: string }) => {
-    const task = await prisma.task.findUnique({
-      where: { id: m.taskId },
-      select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true, status: true },
-    });
+    // BUG-20260808-054：三查询并行（Neon 跨洋延迟下串行 3 次 = 每卡 +600ms）
+    const [task, children, purpose] = await Promise.all([
+      prisma.task.findUnique({
+        where: { id: m.taskId },
+        select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true, status: true },
+      }),
+      // BUG-20260807-049：mustDo 兜底卡的 children 只取【真实子任务】——原实现用 buildChecklist
+      // （含 description 按行拆分的兜底清单），无子任务的"学习型"任务（如背单词）description 单行
+      // 被拆成 1 个清单项 → 前端 hasChildren=true → 误判为清单型卡。真实无子任务 → learning 卡。
+      prisma.task.findMany({
+        where: { userId, parentId: m.taskId },
+        select: { id: true, title: true, completedAt: true },
+        orderBy: { sortOrder: "asc" },
+      }).then((list) => list.map((c) => ({ id: c.id, text: c.title, done: !!c.completedAt, group: null, noteStep: false, self: false }))),
+      resolvePurposeFinal(userId, { purpose: null, parentId: m.taskId }).catch(() => null),
+    ]);
     if (!task) return m;
-    // BUG-20260807-049：mustDo 兜底卡的 children 只取【真实子任务】——原实现用 buildChecklist
-    // （含 description 按行拆分的兜底清单），无子任务的"学习型"任务（如背单词）description 单行
-    // 被拆成 1 个清单项 → 前端 hasChildren=true → 误判为清单型卡。真实无子任务 → learning 卡。
-    const children = await prisma.task.findMany({
-      where: { userId, parentId: m.taskId },
-      select: { id: true, title: true, completedAt: true },
-      orderBy: { sortOrder: "asc" },
-    }).then((list) => list.map((c) => ({ id: c.id, text: c.title, done: !!c.completedAt, group: null, noteStep: false, self: false })));
     const sched = todaySchedules.find((s) => s.taskId === m.taskId);
-    const purpose = await resolvePurposeFinal(userId, task).catch(() => task.purpose);
     return {
       ...m,
       children,
@@ -289,7 +292,7 @@ export async function GET() {
       status: task.status,
       accumulate: task.accumulate,
       departureAt: task.departureAt?.toISOString() || null,
-      purpose,
+      purpose: purpose ?? task.purpose,
       scheduledStart: sched?.scheduledStart?.toISOString() || null,
       scheduledEnd: sched?.scheduledEnd?.toISOString() || null,
     };
