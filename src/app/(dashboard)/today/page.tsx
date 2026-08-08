@@ -651,6 +651,10 @@ export default function TodayPage() {
   const cards = useCallback((): { card: FocusCard; tagLabel: string; statText: string; hint: string; cardV2: FocusCardV2Data }[] => {
     if (!data) return [];
     const list: { card: FocusCard; tagLabel: string; statText: string; hint: string; cardV2: FocusCardV2Data }[] = [];
+    // BUG-20260808-056：卡片列表按任务 id 去重——routeSel 前置卡与 currentTask/mustDo 兜底卡
+    // 可能指向同一任务（如点击今日路线的采购元器件且 currentTask=null → mustDo[0] 同任务），
+    // 两张同 id 卡导致 React key 冲突（"Encountered two children with the same key"）。
+    const seen = new Set<string>();
     const curId = data.currentTask?.id ?? null;
     // 路线选中（非当前任务）→ 前置该任务的基础卡（含提前执行语义）
     if (routeSel && routeSel !== curId) {
@@ -675,26 +679,36 @@ export default function TodayPage() {
         } as CurrentTask;
         const v2 = toCardV2(normBase, treeCache);
         const tagLabel = v2.type === "learning" ? "学习型" : v2.type === "timer" ? "时间型" : v2.type === "accum-daily" || v2.type === "accum-weekly" ? "积累型" : "清单型";
-        list.push({
-          card: {
-            id: tl.taskId, parent: "今日路线", title: tl.title,
-            type: v2.type === "accum-daily" || v2.type === "accum-weekly" ? "accumulate" : v2.type,
-            plannedMinutes: 0, doneCount: v2.items?.filter((i) => i.done).length ?? 0, totalCount: v2.items?.length || 1,
-            progress: v2.progress, elapsedMinutes: 0, items: v2.items ?? [], aiExec: "",
-          },
-          tagLabel, statText: "待开始", hint: "提前执行 · 点「出发」开始计时",
-          cardV2: v2,
-        });
+        if (!seen.has(tl.taskId)) {
+          seen.add(tl.taskId);
+          list.push({
+            card: {
+              id: tl.taskId, parent: "今日路线", title: tl.title,
+              type: v2.type === "accum-daily" || v2.type === "accum-weekly" ? "accumulate" : v2.type,
+              plannedMinutes: 0, doneCount: v2.items?.filter((i) => i.done).length ?? 0, totalCount: v2.items?.length || 1,
+              progress: v2.progress, elapsedMinutes: 0, items: v2.items ?? [], aiExec: "",
+            },
+            tagLabel, statText: "待开始", hint: "提前执行 · 点「出发」开始计时",
+            cardV2: v2,
+          });
+        }
       }
     }
     if (data.currentTask) {
-      const { card, extra } = toCard(data.currentTask);
-      list.push({ card, ...extra, cardV2: toCardV2(data.currentTask, treeCache) });
+      if (!seen.has(data.currentTask.id)) {
+        seen.add(data.currentTask.id);
+        const { card, extra } = toCard(data.currentTask);
+        list.push({ card, ...extra, cardV2: toCardV2(data.currentTask, treeCache) });
+      }
     } else {
       // BUG-20260807-047：mustDo 兜底跳过已完成任务——决策是静态快照（完成动作已删决策，
       // 但打开页面期间完成的场景仍可能命中旧快照），已完成任务不再占主卡。
-      const m = data.mustDo.find((x) => x.status !== "completed" && x.status !== "cancelled") ?? data.mustDo[0];
-      if (m) {
+      // BUG-20260808-056：同时跳过已在 routeSel 前置卡展示的任务（防同 id 双卡）。
+      const m = data.mustDo.find((x) => x.status !== "completed" && x.status !== "cancelled" && !seen.has(x.taskId))
+        ?? data.mustDo.find((x) => !seen.has(x.taskId))
+        ?? data.mustDo[0];
+      if (m && !seen.has(m.taskId)) {
+        seen.add(m.taskId);
         // 修复：mustDo 卡用后端增强数据（真实清单 children）构造完整卡
         const v2 = toCardV2({ id: m.taskId, title: m.title, description: m.description ?? null, taskType: m.taskType ?? null, category: m.category ?? null, parentTitle: null, children: m.children ?? [], scheduledStart: m.scheduledStart ?? null, scheduledEnd: m.scheduledEnd ?? null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: m.estimatedMinutes || 0, completionPercent: 0, purpose: m.purpose ?? null, departureAt: m.departureAt ?? null, accumulate: m.accumulate ?? false } as CurrentTask, treeCache);
         list.push({
