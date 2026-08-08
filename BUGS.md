@@ -544,3 +544,12 @@
 - **代码变更**：`src/app/(dashboard)/today/page.tsx` toCardV2（type 判定）
 - **联动脚本**：12-daily-flow 环节 8 E（planned 组会）改 learning 交互；11-fullflow-ui 搜索定位改「未 」前缀（text= 误匹配主卡 heading）
 - **验证**：11+12 定向重跑 `2 passed (6.2m)`；单元 95/95、tsc 0 错误
+
+
+#### BUG-20260808-053：POST /api/tasks 创建时 ★ 执行清单标记不落库（产品 Bug，线上验证发现）
+- **状态**：已修复 ｜ 2026-08-08
+- **现象**：线上部署后全链路验证——API 创建 ★ 采购元器件清单（star=True）+ 2 子任务 + 排期 → currentTask 指向子任务「采购电容」（细小事项）而非清单标题；本地 100% 复现（star 回读 False → 锚点 BFS 到子任务 → 排期建在子任务）
+- **根因**：POST /api/tasks 解构与 create data 均无 star 字段 → 创建时丢失 ★（UI 路径经 PUT 落库正常，API 路径丢失，E2E 走 UI 未暴露）
+- **修复**：`src/app/api/tasks/route.ts` 解构加 star + create data 加 `star: !!star`
+- **验证**：本地复现 PASS（star=True → 排期在父 → currentTask=★父任务）；线上复验 PASS（注册→建★清单→排期→views/today currentTask=清单标题，children=2 子项）
+- **用户影响**：已存在的「采购元器件」旧数据若排期建在子任务上，需在 Plan 移除旧排期重新拖拽（★ 在父任务时锚点自动解析到父）
