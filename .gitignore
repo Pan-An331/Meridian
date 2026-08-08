@@ -54,3 +54,13 @@ prisma/dev.db.*
 next-env.d.ts
 
 /src/generated/prisma
+
+# 调试残留（禁止提交）
+/*.log
+/scripts/tmp-*.py
+/repro-*.py
+/mdcheck*.py
+/retest-*.js
+/re-test-*.js
+/test-drag.mjs
+/test-results/
