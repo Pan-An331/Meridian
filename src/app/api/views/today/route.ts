@@ -216,12 +216,16 @@ export async function GET() {
   }
 
   // Priority 2: 当前时段排期任务 (scheduledStart ≤ now ≤ scheduledEnd or no end)
+  // BUG-20260807-031：必须过滤任务状态——completed/cancelled 任务只要今天有时段排期
+  // 就会顶替 currentTask（E2E T10 复现：前序用例完成的 T2 任务排期 11:31-12:31 仍在窗口内，
+  // 打开 Today 被选为 currentTask，显示"未出发"）。遍历窗口内排期，跳过已终态任务。
   if (!currentTask) {
-    const cs = todaySchedules.find(s =>
-      s.scheduledStart <= now && (!s.scheduledEnd || s.scheduledEnd >= now)
-    );
-    if (cs) {
-      const t = await prisma.task.findUnique({ where: { id: cs.taskId }, select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true } });
+    for (const cs of todaySchedules) {
+      if (cs.scheduledStart > now || (cs.scheduledEnd && cs.scheduledEnd < now)) continue;
+      const t = await prisma.task.findFirst({
+        where: { id: cs.taskId, userId, status: { notIn: ["completed", "cancelled"] } },
+        select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true },
+      });
       if (t) {
         // 修复：Priority 2 的"预计"必须按排期时长算（原硬编码 0 → Focus Card 显示待排期/0 分钟）
         const plannedMin = cs.scheduledEnd && cs.scheduledEnd > cs.scheduledStart
@@ -230,6 +234,7 @@ export async function GET() {
         currentTask = await buildCurrentTaskCard(userId, t, cs, {
           elapsedMinutes: 0, plannedMinutes: plannedMin, completionPercent: 0,
         });
+        break;
       }
     }
   }
@@ -256,10 +261,48 @@ export async function GET() {
 
   const advice = await getExecutionAdvice(userId).catch(() => null);
   const execPattern = await getUserExecutionPattern(userId).catch(() => null);
+
+  // 修复：mustDo/recommended 补完整卡字段（Focus Card 兜底卡需要真实清单；
+  // 否则 currentTask 为空时前端 children=[] → hasChildren=false → 误判"知识点"且清单消失）
+  const enhanceCard = async (m: { taskId: string; title: string }) => {
+    const task = await prisma.task.findUnique({
+      where: { id: m.taskId },
+      select: { id: true, title: true, description: true, taskType: true, category: true, theme: true, purpose: true, departureAt: true, parentId: true, level: true, accumulate: true, status: true },
+    });
+    if (!task) return m;
+    // BUG-20260807-049：mustDo 兜底卡的 children 只取【真实子任务】——原实现用 buildChecklist
+    // （含 description 按行拆分的兜底清单），无子任务的"学习型"任务（如背单词）description 单行
+    // 被拆成 1 个清单项 → 前端 hasChildren=true → 误判为清单型卡。真实无子任务 → learning 卡。
+    const children = await prisma.task.findMany({
+      where: { userId, parentId: m.taskId },
+      select: { id: true, title: true, completedAt: true },
+      orderBy: { sortOrder: "asc" },
+    }).then((list) => list.map((c) => ({ id: c.id, text: c.title, done: !!c.completedAt, group: null, noteStep: false, self: false })));
+    const sched = todaySchedules.find((s) => s.taskId === m.taskId);
+    const purpose = await resolvePurposeFinal(userId, task).catch(() => task.purpose);
+    return {
+      ...m,
+      children,
+      description: task.description,
+      taskType: task.taskType,
+      category: task.category,
+      status: task.status,
+      accumulate: task.accumulate,
+      departureAt: task.departureAt?.toISOString() || null,
+      purpose,
+      scheduledStart: sched?.scheduledStart?.toISOString() || null,
+      scheduledEnd: sched?.scheduledEnd?.toISOString() || null,
+    };
+  };
+  const [mustDoCards, recommendedCards] = await Promise.all([
+    Promise.all(decision.mustDo.map(enhanceCard)),
+    Promise.all(decision.recommended.map(enhanceCard)),
+  ]);
+
   return NextResponse.json({
     executionPattern: execPattern, executionAdvice: advice,
     currentTask, nextTask, todayTimeline,
-    mustDo: decision.mustDo, recommended: decision.recommended,
+    mustDo: mustDoCards, recommended: recommendedCards,
     alerts, brief,
     currentState: { energy: currentState.energy, focus: currentState.focusLevel, mood: currentState.mood, stress: currentState.stress, stateDescription: currentState.stateDescription },
     todayStats: { completedCount: todayCompleted, totalMinutes: todayTotalMinutes },

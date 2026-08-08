@@ -6,6 +6,7 @@ import { createAccumulateSchedules } from "@/lib/schedule/service";
 import { normalizeCategory } from "@/lib/plan/colors";
 import { normalizeThemeColorInput } from "@/lib/task/theme";
 import { normalizeEstimateUnit } from "@/lib/task/estimate";
+import { localDateStr } from "@/lib/date";
 
 const VALID_TYPES = ["inbox", "planned", "scheduled"];
 
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 事务化：task + schedule 原子创建，避免中途失败留下无排期任务
+    // 2026-08-07：加 timeout 30s（Neon 高延迟下默认 5s 事务超时会导致 accumulate 创建失败）
     const task = await prisma.$transaction(async (tx) => {
       const t = await tx.task.create({
         data: {
@@ -112,12 +114,18 @@ export async function POST(req: NextRequest) {
         await createAccumulateSchedules(session.user.id, t.id, calcEstimated || 20, 30, 20, tx);
       }
       return t;
-    });
+    }, { timeout: 30_000 });
 
     // 修复 P1-16：任务创建写观察（学习闭环数据源）
     prisma.userObservation.create({
       data: { userId: session.user.id, type: "task_create", taskId: task.id, category: task.category, detail: JSON.stringify({ taskType: task.taskType, importance: task.importance }) },
     }).catch(() => {});
+
+    // BUG-20260807-038：新任务创建 → 失效今日决策缓存（today_decision 当天行）。
+    // 今日决策（mustDo/recommended）在首次打开 Today 时生成并固化；用户先打开 Today 再录入任务时，
+    // 新任务不会进入 mustDo → 无排期任务永远无法成为 Today 主卡（学习型卡不可达）。
+    // 删除当天决策行 → 下次打开 Today 重新计算（含新任务）。
+    prisma.todayDecision.deleteMany({ where: { userId: session.user.id, date: localDateStr() } }).catch(() => {});
 
     return NextResponse.json(task, { status: 201 });
   } catch (e) {

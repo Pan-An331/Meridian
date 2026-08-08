@@ -34,7 +34,20 @@ interface CurrentTask {
   scheduledStart: string | null; scheduledEnd: string | null;
   elapsedMinutes: number; remainingMinutes: number; plannedMinutes: number; completionPercent: number;
 }
-interface MustDoTask { taskId: string; title: string; reasons?: string[]; estimatedMinutes?: number; }
+interface MustDoTask {
+  taskId: string; title: string; reasons?: string[];
+  estimatedMinutes?: number;
+  // 修复：Focus Card 兜底卡真实数据（today view 增强返回 —— children 清单/描述/排期等）
+  children?: { id: string; text: string; done: boolean }[];
+  description?: string | null;
+  taskType?: string | null; status?: string;
+  accumulate?: boolean;
+  departureAt?: string | null;
+  purpose?: string | null;
+  category?: string | null;
+  scheduledStart?: string | null;
+  scheduledEnd?: string | null;
+}
 interface TimelineItem { taskId: string; title: string; start: string; end: string | null; duration: string; isCurrent: boolean; }
 interface TodayResponse {
   currentTask: CurrentTask | null;
@@ -188,7 +201,11 @@ function toCardV2(t: CurrentTask, trees: ProjTreeNode[] = []): FocusCardV2Data {
   const children = t.children ?? [];
   const hasChildren = children.length > 0;
   const hasSchedule = !!t.scheduledStart;
-  const type: FcV2Type = t.accumulate ? (t.accumStats?.freqType === "weekly" ? "accum-weekly" : "accum-daily") : hasChildren ? "checklist" : hasSchedule ? "timer" : "learning";
+  // BUG-20260808-052：timer（固定时间·到点自动完成）只属于 taskType=scheduled 的任务——
+  // planned 任务被用户拖拽排期后并不"到点自动完成"（惰性结算仅对 scheduled 生效），
+  // 原判定 hasSchedule→timer 导致无子任务的 planned 任务误显示固定时间卡（无「出发」按钮，提前执行不可达）。
+  const isScheduled = t.taskType === "scheduled";
+  const type: FcV2Type = t.accumulate ? (t.accumStats?.freqType === "weekly" ? "accum-weekly" : "accum-daily") : hasChildren ? "checklist" : hasSchedule && isScheduled ? "timer" : "learning";
   const freq = t.accumStats?.freqType;
   const purposeHint = type === "timer" ? "固定时间 · 到点自动完成" : type === "checklist" ? "做产品/项目" : type === "learning" ? "学书本知识" : freq === "weekly" ? "隔天练 · 中断不算断" : "每天坚持一点点";
   const parent = t.parentTitle || "无归属项目";
@@ -447,6 +464,9 @@ export default function TodayPage() {
         body: JSON.stringify({ action, ...extra }),
       });
       if (!r.ok) throw new Error("操作失败");
+      // BUG-20260807-043：完成当前前置卡后清除 routeSel——否则静态"未出发"前置卡占位，
+      // currentTask 为空时 mustDo 兜底卡（学习型等无排期任务）永不显示。
+      if (action === "complete") setRouteSel(null);
       await load();
     } catch { setError(true); }
     finally { setBusy(false); }
@@ -511,22 +531,6 @@ export default function TodayPage() {
     finally { setBusy(false); }
   }, [load]);
 
-  // 子任务勾选（完成 ↔ 取消完成；Bug1 修复：已勾选的再次点击 = reopen 取消完成）
-  const toggleChildItem = useCallback(async (childId: string) => {
-    setBusy(true);
-    try {
-      const item = data?.currentTask?.children.find((c) => c.id === childId);
-      const action = item?.done ? "reopen" : "complete";
-      const r = await fetch(`/api/tasks/${childId}/action`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
-      if (!r.ok) throw new Error("操作失败");
-      await load();
-    } catch { setError(true); }
-    finally { setBusy(false); }
-  }, [data, load]);
-
   // P1-11：清单新增项（乐观更新 → POST /api/tasks 建子任务 → 刷新落库）
   const addChildItem = useCallback(async (parentId: string, title: string) => {
     const tmp: { id: string; text: string; done: boolean } = { id: `tmp-${Date.now()}`, text: title, done: false };
@@ -557,44 +561,119 @@ export default function TodayPage() {
 
   // B5：今日路线点击选中的任务（切到 Focus Card 展示；null = 默认当前任务）
   const [routeSel, setRouteSel] = useState<string | null>(null);
+  // BUG-20260807-044：路线选中任务详情（点击时 fetch）——前置卡不再写死 checklist+空清单，
+  // 用真实 children/类型构造（清单型可勾选、学习型可加知识点、时间型显示固定时间）。
+  const [routeSelTask, setRouteSelTask] = useState<CurrentTask | null>(null);
+
+  // 子任务勾选（完成 ↔ 取消完成；Bug1 修复：已勾选的再次点击 = reopen 取消完成）
+  // BUG-20260808-050：item 查找源从 currentTask 扩大到 currentTask/routeSelTask/mustDo/recommended
+  // ——mustDo 兜底卡场景 currentTask 为 null，原实现 item 缺失 → 误判 reopen → 子任务永不变更
+  const toggleChildItem = useCallback(async (childId: string) => {
+    setBusy(true);
+    try {
+      const pool = [
+        ...(data?.currentTask?.children ?? []),
+        ...(routeSelTask?.children ?? []),
+        ...(data?.mustDo ?? []).flatMap((m) => m.children ?? []),
+        ...(data?.recommended ?? []).flatMap((m) => m.children ?? []),
+      ];
+      const item = pool.find((c) => c.id === childId);
+      // done 判断兼容两种序列化：{text,done}（views/today）与 {title,status}（GET /api/tasks/:id）
+      const done = item
+        ? typeof (item as { done?: unknown }).done === "boolean"
+          ? (item as { done: boolean }).done
+          : (item as { status?: string }).status === "completed"
+        : false;
+      const action = done ? "reopen" : "complete";
+      const r = await fetch(`/api/tasks/${childId}/action`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!r.ok) throw new Error("操作失败");
+      await load();
+    } catch { setError(true); }
+    finally { setBusy(false); }
+  }, [data, routeSelTask, load]);
+
+  // BUG-20260807-046：data（load 结果）变化时同步刷新 routeSelTask——否则勾选/新增子项后
+  // 前置卡清单停留在点击时的旧快照（新增项不出现、勾选态不更新）。
+  useEffect(() => {
+    if (!routeSel) return;
+    let alive = true;
+    fetch(`/api/tasks/${routeSel}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && d && d.id) setRouteSelTask(d as CurrentTask); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [routeSel, data]);
 
   // 卡片：路线选中优先 → 当前任务；无当前任务时显示第一个必做任务；都没有则空态
-  const cards = useCallback((): { card: FocusCard; tagLabel: string; statText: string; hint: string }[] => {
+  // 修复：每张卡都生成完整 cardV2（Focus Card 渲染直用），mustDo 兜底卡带真实清单，
+  // 避免 children=[] 被 toCardV2 误判为"知识点"且清单消失
+  const cards = useCallback((): { card: FocusCard; tagLabel: string; statText: string; hint: string; cardV2: FocusCardV2Data }[] => {
     if (!data) return [];
-    const list: { card: FocusCard; tagLabel: string; statText: string; hint: string }[] = [];
+    const list: { card: FocusCard; tagLabel: string; statText: string; hint: string; cardV2: FocusCardV2Data }[] = [];
     const curId = data.currentTask?.id ?? null;
     // 路线选中（非当前任务）→ 前置该任务的基础卡（含提前执行语义）
     if (routeSel && routeSel !== curId) {
       const tl = data.todayTimeline.find((t) => t.taskId === routeSel);
       if (tl) {
+        // BUG-20260807-044：优先用点击时 fetch 的真实任务数据构造（children/类型正确）；
+        // fetch 未返回前用时间线字段兜底（items 空，随后 routeSelTask 就绪自动补全）
+        const rt = routeSelTask && routeSelTask.id === routeSel ? routeSelTask : null;
+        const base = rt ?? ({
+          id: tl.taskId, title: tl.title, description: null, taskType: null, category: null,
+          parentTitle: null, children: [], scheduledStart: tl.start, scheduledEnd: tl.end,
+          elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: 0, completionPercent: 0,
+          purpose: null, departureAt: null, accumulate: false,
+        } as CurrentTask);
+        // BUG-20260807-045：GET /api/tasks/:id 的 children 字段是 title，toCardV2 期待 text →
+        // 归一化（title → text），否则清单项文本为空（li 无字，勾选/显示均失效）。
+        const normBase = {
+          ...base,
+          children: ((base as { children?: Array<Record<string, unknown>> }).children ?? []).map((c) => ({
+            ...c, text: (c as { text?: string }).text ?? (c as { title?: string }).title ?? "",
+          })),
+        } as CurrentTask;
+        const v2 = toCardV2(normBase, treeCache);
+        const tagLabel = v2.type === "learning" ? "学习型" : v2.type === "timer" ? "时间型" : v2.type === "accum-daily" || v2.type === "accum-weekly" ? "积累型" : "清单型";
         list.push({
           card: {
-            id: tl.taskId, parent: "今日路线", title: tl.title, type: "checklist",
-            plannedMinutes: 0, doneCount: 0, totalCount: 1,
-            progress: 0, elapsedMinutes: 0, items: [], aiExec: "",
+            id: tl.taskId, parent: "今日路线", title: tl.title,
+            type: v2.type === "accum-daily" || v2.type === "accum-weekly" ? "accumulate" : v2.type,
+            plannedMinutes: 0, doneCount: v2.items?.filter((i) => i.done).length ?? 0, totalCount: v2.items?.length || 1,
+            progress: v2.progress, elapsedMinutes: 0, items: v2.items ?? [], aiExec: "",
           },
-          tagLabel: "清单型", statText: "待开始", hint: "提前执行 · 点「出发」开始计时",
+          tagLabel, statText: "待开始", hint: "提前执行 · 点「出发」开始计时",
+          cardV2: v2,
         });
       }
     }
     if (data.currentTask) {
       const { card, extra } = toCard(data.currentTask);
-      list.push({ card, ...extra });
+      list.push({ card, ...extra, cardV2: toCardV2(data.currentTask, treeCache) });
     } else {
-      const m = data.mustDo[0];
+      // BUG-20260807-047：mustDo 兜底跳过已完成任务——决策是静态快照（完成动作已删决策，
+      // 但打开页面期间完成的场景仍可能命中旧快照），已完成任务不再占主卡。
+      const m = data.mustDo.find((x) => x.status !== "completed" && x.status !== "cancelled") ?? data.mustDo[0];
       if (m) {
+        // 修复：mustDo 卡用后端增强数据（真实清单 children）构造完整卡
+        const v2 = toCardV2({ id: m.taskId, title: m.title, description: m.description ?? null, taskType: m.taskType ?? null, category: m.category ?? null, parentTitle: null, children: m.children ?? [], scheduledStart: m.scheduledStart ?? null, scheduledEnd: m.scheduledEnd ?? null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: m.estimatedMinutes || 0, completionPercent: 0, purpose: m.purpose ?? null, departureAt: m.departureAt ?? null, accumulate: m.accumulate ?? false } as CurrentTask, treeCache);
         list.push({
           card: {
-            id: m.taskId, parent: "今日必做", title: m.title, type: "checklist",
-            plannedMinutes: m.estimatedMinutes || 0, doneCount: 0, totalCount: 1,
-            progress: 0, elapsedMinutes: 0, items: [], aiExec: "",
+            id: m.taskId, parent: "今日必做", title: m.title,
+            type: v2.type === "accum-daily" || v2.type === "accum-weekly" ? "accumulate" : v2.type,
+            plannedMinutes: m.estimatedMinutes || 0, doneCount: v2.items?.filter((i) => i.done).length ?? 0, totalCount: v2.items?.length || 1,
+            progress: v2.progress, elapsedMinutes: v2.elapsedMinutes, items: v2.items ?? [], aiExec: "",
           },
-          tagLabel: "清单型", statText: "待开始", hint: "做产品/项目 — 以产出清单为准，计时是辅助",
+          tagLabel: v2.type === "learning" ? "学习型" : v2.type === "timer" ? "时间型" : "清单型",
+          statText: "待开始", hint: "做产品/项目 — 以产出清单为准，计时是辅助",
+          cardV2: v2,
         });
       }
     }
     return list;
-  }, [data, routeSel]);
+  }, [data, routeSel, routeSelTask, treeCache]);
 
   const cardList = cards();
   const cur = cardList[Math.min(cardIdx, Math.max(0, cardList.length - 1))];
@@ -656,7 +735,8 @@ export default function TodayPage() {
             </>
           )}
           <FocusCardV2
-            card={toCardV2(data?.currentTask ?? { id: cur.card.id, title: cur.card.title, description: null, taskType: null, category: null, parentTitle: null, children: [], scheduledStart: null, scheduledEnd: null, elapsedMinutes: 0, remainingMinutes: 0, plannedMinutes: 0, completionPercent: 0 } as CurrentTask, treeCache)}
+            // 修复：直接使用 cards() 生成的完整 cardV2（含真实清单），不再用空 children 重包
+            card={cur.cardV2}
             onStart={() => doAction(cur.card.id, "start")}
             onComplete={(min) => doAction(cur.card.id, "complete", min && min > 0 ? { durationMinutes: min } : {})}
             onSkip={() => doAction(cur.card.id, "skip_item", { reason: "user_skip_item" })}
@@ -690,7 +770,7 @@ export default function TodayPage() {
       {/* 今日路线 | AI 调整助手（today-row2：900px 断点双栏 · 核心决策链之后） */}
       <div className="today-row2">
         <RouteCard route={data?.todayTimeline ?? []} busy={busy}
-          onSelect={(taskId) => { setRouteSel(taskId); setCardIdx(0); }}
+          onSelect={(taskId) => { setRouteSel(taskId); setCardIdx(0); setRouteSelTask(null); fetch(`/api/tasks/${taskId}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.id) setRouteSelTask(d as CurrentTask); }).catch(() => {}); }}
           onStartNow={(taskId) => { setRouteSel(taskId); setCardIdx(0); doAction(taskId, "start"); }} />
         <AiPanel text={aiPanelText} recommendations={data?.recommended ?? []} onAdopt={adopt} busy={busy} />
       </div>

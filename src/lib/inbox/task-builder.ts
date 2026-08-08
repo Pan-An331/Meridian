@@ -51,7 +51,7 @@ function buildSimpleTask(draft: InboxDraftItem): BuildResult {
       description: draft.description || null,
       taskType: draft.taskType,
       importance: imp,
-      deadline: draft.deadline ? new Date(draft.deadline + "T23:59:59") : null,
+      deadline: toDeadlineDate(draft.deadline),
       estimatedMinutes: draft.estimatedMinutes || null,
       estimatedUnit: draft.estimatedUnit || null,
       category: draft.category || null,
@@ -67,6 +67,20 @@ function buildSimpleTask(draft: InboxDraftItem): BuildResult {
     relations: null,
     parents: [-1],
   };
+}
+
+/**
+ * BUG-20260807-039：deadline 兼容解析——前端 onModify 传完整 ISO（toISOString），
+ * 而原实现假定 YYYY-MM-DD 后拼接 "T23:59:59" → 完整 ISO 被二次拼接成 Invalid Date → 创建 500。
+ * 兼容两种格式：YYYY-MM-DD（拼接当天 23:59:59）与完整 ISO（直接解析）。
+ */
+function toDeadlineDate(v: string | null | undefined): Date | null {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s + "T23:59:59");
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 /** V5：积累型任务（背单词/健身）——单任务，标记 accumulate + repeatMinutes 语义 */
@@ -101,7 +115,7 @@ function buildProjectWithBreakdown(draft: InboxDraftItem): BuildResult {
     description: draft.description || null,
     taskType: "planned",
     importance: imp,
-    deadline: draft.deadline ? new Date(draft.deadline + "T23:59:59") : null,
+    deadline: toDeadlineDate(draft.deadline),
     category: draft.category || null,
     // V3：主题透传（根节点继承，子节点同主题）
     theme: draft.theme || null,

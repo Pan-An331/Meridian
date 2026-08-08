@@ -7,6 +7,7 @@ import { getServerSession, unauthorized, badRequest } from "@/lib/api-utils";
 import { prisma } from "@/lib/prisma";
 import { getStreak } from "@/lib/task/streak";
 import { localDateStr } from "@/lib/date";
+import { refreshTodaySummary } from "@/lib/ai/daily-summary";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession();
@@ -61,6 +62,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   prisma.userObservation.create({
     data: { userId: session.user.id, type: "checkin", taskId: id, category: null, detail: JSON.stringify({ date: dayStr, minutes: durMin }) },
   }).catch(() => {});
+
+  // BUG-20260807-027：打卡更新专注时长 → 强制刷新今日摘要（否则 Review 分钟统计当天滞后）
+  refreshTodaySummary(session.user.id).catch(() => {});
 
   const streak = await getStreak(session.user.id, id);
   return NextResponse.json({ success: true, streak });

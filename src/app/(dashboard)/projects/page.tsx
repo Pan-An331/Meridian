@@ -180,7 +180,12 @@ export default function ProjectsPage() {
       const r = await fetch("/api/projects/tree");
       if (!r.ok) throw new Error();
       const d: TreeResponse = await r.json();
-      setTrees(d.trees || []);
+      // 2026-08-07 修复（BUG-20260807-017）：★ 乐观状态优先——load 重取树时若某节点
+      // 在 starSet 中（用户刚点过 ★，PUT 尚未完成），用 starSet 覆盖接口返回值，
+      // 避免"乐观点亮 → 广播 → load 用旧数据覆盖 → 视觉闪回"竞态。
+      const applyStarSet = (list: TreeNode[]): TreeNode[] =>
+        list.map((t) => ({ ...t, star: starSet.has(t.id) || !!t.star, children: applyStarSet(t.children ?? []) }));
+      setTrees(applyStarSet(d.trees || []));
       setExpanded((prev) => {
         const next = new Set(prev);
         (d.trees || []).forEach((t) => next.add(t.id));
@@ -188,7 +193,7 @@ export default function ProjectsPage() {
       });
     } catch { setError(true); }
     finally { setLoading(false); }
-  }, []);
+  }, [starSet]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -224,7 +229,10 @@ export default function ProjectsPage() {
       if (!r.ok) return;
       const d: TreeResponse = await r.json();
       const orphans = (d.orphans || []).filter((o) => o.status !== "cancelled");
-      setPoolList(orphans.filter((o) => !o.accumulate));
+      // BUG-20260807-042：积累孤儿也进待整理池（可挂树）——原实现排除 accumulate 导致
+      // 积累任务无法挂树 → 无法 ★ → 无法排期 → Today 积累卡今日不可达（死链）。
+      // 习惯区（orphanAcc）仍保留，挂树后习惯区与树行并存不冲突。
+      setPoolList(orphans);
       setOrphanAcc(orphans.filter((o) => o.accumulate));
       const doneInTree = flatten(d.trees || []).filter((t) => t.status === "completed");
       const doneOrphans = (d.orphans || []).filter((o) => o.status === "completed");
@@ -618,7 +626,7 @@ export default function ProjectsPage() {
           />
           <div
             className={`p-[8px_6px_10px] ${treeBlankDragOver ? "ring-2 ring-[var(--v2-brand)] ring-offset-2 rounded-lg" : ""}`}
-            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = dragSource === "pool" ? "copy" : "move"; setTreeBlankDragOver((prev) => prev ? prev : true); }}
+            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setTreeBlankDragOver((prev) => prev ? prev : true); }}
             onDragLeave={(e) => { if (e.currentTarget.contains(e.relatedTarget as Node)) return; setTreeBlankDragOver(false); }}
             onDrop={onTreeBlankDrop}
           >

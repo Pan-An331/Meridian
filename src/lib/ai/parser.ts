@@ -454,7 +454,7 @@ function extractDescription(seg: string, title: string): string | undefined {
 /** 从文本中提取小时数 */
 function extractHour(seg: string): number {
   // 匹配 "下午3点" → 15, "上午9点" → 9, "晚上8点" → 20
-  const m = seg.match(/([上下中]午|晚上|早上|凌晨)(\d{1,2})点/);
+  const m = seg.match(/([上下中]午|晚上|早上|凌晨)\s*(\d{1,2})\s*点/);
   if (m) {
     const h = parseInt(m[2]);
     if (m[1] === "下午" || m[1] === "晚上") return h + 12;
@@ -490,7 +490,7 @@ function fallbackAnalyzeInboxInput(content: string): InboxResponse {
     let startTime: string | undefined;
     let endTime: string | undefined;
 
-    const hasExplicitTime = /[上下中]午\d{1,2}点|晚上\d{1,2}点|早上\d{1,2}点|凌晨\d{1,2}点|今晚|今[早晚]/.test(seg) ||
+    const hasExplicitTime = /[上下中]午\s*\d{1,2}\s*点|晚上\s*\d{1,2}\s*点|早上\s*\d{1,2}\s*点|凌晨\s*\d{1,2}\s*点|今晚|今[早晚]/.test(seg) ||
       /\d{1,2}:\d{2}/.test(seg);
     const hasDuration = /(\d+)\s*(分钟|小时|个?半小时)/.test(seg) || seg.includes("1小时");
 

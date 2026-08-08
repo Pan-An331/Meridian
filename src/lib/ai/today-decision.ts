@@ -4,8 +4,8 @@ import { createDecisionLog } from "./decision-log";
 import { localDateStr } from "@/lib/date";
 
 export interface TodayDecisionResult {
-  mustDo: { taskId: string; title: string; importance: number; deadline: string | null; estimatedMinutes: number | null; reasons: string[] }[];
-  recommended: { taskId: string; title: string; importance: number; deadline: string | null; estimatedMinutes: number | null; reasons: string[] }[];
+  mustDo: { taskId: string; title: string; importance: number; deadline: string | null; estimatedMinutes: number | null; reasons: string[]; status: string }[];
+  recommended: { taskId: string; title: string; importance: number; deadline: string | null; estimatedMinutes: number | null; reasons: string[]; status: string }[];
   later: string[];
 }
 
@@ -62,8 +62,9 @@ export async function generateTodayDecision(userId: string): Promise<TodayDecisi
 
   scored.sort((a, b) => b.score - a.score);
 
-  const mustDo = scored.slice(0, 3).map(t => ({ taskId: t.taskId, title: t.title, importance: t.importance, deadline: t.deadline ? t.deadline.toISOString() : null, estimatedMinutes: t.estimatedMinutes, reasons: t.reasons }));
-  const recommended = scored.slice(3, 5).map(t => ({ taskId: t.taskId, title: t.title, importance: t.importance, deadline: t.deadline ? t.deadline.toISOString() : null, estimatedMinutes: t.estimatedMinutes, reasons: t.reasons }));
+  // BUG-20260807-047：mustDo/recommended 项带 status（前端兜底需跳过已完成）
+  const mustDo = scored.slice(0, 3).map(t => ({ taskId: t.taskId, title: t.title, importance: t.importance, deadline: t.deadline ? t.deadline.toISOString() : null, estimatedMinutes: t.estimatedMinutes, reasons: t.reasons, status: t.status }));
+  const recommended = scored.slice(3, 5).map(t => ({ taskId: t.taskId, title: t.title, importance: t.importance, deadline: t.deadline ? t.deadline.toISOString() : null, estimatedMinutes: t.estimatedMinutes, reasons: t.reasons, status: t.status }));
   const later = scored.slice(5).map(t => t.title);
 
   for (const t of mustDo) {

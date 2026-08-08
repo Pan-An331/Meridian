@@ -79,6 +79,16 @@ export async function getOrCreateTodaySummary(userId: string) {
 }
 
 /**
+ * 强制刷新今日摘要（BUG-20260807-027）：
+ * getOrCreateTodaySummary 语义为"存在即返回"，Today 视图打开时会生成当日摘要并固化；
+ * 之后完成任务/打卡不会更新 → Review 本周统计当天恒为 0（打开 Today 在先、完成在后）。
+ * 任务 complete / checkin 落库后调用本函数强制重建（createDailySummary 内部 upsert 覆盖）。
+ */
+export async function refreshTodaySummary(userId: string) {
+  return createDailySummary(userId, localDateStr());
+}
+
+/**
  * 获取近N天摘要（自动补生成缺失的）
  */
 export async function getDailySummaries(userId: string, days: number = 7) {

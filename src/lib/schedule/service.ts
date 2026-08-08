@@ -65,6 +65,10 @@ export async function addManySchedules(
 /**
  * V5 积累型：生成未来 N 天每日重复排期（默认每晚 20:00 起，时长 minutes）。
  * 支持传入 tx（在 confirm 事务内调用），不传则自建事务。
+ *
+ * 2026-08-07 修复：30 次串行 schedule.create 在 Neon（高延迟连接）下会超过
+ * Prisma 交互式事务默认 5s 超时 → "Transaction not found"（BUG-20260807-013）。
+ * 改为 createMany 批量创建（单次往返），并为自建事务加 30s 超时兜底。
  */
 export async function createAccumulateSchedules(
   userId: string,
@@ -75,22 +79,22 @@ export async function createAccumulateSchedules(
   tx?: Prisma.TransactionClient
 ): Promise<number> {
   const dur = Math.max(10, Math.min(480, Math.round(minutes) || 20));
+  const start = new Date();
+  start.setHours(hour, 0, 0, 0);
+  start.setDate(start.getDate() + 1); // 从明天开始
+  const rows: { userId: string; taskId: string; scheduledStart: Date; scheduledEnd: Date; source: string }[] = [];
+  for (let d = 0; d < days; d++) {
+    const s = new Date(start.getTime() + d * 86400000);
+    const e = new Date(s.getTime() + dur * 60000);
+    rows.push({ userId, taskId, scheduledStart: s, scheduledEnd: e, source: "ai" });
+  }
   const run = async (client: Prisma.TransactionClient | typeof prisma) => {
-    const start = new Date();
-    start.setHours(hour, 0, 0, 0);
-    start.setDate(start.getDate() + 1); // 从明天开始
-    for (let d = 0; d < days; d++) {
-      const s = new Date(start.getTime() + d * 86400000);
-      const e = new Date(s.getTime() + dur * 60000);
-      await client.schedule.create({
-        data: { userId, taskId, scheduledStart: s, scheduledEnd: e, source: "ai" },
-      });
-    }
+    await client.schedule.createMany({ data: rows });
   };
   if (tx) {
     await run(tx);
   } else {
-    await prisma.$transaction(async (c) => { await run(c); });
+    await prisma.$transaction(async (c) => { await run(c); }, { timeout: 30_000 });
   }
   createDecisionLog({ userId, action: "schedule_accumulate_create", targetId: taskId, reasoning: "积累型任务生成每日重复排期", actionDetail: JSON.stringify({ minutes: dur, days }) }).catch(() => {});
   return days;

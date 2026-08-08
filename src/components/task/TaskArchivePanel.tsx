@@ -72,14 +72,35 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
   const [estUnit, setEstUnit] = useState<EstimateUnit>("min");
 
   // 加载任务（V3 C7 聚合：theme/ancestors/schedules/accumStats/aiFields + FCV2 purpose/departureAt 后端已返回）
+  // 2026-08-07 修复（BUG-20260807-016）：异步 GET 返回后若直接 setTheme(...) 会【覆盖用户在加载期间已做的编辑】
+  // （Neon 高延迟下 GET 需 2-5s，用户先点主题/改标题 → 加载完成后被重置）。
+  // 改用函数式 setState：仅填充"用户尚未编辑"的字段。
+  // BUG-20260807-026：Escape 关闭——面板无键盘关闭路径（GlobalSearch 的 Escape 只关搜索结果），
+  // 遮罩盖住侧栏导致后续导航被拦截（E2E L2 复现：180s 点不动"蓝图"链接）。补全局 Escape 监听。
   const loadTask = useCallback(() => {
     setErr(false);
     fetch(`/api/tasks/${taskId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => { setTask(d); setTitle(d.title ?? ""); setCategory(normalizeCategory(d.category)); setTheme(d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category)); setCustomThemeColor(parseThemeColor(d.themeColor)); setPurpose(d.purpose ?? ""); setEstimatedMinutes(d.estimatedMinutes ? String(d.estimatedMinutes) : ""); setEstUnit(normalizeEstimateUnit(d.estimatedUnit) ?? "min"); })
+      .then((d) => {
+        setTask(d);
+        setTitle((prev) => prev || (d.title ?? ""));
+        setCategory((prev) => prev ?? normalizeCategory(d.category));
+        setTheme((prev) => prev ?? d.theme ?? resolveTheme(d.tags, d.title ?? "", d.category));
+        setCustomThemeColor((prev) => prev ?? parseThemeColor(d.themeColor));
+        setPurpose((prev) => prev ?? (d.purpose ?? ""));
+        setEstimatedMinutes((prev) => prev || (d.estimatedMinutes ? String(d.estimatedMinutes) : ""));
+        setEstUnit((prev) => prev ?? (normalizeEstimateUnit(d.estimatedUnit) ?? "min"));
+      })
       .catch(() => setErr(true));
   }, [taskId]);
   useEffect(() => { loadTask(); }, [loadTask]);
+
+  // BUG-20260807-026：Escape 关闭面板（与 ✕/遮罩一致的关闭路径）
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
 
   // 补记实际用时（POST /api/tasks/[id]/time-log → 刷新）
   const addTimeLog = async () => {
@@ -315,7 +336,7 @@ export function TaskArchivePanel({ taskId, seed, onClose }: {
                 {timeEdit ? (
                   <div className="flex items-center gap-1.5 ml-auto">
                     <input type="number" min={1} max={1440} value={timeMin} onChange={(e) => setTimeMin(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") addTimeLog(); if (e.key === "Escape") { setTimeEdit(false); setTimeMin(""); } }}
+                      onKeyDown={(e) => { if (e.key === "Enter") addTimeLog(); if (e.key === "Escape") { e.stopPropagation(); setTimeEdit(false); setTimeMin(""); } }}
                       placeholder="分钟" className="w-16 px-2 py-1 text-sm border border-[var(--v2-border)] rounded outline-none focus:border-[var(--v2-brand)]" autoFocus />
                     <button onClick={addTimeLog} disabled={timeBusy || !(Number(timeMin) > 0)} className="text-sm px-2 py-1 rounded bg-[var(--v2-brand)] text-white disabled:opacity-50">确定</button>
                     <button onClick={() => { setTimeEdit(false); setTimeMin(""); }} className="text-sm px-2 py-1 rounded border border-[var(--v2-border)] text-[var(--v2-text2)]">✕</button>

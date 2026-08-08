@@ -13,6 +13,11 @@
 # testing
 /coverage
 
+# e2e（Playwright 产物 + 测试用户登录态）
+/e2e-results/
+/playwright-report/
+/.e2e/
+
 # next.js
 /.next/
 /.next-prod/

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { buildTasksFromDraft } from "./task-builder";
 import type { InboxDraftItem } from "@/types/inbox";
+import { localDateStr } from "@/lib/date";
 import { createDecisionLog } from "@/lib/ai/decision-log";
 import { createAccumulateSchedules } from "@/lib/schedule/service";
 import { normalizeCategory } from "@/lib/plan/colors";
@@ -106,6 +107,24 @@ export async function confirmDraftItems(userId: string, draftId: string, confirm
         created.push({ id: task.id });
         results.push({ id: task.id, title: task.title });
 
+        // BUG-20260807-041：scheduled 任务补写排期——analyze 返回的 startTime/endTime
+        // （如「早上 8 点备份数据，60 分钟」→ 08:00-09:00）在 confirm 创建时丢失，
+        // 导致时间表达任务没有时间块（惰性结算/今日路线/续排全部失效）。
+        if ((params.taskType === "scheduled" || item.taskType === "scheduled") && item.startTime) {
+          const st = new Date(item.startTime);
+          if (!isNaN(st.getTime())) {
+            const durMin = params.estimatedMinutes || 60;
+            const ed = item.endTime
+              ? new Date(item.endTime)
+              : new Date(st.getTime() + durMin * 60000);
+            if (!isNaN(ed.getTime())) {
+              await tx.schedule.create({
+                data: { userId, taskId: task.id, scheduledStart: st, scheduledEnd: ed, source: "ai" },
+              });
+            }
+          }
+        }
+
         // V3 D2 + FCV2：反馈回流（仅根节点，taskId 用实际创建的任务）
         if (i === 0) {
           await recordModifyFeedback(userId, task.id, "category", aiInferred.category, normalizedItem.category);
@@ -135,7 +154,7 @@ export async function confirmDraftItems(userId: string, draftId: string, confirm
         await tx.taskDraft.updateMany({ where: { id: draftId }, data: { status: "CONFIRMED" } });
       }
     } catch {}
-  });
+  }, { timeout: 30_000 }); // 2026-08-07：Neon 高延迟下防交互式事务默认 5s 超时（BUG-20260807-013）
 
   try {
     createDecisionLog({
@@ -145,6 +164,10 @@ export async function confirmDraftItems(userId: string, draftId: string, confirm
       targetId: draftId,
     }).catch(() => {});
   } catch {}
+
+  // BUG-20260807-038（扩展）：Inbox 确认创建是主要创建入口——同样失效今日决策缓存，
+  // 否则用户先打开 Today 再录入时，新任务永远进不了 mustDo（学习型等无排期任务不可达）。
+  prisma.todayDecision.deleteMany({ where: { userId, date: localDateStr() } }).catch(() => {});
 
   return results;
 }
