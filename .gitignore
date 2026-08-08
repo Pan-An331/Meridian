@@ -64,3 +64,11 @@ next-env.d.ts
 /re-test-*.js
 /test-drag.mjs
 /test-results/
+
+.vercel
+.env*
+
+# 本地启动器日志（不入库）
+/meridian-launcher.log
+/meridian-dev.log
+/meridian-dev.pid
